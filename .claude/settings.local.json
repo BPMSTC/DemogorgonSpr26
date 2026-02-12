@@ -1,5 +1,13 @@
 {
-	"permissions": {
-		"allow": ["Bash(git config:*)"]
-	}
+  "permissions": {
+    "allow": [
+      "Bash(git config:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(MSYS_NO_PATHCONV=1 cat:*)",
+      "Bash(cmd //c type:*)",
+      "Bash(git -C \"C:/Users/Blue/Documents/GitHub/DemogorgonSpr26\" status)",
+      "Bash(MSYS2_ARG_CONV_EXCL=\"*\" powershell.exe:*)",
+      "Bash(python3:*)"
+    ]
+  }
 }

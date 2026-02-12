@@ -48,6 +48,132 @@ body {
 	color: var(--gray-dark);
 	background: var(--off-white);
 }
+/* Navigation Styles - Matching Footer Theme */
+.navbar {
+	background-color: var(--maroon-dark);
+	color: var(--white);
+	padding: var(--spacing-md) 0;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+}
+
+.nav-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 var(--spacing-md);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.navbar .logo {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: var(--gold);
+}
+
+.navbar .logo-icon {
+	font-size: 2rem;
+}
+
+.navbar .logo-text {
+	color: var(--gold);
+}
+
+.nav-menu {
+	display: flex;
+	list-style: none;
+	gap: var(--spacing-lg);
+	margin: 0;
+	padding: 0;
+}
+
+.nav-link {
+	color: var(--white);
+	text-decoration: none;
+	font-weight: 500;
+	padding: var(--spacing-xs) var(--spacing-sm);
+	transition: color 0.3s ease;
+	display: inline-block;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+	color: var(--gold-light);
+	text-decoration: underline;
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+/* Hamburger Menu */
+.hamburger {
+	display: none;
+	flex-direction: column;
+	gap: 5px;
+	background: none;
+	border: 2px solid var(--gold);
+	padding: var(--spacing-xs);
+	cursor: pointer;
+	border-radius: 4px;
+	transition: background-color 0.3s ease;
+}
+
+.hamburger:hover,
+.hamburger:focus {
+	background-color: rgba(255, 215, 0, 0.1);
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+.hamburger span {
+	display: block;
+	width: 25px;
+	height: 3px;
+	background-color: var(--gold);
+	transition: all 0.3s ease;
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+	.hamburger {
+		display: flex;
+	}
+
+	.nav-menu {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background-color: var(--maroon-dark);
+		flex-direction: column;
+		gap: 0;
+		padding: var(--spacing-md);
+		display: none;
+		border-top: 2px solid var(--gold);
+	}
+
+	.nav-menu.active {
+		display: flex;
+	}
+
+	.nav-link {
+		padding: var(--spacing-sm);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		width: 100%;
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+	}
+
+	.nav-link:last-child {
+		border-bottom: none;
+	}
+}
 
 /* Footer Styles - DEM-24 Focus */
 .footer {
