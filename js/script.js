@@ -169,7 +169,9 @@
 		// Update status every 60 seconds
 		setInterval(updateStatusBadge, 60000);
 
-		console.log("✅ DEM-24: Store Hours & Location initialized");
+		if (DEBUG) {
+			console.log("✅ DEM-24: Store Hours & Location initialized");
+		}
 	}
 
 	// Wait for DOM to be ready
