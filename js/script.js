@@ -12,7 +12,10 @@
 	// Debug flag - set to true to enable console logging
 	const DEBUG = false;
 
-	// Store Hours Schedule
+	/**
+	 * Store Hours Schedule
+	 * @type {Record<number, {open: number, close: number, label: string}>}
+	 */
 	const STORE_SCHEDULE = {
 		// Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
 		0: { open: 9, close: 18, label: "Sunday" }, // 9 AM - 6 PM
@@ -78,7 +81,6 @@
 			getCurrentStoreTime();
 		const currentTimeDecimal = currentHour + currentMinute / 60;
 
-		// @ts-ignore
 		const todaySchedule = STORE_SCHEDULE[currentDay];
 		const isOpen =
 			currentTimeDecimal >= todaySchedule.open &&
@@ -96,7 +98,6 @@
 		} else {
 			// Find next opening time
 			const nextDay = (currentDay + 1) % 7;
-			// @ts-ignore
 
 			// Check if opens later today
 			if (currentTimeDecimal < todaySchedule.open) {
@@ -107,7 +108,6 @@
 				const openingPeriod = todaySchedule.open >= 12 ? "PM" : "AM";
 				message = `Closed - Opens today at ${openingHour}:00 ${openingPeriod}`;
 			} else {
-				// @ts-ignore
 				const nextSchedule = STORE_SCHEDULE[nextDay];
 				const openingHour =
 					nextSchedule.open > 12 ? nextSchedule.open - 12 : nextSchedule.open;
@@ -134,22 +134,18 @@
 		const statusText = statusBadge.querySelector(".status-text");
 
 		// Update visual status
-		// @ts-ignore
 		if (status.isOpen) {
 			statusBadge.classList.remove("closed");
 			statusBadge.classList.add("open");
-			// @ts-ignore
 			statusBadge.setAttribute("aria-label", status.message);
 		} else {
 			statusBadge.classList.remove("open");
 			statusBadge.classList.add("closed");
-			// @ts-ignore
 			statusBadge.setAttribute("aria-label", status.message);
 		}
 
 		// Update text content (announced by aria-live region)
 		if (statusText) {
-			// @ts-ignore
 			statusText.textContent = status.message;
 		}
 
