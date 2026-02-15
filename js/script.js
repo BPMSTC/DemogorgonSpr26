@@ -9,6 +9,9 @@
 (function () {
 	"use strict";
 
+	// Debug flag - set to true to enable console logging
+	const DEBUG = false;
+
 	// Store Hours Schedule
 	const STORE_SCHEDULE = {
 		// Day of week (0=Sunday, 1=Monday, ..., 6=Saturday)
@@ -150,8 +153,10 @@
 			statusText.textContent = status.message;
 		}
 
-		// Log for debugging
-		console.log(`[${new Date().toLocaleTimeString()}] Store Status:`, status);
+		// Log for debugging (only when DEBUG is enabled)
+		if (DEBUG) {
+			console.log(`[${new Date().toLocaleTimeString()}] Store Status:`, status);
+		}
 	}
 
 	/**
