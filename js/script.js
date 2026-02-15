@@ -22,14 +22,57 @@
 	};
 
 	/**
+	 * Get current store time in America/Chicago timezone
+	 * @returns {{ day: number, hour: number, minute: number }}
+	 */
+	function getCurrentStoreTime() {
+		const formatter = new Intl.DateTimeFormat("en-US", {
+			timeZone: "America/Chicago",
+			weekday: "short",
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: false,
+		});
+
+		const parts = formatter.formatToParts(new Date());
+		let weekdayShort = "";
+		let hourStr = "";
+		let minuteStr = "";
+
+		for (const part of parts) {
+			if (part.type === "weekday") {
+				weekdayShort = part.value;
+			} else if (part.type === "hour") {
+				hourStr = part.value;
+			} else if (part.type === "minute") {
+				minuteStr = part.value;
+			}
+		}
+
+		const weekdayMap = {
+			Sun: 0,
+			Mon: 1,
+			Tue: 2,
+			Wed: 3,
+			Thu: 4,
+			Fri: 5,
+			Sat: 6,
+		};
+
+		const day = weekdayMap[weekdayShort];
+		const hour = parseInt(hourStr, 10);
+		const minute = parseInt(minuteStr, 10);
+
+		return { day, hour, minute };
+	}
+
+	/**
 	 * Check if store is currently open
 	 * @returns {Object} - { isOpen: boolean, message: string }
 	 */
 	function checkStoreStatus() {
-		const now = new Date();
-		const currentDay = now.getDay();
-		const currentHour = now.getHours();
-		const currentMinute = now.getMinutes();
+		const { day: currentDay, hour: currentHour, minute: currentMinute } =
+			getCurrentStoreTime();
 		const currentTimeDecimal = currentHour + currentMinute / 60;
 
 		// @ts-ignore
