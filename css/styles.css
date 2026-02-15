@@ -1,0 +1,488 @@
+/**
+ * Code & Brew - DEM-24: Store Hours & Location Styles
+ *
+ * @format
+ */
+
+/* Theme: Maroon & Gold with WCAG AA Compliance */
+
+:root {
+	/* Maroon & Gold Theme Colors */
+	--maroon-dark: #800000; /* Primary maroon */
+	--maroon-medium: #a52a2a; /* Medium maroon */
+	--maroon-light: #cd5c5c; /* Light maroon for hover states */
+	--gold: #ffd700; /* Primary gold */
+	--gold-dark: #daa520; /* Darker gold for contrast */
+	--gold-light: #ffed4e; /* Light gold */
+
+	/* Neutral Colors */
+	--white: #ffffff;
+	--off-white: #fafafa;
+	--gray-light: #e0e0e0;
+	--gray-medium: #757575;
+	--gray-dark: #333333;
+	--black: #1a1a1a;
+
+	/* Status Colors (WCAG Compliant) */
+	--status-open: #2e7d32; /* Dark green - 4.5:1 contrast on white */
+	--status-closed: #c62828; /* Dark red - 4.5:1 contrast on white */
+
+	/* Spacing */
+	--spacing-xs: 0.5rem;
+	--spacing-sm: 1rem;
+	--spacing-md: 1.5rem;
+	--spacing-lg: 2rem;
+	--spacing-xl: 3rem;
+}
+
+/* Base Styles */
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	line-height: 1.6;
+	color: var(--gray-dark);
+	background: var(--off-white);
+}
+/* Navigation Styles - Matching Footer Theme */
+.navbar {
+	background-color: var(--maroon-dark);
+	color: var(--white);
+	padding: var(--spacing-md) 0;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+}
+
+.nav-container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 var(--spacing-md);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.navbar .logo {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: var(--gold);
+}
+
+.navbar .logo-icon {
+	font-size: 2rem;
+}
+
+.navbar .logo-text {
+	color: var(--gold);
+}
+
+.nav-menu {
+	display: flex;
+	list-style: none;
+	gap: var(--spacing-lg);
+	margin: 0;
+	padding: 0;
+}
+
+.nav-link {
+	color: var(--white);
+	text-decoration: none;
+	font-weight: 500;
+	padding: var(--spacing-xs) var(--spacing-sm);
+	transition: color 0.3s ease;
+	display: inline-block;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+	color: var(--gold-light);
+	text-decoration: underline;
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+/* Hamburger Menu */
+.hamburger {
+	display: none;
+	flex-direction: column;
+	gap: 5px;
+	background: none;
+	border: 2px solid var(--gold);
+	padding: var(--spacing-xs);
+	cursor: pointer;
+	border-radius: 4px;
+	transition: background-color 0.3s ease;
+}
+
+.hamburger:hover,
+.hamburger:focus {
+	background-color: rgba(255, 215, 0, 0.1);
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+.hamburger span {
+	display: block;
+	width: 25px;
+	height: 3px;
+	background-color: var(--gold);
+	transition: all 0.3s ease;
+}
+
+/* Responsive Navigation */
+@media (max-width: 768px) {
+	.hamburger {
+		display: flex;
+	}
+
+	.nav-menu {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		background-color: var(--maroon-dark);
+		flex-direction: column;
+		gap: 0;
+		padding: var(--spacing-md);
+		display: none;
+		border-top: 2px solid var(--gold);
+	}
+
+	.nav-menu.active {
+		display: flex;
+	}
+
+	.nav-link {
+		padding: var(--spacing-sm);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		width: 100%;
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+	}
+
+	.nav-link:last-child {
+		border-bottom: none;
+	}
+}
+
+/* Footer Styles - DEM-24 Focus */
+.footer {
+	background-color: var(--maroon-dark);
+	color: var(--white);
+	padding: var(--spacing-xl) 0 var(--spacing-md);
+	margin-top: var(--spacing-xl);
+}
+
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 var(--spacing-md);
+}
+
+.footer-content {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: var(--spacing-xl);
+	margin-bottom: var(--spacing-lg);
+}
+
+/* Logo Section */
+.footer-brand {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-md);
+}
+
+.logo {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: var(--gold);
+}
+
+.logo-icon {
+	font-size: 2rem;
+}
+
+.footer-tagline {
+	color: var(--gold-light);
+	font-size: 1rem;
+	font-style: italic;
+	margin-bottom: var(--spacing-sm);
+}
+
+/* Store Hours Section - DEM-24 */
+.store-hours {
+	background-color: rgba(255, 255, 255, 0.05);
+	padding: var(--spacing-md);
+	border-radius: 8px;
+	border-left: 4px solid var(--gold);
+	margin-bottom: var(--spacing-md);
+}
+
+.footer-section-title {
+	color: var(--gold);
+	font-size: 1.25rem;
+	margin-bottom: var(--spacing-sm);
+	font-weight: 600;
+	/* WCAG: Clear heading structure */
+}
+
+.hours-status {
+	margin-bottom: var(--spacing-md);
+	display: flex;
+	align-items: center;
+}
+
+.status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	padding: var(--spacing-xs) var(--spacing-md);
+	border-radius: 20px;
+	font-weight: 600;
+	font-size: 0.95rem;
+	transition: all 0.3s ease;
+	/* WCAG: Minimum 14px font size for accessibility */
+}
+
+/* Open Status - WCAG Compliant Colors */
+.status-badge.open {
+	background-color: var(--status-open);
+	color: var(--white);
+	/* Contrast ratio: 4.5:1 minimum for WCAG AA */
+}
+
+.status-badge.open .status-icon::before {
+	content: "🟢";
+	font-size: 1rem;
+}
+
+/* Closed Status - WCAG Compliant Colors */
+.status-badge.closed {
+	background-color: var(--status-closed);
+	color: var(--white);
+	/* Contrast ratio: 4.5:1 minimum for WCAG AA */
+}
+
+.status-badge.closed .status-icon::before {
+	content: "🔴";
+	font-size: 1rem;
+}
+
+/* Hours List */
+.hours-list {
+	list-style: none;
+	padding: 0;
+}
+
+.hours-list li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: var(--spacing-xs) 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	/* WCAG: Adequate spacing between interactive elements */
+}
+
+.hours-list li:last-child {
+	border-bottom: none;
+}
+
+.day-label {
+	font-weight: 600;
+	color: var(--gold-light);
+}
+
+.time-label {
+	color: var(--white);
+	font-family: "Courier New", monospace;
+	/* Monospace for better time readability */
+}
+
+/* Store Location Section - DEM-24 */
+.store-location {
+	background-color: rgba(255, 255, 255, 0.05);
+	padding: var(--spacing-md);
+	border-radius: 8px;
+	border-left: 4px solid var(--gold);
+}
+
+.store-address {
+	color: var(--white);
+	font-style: normal;
+	line-height: 1.8;
+	margin-bottom: var(--spacing-md);
+	/* WCAG: <address> semantic HTML for accessibility */
+}
+
+.store-address strong {
+	color: var(--gold-light);
+	font-size: 1.1rem;
+	display: block;
+	margin-bottom: var(--spacing-xs);
+}
+
+/* Map Container */
+.map-container {
+	border-radius: 8px;
+	overflow: hidden;
+	margin: var(--spacing-md) 0;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	/* WCAG: Sufficient contrast for borders */
+	border: 2px solid var(--gold-dark);
+}
+
+.map-container iframe {
+	display: block;
+	width: 100%;
+	/* WCAG: iframe has title attribute for screen readers */
+}
+
+.map-link {
+	margin-top: var(--spacing-sm);
+}
+
+.map-link a {
+	color: var(--gold);
+	text-decoration: none;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	transition: color 0.3s ease;
+	/* WCAG: Minimum 14px font for links */
+	font-size: 0.95rem;
+}
+
+.map-link a:hover,
+.map-link a:focus {
+	color: var(--gold-light);
+	text-decoration: underline;
+	/* WCAG: Clear focus and hover states */
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+/* Footer Links Navigation */
+.footer-links {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-lg);
+}
+
+.footer-column h4 {
+	color: var(--gold);
+	margin-bottom: var(--spacing-sm);
+	font-size: 1.1rem;
+	font-weight: 600;
+}
+
+.footer-column ul {
+	list-style: none;
+	padding: 0;
+}
+
+.footer-column li {
+	margin-bottom: var(--spacing-xs);
+}
+
+.footer-column a {
+	color: var(--white);
+	text-decoration: none;
+	transition: color 0.3s ease;
+	display: inline-block;
+	padding: 0.25rem 0;
+	/* WCAG: Adequate touch target size */
+}
+
+.footer-column a:hover,
+.footer-column a:focus {
+	color: var(--gold-light);
+	text-decoration: underline;
+	/* WCAG: Clear focus indicator */
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+	text-align: center;
+	padding-top: var(--spacing-md);
+	border-top: 1px solid rgba(255, 255, 255, 0.2);
+	color: var(--gold-light);
+	font-size: 0.9rem;
+}
+
+/* Responsive Design - WCAG Compliant */
+@media (max-width: 768px) {
+	.footer-content {
+		grid-template-columns: 1fr;
+		gap: var(--spacing-md);
+	}
+
+	.hours-list li {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.25rem;
+	}
+
+	/* WCAG: Maintain touch target sizes on mobile */
+	.footer-column a {
+		padding: var(--spacing-xs) 0;
+		min-height: 44px;
+		display: flex;
+		align-items: center;
+	}
+}
+
+/* Skip to Content Link - WCAG AAA */
+.skip-link {
+	position: absolute;
+	top: -40px;
+	left: 0;
+	background: var(--gold);
+	color: var(--maroon-dark);
+	padding: 8px;
+	text-decoration: none;
+	font-weight: bold;
+	z-index: 100;
+}
+
+.skip-link:focus {
+	top: 0;
+}
+
+/* Focus Visible Enhancement - WCAG */
+*:focus-visible {
+	outline: 3px solid var(--gold);
+	outline-offset: 2px;
+}
+
+/* Print Styles - Accessibility */
+@media print {
+	.footer {
+		background: white;
+		color: black;
+	}
+
+	.map-container {
+		border: 2px solid black;
+	}
+
+	.status-badge {
+		border: 2px solid black;
+	}
+}
