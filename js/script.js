@@ -169,6 +169,19 @@
 		// Update status every 60 seconds
 		setInterval(updateStatusBadge, 60000);
 
+		// Initialize mobile navigation toggle (hamburger menu)
+		var hamburger = document.querySelector(".hamburger");
+		var navMenu = document.querySelector(".nav-menu");
+
+		if (hamburger && navMenu) {
+			hamburger.addEventListener("click", function () {
+				var isExpanded = hamburger.getAttribute("aria-expanded") === "true";
+				var newExpanded = !isExpanded;
+
+				hamburger.setAttribute("aria-expanded", String(newExpanded));
+				navMenu.classList.toggle("active", newExpanded);
+			});
+		}
 		if (DEBUG) {
 			console.log("✅ DEM-24: Store Hours & Location initialized");
 		}
