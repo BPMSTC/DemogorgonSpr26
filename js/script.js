@@ -92,9 +92,8 @@
 			message = `Open Now - Closes at ${closingHour}:00 ${closingPeriod}`;
 		} else {
 			// Find next opening time
-			let nextDay = (currentDay + 1) % 7;
+			const nextDay = (currentDay + 1) % 7;
 			// @ts-ignore
-			let daysUntilOpen = 1;
 
 			// Check if opens later today
 			if (currentTimeDecimal < todaySchedule.open) {
