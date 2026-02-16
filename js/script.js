@@ -156,6 +156,45 @@
 	}
 
 	/**
+	 * Toggle the mobile navigation menu open or closed
+	 * Updates ARIA attributes, CSS classes, and overlay visibility
+	 * @param {boolean} forceClose - If true, always close the menu
+	 */
+	function toggleMobileMenu(forceClose) {
+		var hamburger = document.querySelector(".hamburger");
+		var navMenu = document.querySelector(".nav-menu");
+		var navOverlay = document.getElementById("navOverlay");
+
+		if (!hamburger || !navMenu) {
+			return;
+		}
+
+		var isCurrentlyOpen =
+			hamburger.getAttribute("aria-expanded") === "true";
+		var shouldOpen = forceClose ? false : !isCurrentlyOpen;
+
+		hamburger.setAttribute("aria-expanded", String(shouldOpen));
+		hamburger.classList.toggle("active", shouldOpen);
+		navMenu.classList.toggle("active", shouldOpen);
+
+		if (navOverlay) {
+			navOverlay.classList.toggle("active", shouldOpen);
+			navOverlay.setAttribute("aria-hidden", String(!shouldOpen));
+		}
+
+		if (DEBUG) {
+			console.log("[Nav] Menu " + (shouldOpen ? "opened" : "closed"));
+		}
+	}
+
+	/**
+	 * Close the mobile menu (convenience wrapper)
+	 */
+	function closeMobileMenu() {
+		toggleMobileMenu(true);
+	}
+
+	/**
 	 * Initialize store hours functionality
 	 */
 	function init() {
@@ -168,18 +207,40 @@
 		// Initialize mobile navigation toggle (hamburger menu)
 		var hamburger = document.querySelector(".hamburger");
 		var navMenu = document.querySelector(".nav-menu");
+		var navOverlay = document.getElementById("navOverlay");
 
 		if (hamburger && navMenu) {
+			// Toggle menu on hamburger click (includes X close)
 			hamburger.addEventListener("click", function () {
-				var isExpanded = hamburger.getAttribute("aria-expanded") === "true";
-				var newExpanded = !isExpanded;
+				toggleMobileMenu(false);
+			});
 
-				hamburger.setAttribute("aria-expanded", String(newExpanded));
-				navMenu.classList.toggle("active", newExpanded);
+			// Close menu when a nav link is clicked
+			var navLinks = navMenu.querySelectorAll(".nav-link");
+			for (var i = 0; i < navLinks.length; i++) {
+				navLinks[i].addEventListener("click", closeMobileMenu);
+			}
+
+			// Close menu on overlay click (outside menu area)
+			if (navOverlay) {
+				navOverlay.addEventListener("click", closeMobileMenu);
+			}
+
+			// Close menu on Escape key press
+			document.addEventListener("keydown", function (event) {
+				if (event.key === "Escape" || event.key === "Esc") {
+					var isOpen =
+						hamburger.getAttribute("aria-expanded") === "true";
+					if (isOpen) {
+						closeMobileMenu();
+						hamburger.focus();
+					}
+				}
 			});
 		}
+
 		if (DEBUG) {
-			console.log("✅ DEM-24: Store Hours & Location initialized");
+			console.log("DEM-24: Store Hours & Location initialized");
 		}
 	}
 
