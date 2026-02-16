@@ -157,7 +157,7 @@
 
 	/**
 	 * Toggle the mobile navigation menu open or closed
-	 * Updates ARIA attributes, CSS classes, and overlay visibility
+	 * Updates ARIA attributes, CSS classes, overlay visibility, and body scroll
 	 * @param {boolean} forceClose - If true, always close the menu
 	 */
 	function toggleMobileMenu(forceClose) {
@@ -181,6 +181,9 @@
 			navOverlay.classList.toggle("active", shouldOpen);
 			navOverlay.setAttribute("aria-hidden", String(!shouldOpen));
 		}
+
+		// Prevent body scroll when menu is open
+		document.body.style.overflow = shouldOpen ? "hidden" : "";
 
 		if (DEBUG) {
 			console.log("[Nav] Menu " + (shouldOpen ? "opened" : "closed"));
@@ -210,6 +213,24 @@
 		var navOverlay = document.getElementById("navOverlay");
 
 		if (hamburger && navMenu) {
+			// Store event handlers to prevent duplicate listeners
+			var handleEscapeKey = function (event) {
+				if (event.key === "Escape") {
+					var isOpen =
+						hamburger.getAttribute("aria-expanded") === "true";
+					if (isOpen) {
+						closeMobileMenu();
+						hamburger.focus();
+					}
+				}
+			};
+
+			var handleResize = function () {
+				if (window.innerWidth > 768) {
+					closeMobileMenu();
+				}
+			};
+
 			// Toggle menu on hamburger click (includes X close)
 			hamburger.addEventListener("click", function () {
 				toggleMobileMenu(false);
@@ -221,22 +242,19 @@
 				navLinks[i].addEventListener("click", closeMobileMenu);
 			}
 
-			// Close menu on overlay click (outside menu area)
+			// Close menu on overlay click (outside menu area) with focus management
 			if (navOverlay) {
-				navOverlay.addEventListener("click", closeMobileMenu);
+				navOverlay.addEventListener("click", function () {
+					closeMobileMenu();
+					hamburger.focus();
+				});
 			}
 
 			// Close menu on Escape key press
-			document.addEventListener("keydown", function (event) {
-				if (event.key === "Escape" || event.key === "Esc") {
-					var isOpen =
-						hamburger.getAttribute("aria-expanded") === "true";
-					if (isOpen) {
-						closeMobileMenu();
-						hamburger.focus();
-					}
-				}
-			});
+			document.addEventListener("keydown", handleEscapeKey);
+
+			// Ensure mobile menu is closed when switching to desktop width
+			window.addEventListener("resize", handleResize);
 		}
 
 		if (DEBUG) {
