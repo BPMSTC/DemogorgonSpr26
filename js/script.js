@@ -231,7 +231,7 @@
 				clearTimeout(resizeTimer);
 				resizeTimer = setTimeout(function () {
 					if (
-						window.innerWidth > 768 &&
+						window.innerWidth >= 769 &&
 						hamburger.getAttribute("aria-expanded") === "true"
 					) {
 						closeMobileMenu();
