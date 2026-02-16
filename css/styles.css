@@ -47,7 +47,19 @@ body {
 	line-height: 1.6;
 	color: var(--gray-dark);
 	background: var(--off-white);
+	overflow-x: hidden;
 }
+
+/* Responsive Images - prevent horizontal scrolling */
+img,
+iframe,
+video,
+embed,
+object {
+	max-width: 100%;
+	height: auto;
+}
+
 /* Navigation Styles - Matching Footer Theme */
 .navbar {
 	background-color: var(--maroon-dark);
@@ -121,6 +133,10 @@ body {
 	cursor: pointer;
 	border-radius: 4px;
 	transition: background-color 0.3s ease;
+	min-width: 44px;
+	min-height: 44px;
+	justify-content: center;
+	align-items: center;
 }
 
 .hamburger:hover,
@@ -135,7 +151,40 @@ body {
 	width: 25px;
 	height: 3px;
 	background-color: var(--gold);
-	transition: all 0.3s ease;
+	transition: transform 0.3s ease, opacity 0.3s ease;
+	transform-origin: center;
+}
+
+/* Hamburger to X animation when menu is active */
+.hamburger.active span:nth-child(1) {
+	transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.active span:nth-child(2) {
+	opacity: 0;
+}
+
+.hamburger.active span:nth-child(3) {
+	transform: translateY(-8px) rotate(-45deg);
+}
+
+/* Navigation Overlay - for closing menu on outside click */
+.nav-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 999;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.nav-overlay.active {
+	opacity: 1;
+	visibility: visible;
 }
 
 /* Responsive Navigation */
@@ -152,26 +201,43 @@ body {
 		background-color: var(--maroon-dark);
 		flex-direction: column;
 		gap: 0;
-		padding: var(--spacing-md);
-		display: none;
+		padding: 0;
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.3s ease, padding 0.3s ease;
 		border-top: 2px solid var(--gold);
+		display: flex;
+		z-index: 1001;
 	}
 
 	.nav-menu.active {
-		display: flex;
+		max-height: 400px;
+		padding: var(--spacing-md);
 	}
 
 	.nav-link {
-		padding: var(--spacing-sm);
+		padding: var(--spacing-sm) var(--spacing-md);
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 		width: 100%;
-		min-height: 44px;
+		min-height: 48px;
 		display: flex;
 		align-items: center;
+		font-size: 1.1rem;
 	}
 
-	.nav-link:last-child {
+	.nav-menu li:last-child .nav-link {
 		border-bottom: none;
+	}
+
+	/* Thumb-friendly buttons on mobile */
+	.btn,
+	button,
+	[type="submit"],
+	[type="button"] {
+		min-height: 48px;
+		min-width: 48px;
+		padding: var(--spacing-sm) var(--spacing-md);
+		font-size: 1rem;
 	}
 }
 
