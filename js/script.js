@@ -225,10 +225,18 @@
 				}
 			};
 
+			var resizeTimer;
 			var handleResize = function () {
-				if (window.innerWidth > 768) {
-					closeMobileMenu();
-				}
+				// Debounce resize events and only close if menu is open
+				clearTimeout(resizeTimer);
+				resizeTimer = setTimeout(function () {
+					if (
+						window.innerWidth > 768 &&
+						hamburger.getAttribute("aria-expanded") === "true"
+					) {
+						closeMobileMenu();
+					}
+				}, 150);
 			};
 
 			// Toggle menu on hamburger click (includes X close)

@@ -188,7 +188,7 @@ object {
 }
 
 /* Hide overlay on desktop to prevent issues when resizing from mobile to desktop */
-@media (min-width: 769px) {
+@media (min-width: 768.1px) {
 	.nav-overlay {
 		display: none !important;
 	}
