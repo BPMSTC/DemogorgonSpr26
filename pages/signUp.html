@@ -229,7 +229,7 @@
                                     required
                                 >
                                 <label class="form-check-label" for="terms">
-                                    I agree to the <a href="#" class="text-decoration-none">Terms & Conditions</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                    I agree to the <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#termsModal">Terms & Conditions</a> and <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacy Policy</a>
                                 </label>
                                 <div class="invalid-feedback">
                                     You must agree to the terms and conditions
@@ -379,6 +379,72 @@
 				</div>
 			</div>
 		</footer>
+    
+    <!-- Terms & Conditions Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Terms & Conditions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Acceptance of Terms</h6>
+                    <p>By creating an account with Code & Brew, you agree to be bound by these Terms & Conditions.</p>
+                    
+                    <h6>2. User Account</h6>
+                    <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+                    
+                    <h6>3. Service Use</h6>
+                    <p>Our services are provided for personal, non-commercial use. You agree not to misuse our platform or help anyone else do so.</p>
+                    
+                    <h6>4. Content</h6>
+                    <p>All content provided on this platform is for informational purposes only. We reserve the right to modify or discontinue services at any time.</p>
+                    
+                    <h6>5. Limitation of Liability</h6>
+                    <p>Code & Brew shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of our services.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Policy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Information We Collect</h6>
+                    <p>We collect information you provide directly to us, including your username and email address when you create an account.</p>
+                    
+                    <h6>How We Use Your Information</h6>
+                    <p>We use the information we collect to provide, maintain, and improve our services, and to communicate with you.</p>
+                    
+                    <h6>Data Storage</h6>
+                    <p>Your preferences and favorites are stored locally in your browser using localStorage and sessionStorage.</p>
+                    
+                    <h6>Information Sharing</h6>
+                    <p>We do not share your personal information with third parties except as described in this policy or with your consent.</p>
+                    
+                    <h6>Data Security</h6>
+                    <p>We take reasonable measures to help protect your personal information from loss, theft, misuse, and unauthorized access.</p>
+                    
+                    <h6>Your Rights</h6>
+                    <p>You have the right to access, update, or delete your personal information at any time.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     

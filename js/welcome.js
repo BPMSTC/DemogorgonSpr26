@@ -9,8 +9,8 @@
     "use strict";
 
     // Constants
-    var SESSION_KEY   = "currentUser";
-    var FAVORITES_KEY = "favoriteDrinks";
+    const SESSION_KEY   = "currentUser";
+    const FAVORITES_KEY = "favoriteDrinks";
 
     // ===================================
     // Session Helper
@@ -22,7 +22,7 @@
      */
     function getCurrentUser() {
         try {
-            var raw = sessionStorage.getItem(SESSION_KEY);
+            const raw = sessionStorage.getItem(SESSION_KEY);
             return raw ? JSON.parse(raw) : null;
         } catch (err) {
             console.error("Could not read session:", err);
@@ -40,7 +40,7 @@
      */
     function loadFavorites() {
         try {
-            var raw = localStorage.getItem(FAVORITES_KEY);
+            const raw = localStorage.getItem(FAVORITES_KEY);
             return raw ? JSON.parse(raw) : [];
         } catch (err) {
             console.error("Could not read favorites:", err);
@@ -66,8 +66,8 @@
      * @returns {Object} The saved drink with generated id and timestamp
      */
     function addFavorite(drink) {
-        var favorites = loadFavorites();
-        var newDrink = {
+        const favorites = loadFavorites();
+        const newDrink = {
             id:            Date.now(),
             name:          drink.name,
             size:          drink.size,
@@ -87,9 +87,9 @@
      * @returns {boolean} True if found and updated
      */
     function updateFavorite(id, updates) {
-        var favorites = loadFavorites();
-        var found = false;
-        for (var i = 0; i < favorites.length; i++) {
+        const favorites = loadFavorites();
+        let found = false;
+        for (let i = 0; i < favorites.length; i++) {
             if (favorites[i].id === id) {
                 favorites[i].name          = updates.name;
                 favorites[i].size          = updates.size;
@@ -109,12 +109,12 @@
      * @returns {boolean} True if found and deleted
      */
     function deleteFavorite(id) {
-        var favorites = loadFavorites();
-        var next = [];
-        for (var i = 0; i < favorites.length; i++) {
+        const favorites = loadFavorites();
+        const next = [];
+        for (let i = 0; i < favorites.length; i++) {
             if (favorites[i].id !== id) next.push(favorites[i]);
         }
-        var deleted = next.length < favorites.length;
+        const deleted = next.length < favorites.length;
         if (deleted) saveFavorites(next);
         return deleted;
     }
@@ -125,8 +125,8 @@
      * @returns {Object|null} Drink object or null
      */
     function findFavorite(id) {
-        var favorites = loadFavorites();
-        for (var i = 0; i < favorites.length; i++) {
+        const favorites = loadFavorites();
+        for (let i = 0; i < favorites.length; i++) {
             if (favorites[i].id === id) return favorites[i];
         }
         return null;
@@ -151,7 +151,7 @@
      * @returns {string} Formatted date e.g. "Jan 1, 2025"
      */
     function formatDate(isoString) {
-        var d = new Date(isoString);
+        const d = new Date(isoString);
         return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
     }
 
@@ -162,12 +162,12 @@
      */
     function showToast(message, type) {
         type = type || "success";
-        var bgClass   = type === "success" ? "bg-success" : "bg-danger";
-        var iconClass = type === "success" ? "fa-check-circle" : "fa-exclamation-circle";
+        const bgClass   = type === "success" ? "bg-success" : "bg-danger";
+        const iconClass = type === "success" ? "fa-check-circle" : "fa-exclamation-circle";
 
         $(".toast-container").remove();
 
-        var $toast = $(
+        const $toast = $(
             '<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:9999;">' +
             '<div class="toast align-items-center text-white ' + bgClass + ' border-0" role="alert">' +
             '<div class="d-flex">' +
@@ -177,7 +177,7 @@
         );
 
         $("body").append($toast);
-        var toast = new bootstrap.Toast($toast.find(".toast")[0], { delay: 3000 });
+        const toast = new bootstrap.Toast($toast.find(".toast")[0], { delay: 3000 });
         toast.show();
         $toast.find(".toast").on("hidden.bs.toast", function() { $toast.remove(); });
     }
@@ -192,14 +192,14 @@
      * @returns {jQuery} Drink card element
      */
     function buildDrinkCard(drink) {
-        var customizationRow = drink.customization
+        const customizationRow = drink.customization
             ? '<div class="drink-detail-item">' +
               '<i class="fas fa-sliders-h"></i>' +
               '<div><strong>Customization:</strong><div>' + escapeHtml(drink.customization) + "</div></div>" +
               "</div>"
             : "";
 
-        var notesRow = drink.notes
+        const notesRow = drink.notes
             ? '<div class="drink-detail-item">' +
               '<i class="fas fa-sticky-note"></i>' +
               '<div><strong>Notes:</strong><div>' + escapeHtml(drink.notes) + "</div></div>" +
@@ -239,9 +239,9 @@
      * Render all favorite drinks into the grid
      */
     function renderFavorites() {
-        var favorites  = loadFavorites();
-        var $container = $("#favoritesContainer");
-        var $empty     = $("#emptyState");
+        const favorites  = loadFavorites();
+        const $container = $("#favoritesContainer");
+        const $empty     = $("#emptyState");
 
         $container.find(".drink-card").remove();
 
@@ -249,7 +249,7 @@
             $empty.show();
         } else {
             $empty.hide();
-            for (var i = 0; i < favorites.length; i++) {
+            for (let i = 0; i < favorites.length; i++) {
                 $container.append(buildDrinkCard(favorites[i]));
             }
         }
@@ -265,10 +265,10 @@
      */
     function handleAddDrink(e) {
         e.preventDefault();
-        var name          = $("#drinkName").val().trim();
-        var size          = $("#drinkSize").val();
-        var customization = $("#drinkCustomization").val().trim();
-        var notes         = $("#drinkNotes").val().trim();
+        const name          = $("#drinkName").val().trim();
+        const size          = $("#drinkSize").val();
+        const customization = $("#drinkCustomization").val().trim();
+        const notes         = $("#drinkNotes").val().trim();
 
         if (!name || !size) {
             showToast("Please fill in Drink Name and Size.", "error");
@@ -287,8 +287,8 @@
      */
     function handleEditClick(e) {
         e.preventDefault();
-        var id    = parseInt($(this).data("id"), 10);
-        var drink = findFavorite(id);
+        const id    = parseInt($(this).data("id"), 10);
+        const drink = findFavorite(id);
         if (!drink) return;
 
         $("#editDrinkId").val(drink.id);
@@ -306,9 +306,9 @@
      */
     function handleUpdateDrink(e) {
         e.preventDefault();
-        var id   = parseInt($("#editDrinkId").val(), 10);
-        var name = $("#editDrinkName").val().trim();
-        var size = $("#editDrinkSize").val();
+        const id   = parseInt($("#editDrinkId").val(), 10);
+        const name = $("#editDrinkName").val().trim();
+        const size = $("#editDrinkSize").val();
 
         if (!name || !size) {
             showToast("Please fill in Drink Name and Size.", "error");
@@ -333,8 +333,8 @@
      */
     function handleDeleteClick(e) {
         e.preventDefault();
-        var id    = parseInt($(this).data("id"), 10);
-        var drink = findFavorite(id);
+        const id    = parseInt($(this).data("id"), 10);
+        const drink = findFavorite(id);
         if (!drink) return;
 
         if (!confirm('Remove "' + drink.name + '" from your favorites?')) return;
@@ -350,8 +350,8 @@
      */
     function handleOrderClick(e) {
         e.preventDefault();
-        var id    = parseInt($(this).data("id"), 10);
-        var drink = findFavorite(id);
+        const id    = parseInt($(this).data("id"), 10);
+        const drink = findFavorite(id);
         if (drink) showToast('Re-order for "' + drink.name + '" is coming soon.');
     }
 
@@ -390,7 +390,7 @@
      */
     function init() {
         // Read user from session (set by account.js on successful registration)
-        var user = getCurrentUser();
+        const user = getCurrentUser();
 
         if (user && user.username) {
             $("#welcomeUsername").text(user.username);
@@ -410,7 +410,7 @@
         $("#editDrinkModal").on("hidden.bs.modal", clearEditForm);
 
         // Logout (only bind if the button exists on this page)
-        var $logoutBtn = $("#logoutBtn");
+        const $logoutBtn = $("#logoutBtn");
         if ($logoutBtn.length) {
             $logoutBtn.on("click", handleLogout);
         }
