@@ -229,7 +229,7 @@
 			// Close menu on Escape key press
 			document.addEventListener("keydown", function (event) {
 				if (event.key === "Escape" || event.key === "Esc") {
-					var isOpen =
+					const isOpen =
 						hamburger.getAttribute("aria-expanded") === "true";
 					if (isOpen) {
 						closeMobileMenu();
