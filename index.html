@@ -7,6 +7,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Code & Brew - Where Coffee Meets Code</title>
 		<link rel="stylesheet" href="css/styles.css" />
+		<link rel="stylesheet" href="css/blog.css" />
 	</head>
 
 	<body>
@@ -22,6 +23,7 @@
 					<li><a href="#about" class="nav-link">About</a></li>
 					<li><a href="#menu" class="nav-link">Menu</a></li>
 					<li><a href="#contact" class="nav-link">Contact</a></li>
+					<li><a href="#blog" class="nav-link">Blog</a></li>
 				</ul>
 				<button
 					class="hamburger"
@@ -252,6 +254,43 @@
 			</div>
 		</section>
 
+		<!-- Blog Section -->
+		<section id="blog" class="blog" aria-labelledby="blog-heading">
+			<div class="container">
+				<h2 class="section-title" id="blog-heading">
+					The <span class="gradient-text">Blog</span>
+				</h2>
+				<p class="section-subtitle">
+					Coffee culture, brewing tips, and stories from our community
+				</p>
+
+				<!-- Category Filter -->
+				<div class="blog-filters" role="toolbar" aria-label="Filter articles by category">
+					<button class="blog-filter-btn active" data-category="all" type="button" aria-pressed="true">All</button>
+					<button class="blog-filter-btn" data-category="coffee-culture" type="button" aria-pressed="false">Coffee Culture</button>
+					<button class="blog-filter-btn" data-category="brewing-tips" type="button" aria-pressed="false">Brewing Tips</button>
+					<button class="blog-filter-btn" data-category="customer-stories" type="button" aria-pressed="false">Customer Stories</button>
+				</div>
+
+				<!-- Articles Grid -->
+				<div class="blog-grid" id="blogGrid" role="feed" aria-label="Blog articles">
+					<!-- Articles rendered by js/blog.js -->
+				</div>
+
+				<!-- Empty State (hidden by default) -->
+				<div class="blog-empty" id="blogEmpty" hidden>
+					<p>No articles found in this category. Check back soon!</p>
+				</div>
+
+				<!-- Load More -->
+				<div class="blog-load-more" id="blogLoadMore">
+					<button class="btn btn-outline" id="loadMoreBtn" type="button">
+						Load More Articles
+					</button>
+				</div>
+			</div>
+		</section>
+
 		<!-- Footer -->
 		<footer class="footer" role="contentinfo" aria-label="Site footer">
 			<div class="container">
@@ -338,6 +377,7 @@
 								<li><a href="#about">About Us</a></li>
 								<li><a href="#menu">Menu</a></li>
 								<li><a href="#contact">Contact</a></li>
+								<li><a href="#blog">Blog</a></li>
 							</ul>
 						</div>
 						<div class="footer-column">
@@ -367,5 +407,6 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 		<script src="js/script.js"></script>
 		<script src="js/contactForm.js"></script>
+    <script src="js/blog.js"></script>
 	</body>
 </html>
