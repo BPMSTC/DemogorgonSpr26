@@ -10,14 +10,14 @@
 	"use strict";
 
 	// Storage key for localStorage submissions
-	var STORAGE_KEY = "codeBrewInquiries";
+	const STORAGE_KEY = "codeBrewInquiries";
 
 	// Minimum character lengths for validation
-	var MIN_NAME_LENGTH = 2;
-	var MIN_MESSAGE_LENGTH = 10;
+	const MIN_NAME_LENGTH = 2;
+	const MIN_MESSAGE_LENGTH = 10;
 
-	// Email validation pattern (standard RFC-compliant regex)
-	var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	// Email validation pattern (simplified email validation regex)
+	const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 	/**
 	 * Validate a single form field and display error message
@@ -26,9 +26,9 @@
 	 * @returns {boolean} - True if the field is valid
 	 */
 	function validateField($field, $errorSpan) {
-		var value = $.trim($field.val());
-		var fieldName = $field.attr("name");
-		var errorMessage = "";
+		const value = $.trim($field.val());
+		const fieldName = $field.attr("name");
+		let errorMessage = "";
 
 		if (fieldName === "name") {
 			if (value.length === 0) {
@@ -72,7 +72,7 @@
 	 * @returns {boolean} - True if all fields are valid
 	 */
 	function validateForm($form) {
-		var isValid = true;
+		let isValid = true;
 
 		// Validate each required field
 		isValid =
@@ -101,7 +101,7 @@
 	 * @param {Object} formData - The submitted form data
 	 */
 	function saveSubmission(formData) {
-		var submissions = loadSubmissions();
+		const submissions = loadSubmissions();
 		submissions.push(formData);
 
 		try {
@@ -118,7 +118,7 @@
 	 */
 	function loadSubmissions() {
 		try {
-			var data = localStorage.getItem(STORAGE_KEY);
+			const data = localStorage.getItem(STORAGE_KEY);
 			return data ? JSON.parse(data) : [];
 		} catch (e) {
 			return [];
@@ -161,33 +161,38 @@
 	 * Initialize contact form event handlers
 	 */
 	function initContactForm() {
-		var $form = $("#contactForm");
-		var $submitBtn = $("#submitBtn");
-		var $feedbackDiv = $("#formFeedback");
+		const $form = $("#contactForm");
+		const $submitBtn = $("#submitBtn");
+		const $feedbackDiv = $("#formFeedback");
 
 		if ($form.length === 0) {
 			return;
 		}
 
+		// Cache error element selectors for better performance
+		const $nameError = $("#nameError");
+		const $emailError = $("#emailError");
+		const $messageError = $("#messageError");
+
 		// Real-time validation on blur for required fields
 		$form.find("#name").on("blur", function () {
-			validateField($(this), $("#nameError"));
+			validateField($(this), $nameError);
 		});
 
 		$form.find("#email").on("blur", function () {
-			validateField($(this), $("#emailError"));
+			validateField($(this), $emailError);
 		});
 
 		$form.find("#message").on("blur", function () {
-			validateField($(this), $("#messageError"));
+			validateField($(this), $messageError);
 		});
 
 		// Clear error styling when user starts typing
 		$form.find("input, textarea").on("input", function () {
-			var $this = $(this);
+			const $this = $(this);
 			if ($this.hasClass("invalid")) {
 				$this.removeClass("invalid");
-				var errorId = $this.attr("id") + "Error";
+				const errorId = $this.attr("id") + "Error";
 				$("#" + errorId).text("");
 			}
 		});
@@ -206,12 +211,15 @@
 				return;
 			}
 
-			// Collect form data
-			var formData = {
-				name: $.trim($("#name").val()),
-				email: $.trim($("#email").val()),
-				subject: $.trim($("#subject").val()) || "(No subject)",
-				message: $.trim($("#message").val()),
+			// Collect form data using FormData API to avoid redundant DOM queries
+			const nativeForm = $form[0];
+			const fd = new FormData(nativeForm);
+			
+			const formData = {
+				name: $.trim(fd.get("name") || ""),
+				email: $.trim(fd.get("email") || ""),
+				subject: $.trim(fd.get("subject") || "") || "(No subject)",
+				message: $.trim(fd.get("message") || ""),
 				submittedAt: new Date().toISOString(),
 			};
 
