@@ -1,0 +1,432 @@
+/* ===================================
+   Code & Brew - Account Creation Styles
+   Dedicated styles for account pages
+   =================================== */
+
+/* ===================================
+   Layout
+   =================================== */
+
+.branding-section {
+    color: var(--color-white);
+    padding: var(--spacing-3xl);
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.branding-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: floatPattern 20s linear infinite;
+}
+
+@keyframes floatPattern {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(50px, 50px);
+    }
+}
+
+.branding-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 500px;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-2xl);
+    font-size: 4rem;
+}
+
+.logo-container i {
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.logo-container i:first-child {
+    animation-delay: 0s;
+}
+
+.logo-container i:last-child {
+    animation-delay: 0.5s;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.brand-name {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-white);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.brand-tagline {
+    font-size: var(--font-size-xl);
+    color: var(--maroon-dark);
+    margin-bottom: var(--spacing-3xl);
+    font-family: var(--font-secondary);
+}
+
+.features-list {
+    text-align: left;
+    display: inline-block;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-xl);
+}
+
+.feature-item i {
+    color: var(--gold);
+    font-size: var(--font-size-xl);
+}
+
+/* ===================================
+   Form Section
+   =================================== */
+
+.form-section {
+    background-color: var(--color-white);
+    padding: var(--spacing-2xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 500px;
+    padding: var(--spacing-xl);
+}
+
+.mobile-logo {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.mobile-logo i {
+    font-size: 2rem;
+    color: var(--maroon-dark);
+    margin: 0 var(--spacing-sm);
+}
+
+.mobile-logo h2 {
+    color: var(--maroon-dark);
+    margin-top: var(--spacing-md);
+    margin-bottom: 0;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+}
+
+.form-header h2 {
+    color: var(--maroon-dark);
+    margin-bottom: var(--spacing-sm);
+}
+
+.form-header p {
+    color: var(--color-medium-gray);
+    margin-bottom: 0;
+}
+
+/* ===================================
+   Form Inputs
+   =================================== */
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group .input-group-text {
+    border-right: none;
+}
+
+.toggle-password {
+    border-left: none;
+}
+
+.toggle-password:hover {
+    background-color: var(--color-light-gray);
+}
+
+/* ===================================
+   Password Strength Indicator
+   =================================== */
+
+.password-strength {
+    margin-top: var(--spacing-sm);
+}
+
+.strength-bar {
+    height: 4px;
+    background-color: var(--color-gray);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all var(--transition-base);
+    border-radius: var(--radius-full);
+}
+
+.strength-fill.weak {
+    width: 25%;
+    background-color: var(--color-danger);
+}
+
+.strength-fill.fair {
+    width: 50%;
+    background-color: var(--color-warning);
+}
+
+.strength-fill.good {
+    width: 75%;
+    background-color: var(--color-info);
+}
+
+.strength-fill.strong {
+    width: 100%;
+    background-color: var(--color-success);
+}
+
+.strength-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-medium-gray);
+}
+
+.strength-level {
+    font-weight: var(--font-weight-semibold);
+}
+
+.strength-level.weak {
+    color: var(--color-danger);
+}
+
+.strength-level.fair {
+    color: var(--color-warning);
+}
+
+.strength-level.good {
+    color: var(--color-info);
+}
+
+.strength-level.strong {
+    color: var(--color-success);
+}
+
+/* ===================================
+   Password Requirements
+   =================================== */
+
+.password-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--color-medium-gray);
+    font-size: var(--font-size-sm);
+    transition: color var(--transition-fast);
+}
+
+.requirement i {
+    font-size: 0.5rem;
+    transition: all var(--transition-fast);
+}
+
+.requirement.met {
+    color: var(--color-success);
+}
+
+.requirement.met i {
+    transform: scale(1.2);
+}
+
+.requirement.met i::before {
+    content: '\f058';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+/* ===================================
+   Submit Button
+   =================================== */
+
+.btn.w-100 {
+    position: relative;
+}
+
+.btn-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* ===================================
+   Social Buttons
+   =================================== */
+
+.social-divider {
+    position: relative;
+    text-align: center;
+    margin: var(--spacing-2xl) 0;
+}
+
+.social-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--color-gray);
+}
+
+.social-divider span {
+    position: relative;
+    background-color: var(--color-white);
+    padding: 0 var(--spacing-md);
+    color: var(--color-medium-gray);
+    font-size: var(--font-size-sm);
+}
+
+.social-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.social-buttons .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.social-buttons .btn i {
+    font-size: var(--font-size-lg);
+}
+
+/* ===================================
+   Success Message
+   =================================== */
+
+#successMessage {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===================================
+   Form Check
+   =================================== */
+
+.form-check-input:checked {
+    background-color: var(--maroon-dark);
+    border-color: var(--maroon-dark);
+}
+
+.form-check-label a {
+    color: var(--maroon-dark);
+    font-weight: var(--font-weight-medium);
+}
+
+.form-check-label a:hover {
+    color: var(--maroon-medium);
+    text-decoration: underline;
+}
+
+/* ===================================
+   Responsive Styles
+   =================================== */
+
+@media (max-width: 992px) {
+    .form-section {
+        padding: var(--spacing-xl);
+    }
+    
+    .form-container {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 576px) {
+    .form-section {
+        padding: var(--spacing-md);
+    }
+    
+    .form-container {
+        padding: var(--spacing-sm);
+    }
+    
+    .social-buttons {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===================================
+   Animation for Form Validation
+   =================================== */
+
+.form-control.is-invalid,
+.form-control.is-valid {
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}

@@ -70,15 +70,19 @@ object {
 	position: sticky;
 	top: 0;
 	z-index: 1000;
+	/* Reset Bootstrap centering defaults */
+	text-align: left !important;
+	display: block !important;
 }
 
 .nav-container {
 	max-width: 1200px;
 	margin: 0 auto;
 	padding: 0 var(--spacing-md);
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	width: 100% !important;
 }
 
 .navbar .logo {
