@@ -14,6 +14,7 @@
 	--gold: #ffd700; /* Primary gold */
 	--gold-dark: #daa520; /* Darker gold for contrast */
 	--gold-light: #ffed4e; /* Light gold */
+	--gold-dark-transparent: rgba(218, 165, 32, 0.2); /* Gold dark with transparency */
 
 	/* Neutral Colors */
 	--white: #ffffff;
@@ -156,6 +157,7 @@ object {
 }
 
 /* Hamburger to X animation when menu is active */
+/* Transform values calculated based on: span height (3px) + gap (5px) = 8px offset */
 .hamburger.active span:nth-child(1) {
 	transform: translateY(8px) rotate(45deg);
 }
@@ -309,7 +311,7 @@ object {
 .form-group input:focus,
 .form-group textarea:focus {
 	border-color: var(--gold-dark);
-	box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.2);
+	box-shadow: 0 0 0 3px var(--gold-dark-transparent);
 	outline: none;
 }
 

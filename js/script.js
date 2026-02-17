@@ -161,17 +161,17 @@
 	 * @param {boolean} forceClose - If true, always close the menu
 	 */
 	function toggleMobileMenu(forceClose) {
-		var hamburger = document.querySelector(".hamburger");
-		var navMenu = document.querySelector(".nav-menu");
-		var navOverlay = document.getElementById("navOverlay");
+		const hamburger = document.querySelector(".hamburger");
+		const navMenu = document.querySelector(".nav-menu");
+		const navOverlay = document.getElementById("navOverlay");
 
 		if (!hamburger || !navMenu) {
 			return;
 		}
 
-		var isCurrentlyOpen =
+		const isCurrentlyOpen =
 			hamburger.getAttribute("aria-expanded") === "true";
-		var shouldOpen = forceClose ? false : !isCurrentlyOpen;
+		const shouldOpen = forceClose ? false : !isCurrentlyOpen;
 
 		hamburger.setAttribute("aria-expanded", String(shouldOpen));
 		hamburger.classList.toggle("active", shouldOpen);
@@ -205,9 +205,9 @@
 		setInterval(updateStatusBadge, 60000);
 
 		// Initialize mobile navigation toggle (hamburger menu)
-		var hamburger = document.querySelector(".hamburger");
-		var navMenu = document.querySelector(".nav-menu");
-		var navOverlay = document.getElementById("navOverlay");
+		const hamburger = document.querySelector(".hamburger");
+		const navMenu = document.querySelector(".nav-menu");
+		const navOverlay = document.getElementById("navOverlay");
 
 		if (hamburger && navMenu) {
 			// Toggle menu on hamburger click (includes X close)
@@ -216,8 +216,8 @@
 			});
 
 			// Close menu when a nav link is clicked
-			var navLinks = navMenu.querySelectorAll(".nav-link");
-			for (var i = 0; i < navLinks.length; i++) {
+			const navLinks = navMenu.querySelectorAll(".nav-link");
+			for (let i = 0; i < navLinks.length; i++) {
 				navLinks[i].addEventListener("click", closeMobileMenu);
 			}
 
@@ -229,7 +229,7 @@
 			// Close menu on Escape key press
 			document.addEventListener("keydown", function (event) {
 				if (event.key === "Escape" || event.key === "Esc") {
-					var isOpen =
+					const isOpen =
 						hamburger.getAttribute("aria-expanded") === "true";
 					if (isOpen) {
 						closeMobileMenu();
