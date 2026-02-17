@@ -238,7 +238,6 @@ object {
 
 	/* Thumb-friendly buttons on mobile - specific to nav and form buttons */
 	.nav-link,
-	.btn,
 	.hamburger,
 	.contact-form button,
 	.hero-buttons .btn,
