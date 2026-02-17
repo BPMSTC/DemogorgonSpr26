@@ -1,0 +1,258 @@
+/**
+ * Code & Brew - Blog Section Styles
+ * Depends on :root variables defined in styles.css
+ *
+ * @format
+ */
+
+/* ============================================================
+   Blog Section
+   ============================================================ */
+.blog {
+	padding: var(--spacing-xl) 0;
+	background-color: var(--white);
+}
+
+/* Category Filter Toolbar */
+.blog-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-xs);
+	justify-content: center;
+	margin-bottom: var(--spacing-xl);
+}
+
+.blog-filter-btn {
+	background-color: transparent;
+	color: var(--maroon-dark);
+	border: 2px solid var(--maroon-dark);
+	padding: 0.5rem var(--spacing-md);
+	border-radius: 20px;
+	font-family: inherit;
+	font-size: 0.95rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.3s ease, color 0.3s ease;
+	min-height: 44px;
+}
+
+.blog-filter-btn:hover,
+.blog-filter-btn:focus {
+	background-color: var(--maroon-dark);
+	color: var(--white);
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+.blog-filter-btn.active {
+	background-color: var(--maroon-dark);
+	color: var(--gold);
+	border-color: var(--maroon-dark);
+}
+
+.blog-filter-btn.active:focus {
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+/* Articles Grid */
+.blog-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: var(--spacing-lg);
+	margin-bottom: var(--spacing-lg);
+}
+
+/* Individual Article Card */
+.blog-card {
+	background-color: var(--off-white);
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+	border: 1px solid var(--gray-light);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	display: flex;
+	flex-direction: column;
+}
+
+.blog-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Card Thumbnail */
+.blog-card-thumb {
+	width: 100%;
+	height: 180px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 3rem;
+	color: var(--white);
+	position: relative;
+}
+
+.blog-card-thumb.coffee-culture {
+	background: linear-gradient(135deg, var(--maroon-dark), var(--maroon-medium));
+}
+
+.blog-card-thumb.brewing-tips {
+	background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+}
+
+.blog-card-thumb.customer-stories {
+	background: linear-gradient(135deg, var(--maroon-light), var(--gold-dark));
+}
+
+/* Category Badge on Thumbnail */
+.blog-card-category {
+	position: absolute;
+	top: var(--spacing-xs);
+	right: var(--spacing-xs);
+	background-color: rgba(0, 0, 0, 0.6);
+	color: var(--white);
+	padding: 0.25rem 0.75rem;
+	border-radius: 12px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* Card Body */
+.blog-card-body {
+	padding: var(--spacing-md);
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.blog-card-title {
+	color: var(--maroon-dark);
+	font-size: 1.15rem;
+	font-weight: 700;
+	margin-bottom: var(--spacing-xs);
+	line-height: 1.4;
+}
+
+.blog-card-excerpt {
+	color: var(--gray-medium);
+	font-size: 0.95rem;
+	line-height: 1.6;
+	margin-bottom: var(--spacing-md);
+	flex: 1;
+}
+
+/* Expanded Article Content (hidden by default) */
+.blog-card-full {
+	display: none;
+	color: var(--gray-dark);
+	font-size: 0.95rem;
+	line-height: 1.7;
+	margin-bottom: var(--spacing-md);
+	padding-top: var(--spacing-sm);
+	border-top: 1px solid var(--gray-light);
+}
+
+.blog-card-full.visible {
+	display: block;
+}
+
+/* Card Footer / Meta */
+.blog-card-meta {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-top: var(--spacing-sm);
+	border-top: 1px solid var(--gray-light);
+	font-size: 0.85rem;
+	color: var(--gray-medium);
+}
+
+.blog-card-author {
+	font-weight: 600;
+	color: var(--maroon-dark);
+}
+
+.blog-card-date {
+	font-style: italic;
+}
+
+/* Read More Link */
+.blog-read-more {
+	display: inline-block;
+	color: var(--gold-dark);
+	font-weight: 600;
+	font-size: 0.95rem;
+	text-decoration: none;
+	cursor: pointer;
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: inherit;
+	margin-bottom: var(--spacing-sm);
+	transition: color 0.3s ease;
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
+}
+
+.blog-read-more:hover,
+.blog-read-more:focus {
+	color: var(--maroon-dark);
+	text-decoration: underline;
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+/* Empty State */
+.blog-empty {
+	text-align: center;
+	padding: var(--spacing-xl);
+	color: var(--gray-medium);
+	font-size: 1.1rem;
+}
+
+/* Load More */
+.blog-load-more {
+	text-align: center;
+	margin-top: var(--spacing-md);
+}
+
+/* Blog Responsive */
+@media (max-width: 768px) {
+	.blog-grid {
+		grid-template-columns: 1fr;
+		gap: var(--spacing-md);
+	}
+
+	.blog-filters {
+		gap: var(--spacing-xs);
+	}
+
+	.blog-filter-btn {
+		padding: 0.5rem var(--spacing-sm);
+		font-size: 0.85rem;
+		min-height: 48px;
+	}
+
+	.blog-card-thumb {
+		height: 150px;
+	}
+
+	.blog-card-meta {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.25rem;
+	}
+
+	.blog-read-more {
+		min-height: 48px;
+	}
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+	.blog-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}

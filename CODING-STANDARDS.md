@@ -75,7 +75,7 @@ All colors, spacing, and shared values live in `:root` custom properties inside 
 ### Rules
 
 - **Use CSS custom properties** (`var(--maroon-dark)`) instead of hard-coded hex values.
-- **One stylesheet** (`css/styles.css`) with sections clearly commented per feature (e.g., `/* Blog Section */`).
+- **Separate stylesheets per feature** (e.g., `css/blog.css`). Core/shared styles live in `css/styles.css`.
 - **kebab-case** for all class names: `.blog-card`, `.blog-filter-btn`.
 - **No `!important`** unless overriding a third-party library.
 - **Mobile breakpoint** at `768px` using `@media (max-width: 768px)`.
@@ -195,16 +195,17 @@ The project targets **WCAG 2.1 AA** compliance.
 DemogorgonSpr26/
   index.html              # Single-page app, all sections
   css/
-    styles.css            # All styles, sectioned by feature
+    styles.css            # Core/shared styles (theme, nav, footer, etc.)
+    blog.css              # Blog section styles
   js/
     script.js             # Core site logic (store hours, nav)
     contactForm.js        # DEM-27: Contact form
-    blog.js               # DEM-XX: Blog section
+    blog.js               # Blog section
   CODING-STANDARDS.md     # This file
   README.md
 ```
 
-- New features add a **JS file** in `js/` and a **CSS section** in `css/styles.css`.
+- New features add a **JS file** in `js/` and a **CSS file** in `css/` (e.g., `css/featureName.css`).
 - Keep `index.html` as the single page; add sections in logical order.
 
 ---
