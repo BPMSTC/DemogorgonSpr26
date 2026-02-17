@@ -156,6 +156,48 @@
 	}
 
 	/**
+	 * Toggle the mobile navigation menu open or closed
+	 * Updates ARIA attributes, CSS classes, overlay visibility, and body scroll
+	 * @param {boolean} forceClose - If true, always close the menu
+	 */
+	function toggleMobileMenu(forceClose) {
+		var hamburger = document.querySelector(".hamburger");
+		var navMenu = document.querySelector(".nav-menu");
+		var navOverlay = document.getElementById("navOverlay");
+
+		if (!hamburger || !navMenu) {
+			return;
+		}
+
+		var isCurrentlyOpen =
+			hamburger.getAttribute("aria-expanded") === "true";
+		var shouldOpen = forceClose ? false : !isCurrentlyOpen;
+
+		hamburger.setAttribute("aria-expanded", String(shouldOpen));
+		hamburger.classList.toggle("active", shouldOpen);
+		navMenu.classList.toggle("active", shouldOpen);
+
+		if (navOverlay) {
+			navOverlay.classList.toggle("active", shouldOpen);
+			navOverlay.setAttribute("aria-hidden", String(!shouldOpen));
+		}
+
+		// Prevent body scroll when menu is open
+		document.body.style.overflow = shouldOpen ? "hidden" : "";
+
+		if (DEBUG) {
+			console.log("[Nav] Menu " + (shouldOpen ? "opened" : "closed"));
+		}
+	}
+
+	/**
+	 * Close the mobile menu (convenience wrapper)
+	 */
+	function closeMobileMenu() {
+		toggleMobileMenu(true);
+	}
+
+	/**
 	 * Initialize store hours functionality
 	 */
 	function init() {
@@ -168,18 +210,63 @@
 		// Initialize mobile navigation toggle (hamburger menu)
 		var hamburger = document.querySelector(".hamburger");
 		var navMenu = document.querySelector(".nav-menu");
+		var navOverlay = document.getElementById("navOverlay");
 
 		if (hamburger && navMenu) {
-			hamburger.addEventListener("click", function () {
-				var isExpanded = hamburger.getAttribute("aria-expanded") === "true";
-				var newExpanded = !isExpanded;
+			// Store event handlers to prevent duplicate listeners
+			var handleEscapeKey = function (event) {
+				if (event.key === "Escape") {
+					var isOpen =
+						hamburger.getAttribute("aria-expanded") === "true";
+					if (isOpen) {
+						closeMobileMenu();
+						hamburger.focus();
+					}
+				}
+			};
 
-				hamburger.setAttribute("aria-expanded", String(newExpanded));
-				navMenu.classList.toggle("active", newExpanded);
+			var resizeTimer;
+			var handleResize = function () {
+				// Debounce resize events and only close if menu is open
+				clearTimeout(resizeTimer);
+				resizeTimer = setTimeout(function () {
+					if (
+						window.innerWidth >= 769 &&
+						hamburger.getAttribute("aria-expanded") === "true"
+					) {
+						closeMobileMenu();
+					}
+				}, 150);
+			};
+
+			// Toggle menu on hamburger click (includes X close)
+			hamburger.addEventListener("click", function () {
+				toggleMobileMenu(false);
 			});
+
+			// Close menu when a nav link is clicked
+			var navLinks = navMenu.querySelectorAll(".nav-link");
+			for (var i = 0; i < navLinks.length; i++) {
+				navLinks[i].addEventListener("click", closeMobileMenu);
+			}
+
+			// Close menu on overlay click (outside menu area) with focus management
+			if (navOverlay) {
+				navOverlay.addEventListener("click", function () {
+					closeMobileMenu();
+					hamburger.focus();
+				});
+			}
+
+			// Close menu on Escape key press
+			document.addEventListener("keydown", handleEscapeKey);
+
+			// Ensure mobile menu is closed when switching to desktop width
+			window.addEventListener("resize", handleResize);
 		}
+
 		if (DEBUG) {
-			console.log("✅ DEM-24: Store Hours & Location initialized");
+			console.log("DEM-24: Store Hours & Location initialized");
 		}
 	}
 

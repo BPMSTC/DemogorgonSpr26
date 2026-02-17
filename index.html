@@ -17,19 +17,26 @@
 					<span class="logo-icon">☕</span>
 					<span class="logo-text">Code & Brew</span>
 				</div>
-				<ul class="nav-menu">
+				<ul class="nav-menu" id="navMenu">
 					<li><a href="#home" class="nav-link">Home</a></li>
 					<li><a href="#about" class="nav-link">About</a></li>
 					<li><a href="#menu" class="nav-link">Menu</a></li>
 					<li><a href="#contact" class="nav-link">Contact</a></li>
 				</ul>
-				<button class="hamburger" type="button">
+				<button
+					class="hamburger"
+					type="button"
+					aria-expanded="false"
+					aria-controls="navMenu"
+					aria-label="Toggle navigation menu">
 					<span></span>
 					<span></span>
 					<span></span>
 				</button>
 			</div>
 		</nav>
+		<!-- Overlay for closing mobile menu on outside click -->
+		<div class="nav-overlay" id="navOverlay" aria-hidden="true"></div>
 
 		<!-- Hero Section -->
 		<section id="home" class="hero">
