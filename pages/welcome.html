@@ -79,7 +79,7 @@
                         </div>
                         <h3>Browse Menu</h3>
                         <p>Explore our selection of coffee and code-inspired drinks</p>
-                        <a href="#menu" class="btn btn-outline-secondary">View Menu</a>
+                        <a href="../index.html#menu" class="btn btn-outline-secondary">View Menu</a>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -99,13 +99,13 @@
                         </div>
                         <h3>Rewards</h3>
                         <p>Earn points with every purchase</p>
-                        <a href="#rewards" class="btn btn-outline-secondary">Learn More</a>
+                        <a href="../index.html#about" class="btn btn-outline-secondary">Learn More</a>
                     </div>
                 </div>
             </div>
             
             <!-- Favorite Drinks Section -->
-            <div class="row">
+            <div id="favorites" class="row">
                 <div class="col-12">
                     <div class="favorites-header">
                         <h2 class="section-title">
@@ -139,11 +139,11 @@
     </main>
     
     <!-- Add Drink Modal -->
-    <div class="modal fade" id="addDrinkModal" tabindex="-1">
+    <div class="modal fade" id="addDrinkModal" tabindex="-1" aria-labelledby="addDrinkModalLabel">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
+                    <h5 class="modal-title" id="addDrinkModalLabel">
                         <i class="fas fa-plus-circle"></i>
                         Add Favorite Drink
                     </h5>
@@ -189,11 +189,11 @@
     </div>
     
     <!-- Edit Drink Modal -->
-    <div class="modal fade" id="editDrinkModal" tabindex="-1">
+    <div class="modal fade" id="editDrinkModal" tabindex="-1" aria-labelledby="editDrinkModalLabel">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
+                    <h5 class="modal-title" id="editDrinkModalLabel">
                         <i class="fas fa-edit"></i>
                         Edit Favorite Drink
                     </h5>
@@ -322,9 +322,9 @@
 						<div class="footer-column">
 							<h4>Quick Links</h4>
 							<ul>
-								<li><a href="#about">About Us</a></li>
-								<li><a href="#menu">Menu</a></li>
-								<li><a href="#contact">Contact</a></li>
+								<li><a href="../index.html#about">About Us</a></li>
+								<li><a href="../index.html#menu">Menu</a></li>
+								<li><a href="../index.html#contact">Contact</a></li>
 							</ul>
 						</div>
 						<div class="footer-column">

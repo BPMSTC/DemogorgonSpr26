@@ -8,6 +8,7 @@
    =================================== */
 
 .branding-section {
+    background-color: var(--maroon-dark);
     color: var(--color-white);
     padding: var(--spacing-3xl);
     align-items: center;
@@ -84,7 +85,7 @@
 
 .brand-tagline {
     font-size: var(--font-size-xl);
-    color: var(--maroon-dark);
+    color: var(--gold-light);
     margin-bottom: var(--spacing-3xl);
     font-family: var(--font-secondary);
 }

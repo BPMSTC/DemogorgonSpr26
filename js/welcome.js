@@ -1,6 +1,6 @@
 /**
  * Code & Brew - Welcome Dashboard
- * Reads user from sessionStorage and handles favourite drinks
+ * Reads user from sessionStorage and handles favorite drinks
  *
  * @format
  */
@@ -35,7 +35,7 @@
     // ===================================
 
     /**
-     * Load all favourites from localStorage
+     * Load all favorites from localStorage
      * @returns {Array} Array of drink objects
      */
     function loadFavorites() {
@@ -43,25 +43,25 @@
             var raw = localStorage.getItem(FAVORITES_KEY);
             return raw ? JSON.parse(raw) : [];
         } catch (err) {
-            console.error("Could not read favourites:", err);
+            console.error("Could not read favorites:", err);
             return [];
         }
     }
 
     /**
-     * Persist favourites array to localStorage
+     * Persist favorites array to localStorage
      * @param {Array} favorites - Array of drink objects to save
      */
     function saveFavorites(favorites) {
         try {
             localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
         } catch (err) {
-            console.error("Could not save favourites:", err);
+            console.error("Could not save favorites:", err);
         }
     }
 
     /**
-     * Add a new favourite drink
+     * Add a new favorite drink
      * @param {Object} drink - Drink data { name, size, customization, notes }
      * @returns {Object} The saved drink with generated id and timestamp
      */
@@ -81,7 +81,7 @@
     }
 
     /**
-     * Update an existing favourite drink by id
+     * Update an existing favorite drink by id
      * @param {number} id - Drink id to update
      * @param {Object} updates - Fields to update
      * @returns {boolean} True if found and updated
@@ -104,7 +104,7 @@
     }
 
     /**
-     * Delete a favourite drink by id
+     * Delete a favorite drink by id
      * @param {number} id - Drink id to delete
      * @returns {boolean} True if found and deleted
      */
@@ -120,7 +120,7 @@
     }
 
     /**
-     * Find a favourite drink by id
+     * Find a favorite drink by id
      * @param {number} id - Drink id to find
      * @returns {Object|null} Drink object or null
      */
@@ -183,7 +183,7 @@
     }
 
     // ===================================
-    // Render Favourites
+    // Render Favorites
     // ===================================
 
     /**
@@ -236,7 +236,7 @@
     }
 
     /**
-     * Render all favourite drinks into the grid
+     * Render all favorite drinks into the grid
      */
     function renderFavorites() {
         var favorites  = loadFavorites();
@@ -260,7 +260,7 @@
     // ===================================
 
     /**
-     * Handle Save Favourite button in the Add modal
+     * Handle Save Favorite button in the Add modal
      * @param {Event} e - Click event
      */
     function handleAddDrink(e) {
@@ -277,7 +277,7 @@
 
         addFavorite({ name: name, size: size, customization: customization, notes: notes });
         bootstrap.Modal.getInstance($("#addDrinkModal")[0]).hide();
-        showToast('"' + name + '" added to your favourites!');
+        showToast('"' + name + '" added to your favorites!');
         renderFavorites();
     }
 
@@ -337,10 +337,10 @@
         var drink = findFavorite(id);
         if (!drink) return;
 
-        if (!confirm('Remove "' + drink.name + '" from your favourites?')) return;
+        if (!confirm('Remove "' + drink.name + '" from your favorites?')) return;
 
         deleteFavorite(id);
-        showToast('"' + drink.name + '" removed from favourites.');
+        showToast('"' + drink.name + '" removed from favorites.');
         renderFavorites();
     }
 
@@ -352,18 +352,18 @@
         e.preventDefault();
         var id    = parseInt($(this).data("id"), 10);
         var drink = findFavorite(id);
-        if (drink) showToast('"' + drink.name + '" added to your cart!');
+        if (drink) showToast('Re-order for "' + drink.name + '" is coming soon.');
     }
 
     /**
-     * Handle Logout — clear session and return to sign-up page
+     * Handle Logout — clear session and return to home page
      * @param {Event} e - Click event
      */
     function handleLogout(e) {
         e.preventDefault();
         if (confirm("Are you sure you want to log out?")) {
             sessionStorage.removeItem(SESSION_KEY);
-            window.location.href = "index.html";
+            window.location.href = "../index.html";
         }
     }
 
@@ -394,10 +394,9 @@
 
         if (user && user.username) {
             $("#welcomeUsername").text(user.username);
-            $("#userDisplay").html('<i class="fas fa-user-circle"></i> ' + escapeHtml(user.username));
         }
 
-        // Favourite drink events (delegated so they work after re-render)
+        // Favorite drink events (delegated so they work after re-render)
         $(document).on("click", ".btn-edit",   handleEditClick);
         $(document).on("click", ".btn-delete", handleDeleteClick);
         $(document).on("click", ".btn-order",  handleOrderClick);
@@ -410,8 +409,11 @@
         $("#addDrinkModal").on("hidden.bs.modal",  clearAddForm);
         $("#editDrinkModal").on("hidden.bs.modal", clearEditForm);
 
-        // Logout
-        $("#logoutBtn").on("click", handleLogout);
+        // Logout (only bind if the button exists on this page)
+        var $logoutBtn = $("#logoutBtn");
+        if ($logoutBtn.length) {
+            $logoutBtn.on("click", handleLogout);
+        }
 
         // Initial render
         renderFavorites();

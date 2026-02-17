@@ -12,7 +12,7 @@
     var MIN_PASSWORD_LENGTH = 8;
     var MIN_USERNAME_LENGTH = 3;
     var MAX_USERNAME_LENGTH = 20;
-    var PASSWORD_SPECIAL_CHARS = "!@#$%^&*";
+    var PASSWORD_SPECIAL_CHARS_REGEX = /[!@#$%^&*]/;
     var SESSION_KEY = "currentUser";
 
     // ===================================
@@ -63,7 +63,7 @@
             uppercase: /[A-Z]/.test(password),
             lowercase: /[a-z]/.test(password),
             number:    /[0-9]/.test(password),
-            special:   new RegExp("[" + PASSWORD_SPECIAL_CHARS + "]").test(password)
+            special:   PASSWORD_SPECIAL_CHARS_REGEX.test(password)
         };
     }
 
