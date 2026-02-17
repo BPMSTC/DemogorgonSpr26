@@ -14,6 +14,7 @@
 	--gold: #ffd700; /* Primary gold */
 	--gold-dark: #daa520; /* Darker gold for contrast */
 	--gold-light: #ffed4e; /* Light gold */
+	--gold-dark-transparent: rgba(218, 165, 32, 0.2); /* Gold dark with transparency */
 
 	/* Neutral Colors */
 	--white: #ffffff;
@@ -133,8 +134,8 @@ object {
 	cursor: pointer;
 	border-radius: 4px;
 	transition: background-color 0.3s ease;
-	min-width: 44px;
-	min-height: 44px;
+	min-width: 48px;
+	min-height: 48px;
 	justify-content: center;
 	align-items: center;
 }
@@ -156,6 +157,7 @@ object {
 }
 
 /* Hamburger to X animation when menu is active */
+/* Transform values calculated based on: span height (3px) + gap (5px) = 8px offset */
 .hamburger.active span:nth-child(1) {
 	transform: translateY(8px) rotate(45deg);
 }
@@ -187,6 +189,13 @@ object {
 	visibility: visible;
 }
 
+/* Hide overlay on desktop to prevent issues when resizing from mobile to desktop */
+@media (min-width: 769px) {
+	.nav-overlay {
+		display: none !important;
+	}
+}
+
 /* Responsive Navigation */
 @media (max-width: 768px) {
 	.hamburger {
@@ -211,7 +220,7 @@ object {
 	}
 
 	.nav-menu.active {
-		max-height: 400px;
+		max-height: 100vh;
 		padding: var(--spacing-md);
 	}
 
@@ -229,11 +238,13 @@ object {
 		border-bottom: none;
 	}
 
-	/* Thumb-friendly buttons on mobile */
+	/* Thumb-friendly buttons on mobile - specific to nav and form buttons */
+	.nav-link,
 	.btn,
-	button,
-	[type="submit"],
-	[type="button"] {
+	.hamburger,
+	.contact-form button,
+	.hero-buttons .btn,
+	.product-card button {
 		min-height: 48px;
 		min-width: 48px;
 		padding: var(--spacing-sm) var(--spacing-md);
@@ -309,7 +320,7 @@ object {
 .form-group input:focus,
 .form-group textarea:focus {
 	border-color: var(--gold-dark);
-	box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.2);
+	box-shadow: 0 0 0 3px var(--gold-dark-transparent);
 	outline: none;
 }
 
