@@ -9,11 +9,11 @@
     "use strict";
 
     // Constants
-    var MIN_PASSWORD_LENGTH = 8;
-    var MIN_USERNAME_LENGTH = 3;
-    var MAX_USERNAME_LENGTH = 20;
-    var PASSWORD_SPECIAL_CHARS = "!@#$%^&*";
-    var SESSION_KEY = "currentUser";
+    const MIN_PASSWORD_LENGTH = 8;
+    const MIN_USERNAME_LENGTH = 3;
+    const MAX_USERNAME_LENGTH = 20;
+    const PASSWORD_SPECIAL_CHARS_REGEX = /[!@#$%^&*]/;
+    const SESSION_KEY = "currentUser";
 
     // ===================================
     // Validators
@@ -63,7 +63,7 @@
             uppercase: /[A-Z]/.test(password),
             lowercase: /[a-z]/.test(password),
             number:    /[0-9]/.test(password),
-            special:   new RegExp("[" + PASSWORD_SPECIAL_CHARS + "]").test(password)
+            special:   PASSWORD_SPECIAL_CHARS_REGEX.test(password)
         };
     }
 
@@ -76,8 +76,8 @@
         if (!password || password.length === 0) {
             return { valid: false, message: "Password is required." };
         }
-        var reqs = checkPasswordRequirements(password);
-        var allMet = reqs.length && reqs.uppercase && reqs.lowercase && reqs.number && reqs.special;
+        const reqs = checkPasswordRequirements(password);
+        const allMet = reqs.length && reqs.uppercase && reqs.lowercase && reqs.number && reqs.special;
         if (!allMet) {
             return { valid: false, message: "Password does not meet all requirements below." };
         }
@@ -137,20 +137,20 @@
      * @param {string} password - Current password value
      */
     function updateStrengthBar(password) {
-        var reqs = checkPasswordRequirements(password);
-        var metCount = 0;
-        for (var key in reqs) {
+        const reqs = checkPasswordRequirements(password);
+        let metCount = 0;
+        for (const key in reqs) {
             if (reqs[key]) metCount++;
         }
 
-        var strength = "none";
+        let strength = "none";
         if (metCount <= 2) strength = "weak";
         else if (metCount === 3) strength = "fair";
         else if (metCount === 4) strength = "good";
         else if (metCount === 5) strength = "strong";
 
-        var $fill = $(".strength-fill");
-        var $label = $(".strength-level");
+        const $fill = $(".strength-fill");
+        const $label = $(".strength-level");
 
         $fill.removeClass("weak fair good strong");
         $label.removeClass("weak fair good strong");
@@ -168,9 +168,9 @@
      * @param {string} password - Current password value
      */
     function updateRequirementsList(password) {
-        var reqs = checkPasswordRequirements(password);
-        for (var key in reqs) {
-            var $item = $(".requirement[data-requirement='" + key + "']");
+        const reqs = checkPasswordRequirements(password);
+        for (const key in reqs) {
+            const $item = $(".requirement[data-requirement='" + key + "']");
             if (reqs[key]) {
                 $item.addClass("met");
             } else {
@@ -188,16 +188,16 @@
      * @returns {boolean} Whether the entire form is valid
      */
     function validateAll() {
-        var username        = $("#username").val().trim();
-        var email           = $("#email").val().trim();
-        var password        = $("#password").val();
-        var confirmPassword = $("#confirmPassword").val();
-        var termsChecked    = $("#terms").is(":checked");
+        const username        = $("#username").val().trim();
+        const email           = $("#email").val().trim();
+        const password        = $("#password").val();
+        const confirmPassword = $("#confirmPassword").val();
+        const termsChecked    = $("#terms").is(":checked");
 
-        var usernameResult        = validateUsername(username);
-        var emailResult           = validateEmail(email);
-        var passwordResult        = validatePassword(password);
-        var confirmPasswordResult = validateConfirmPassword(password, confirmPassword);
+        const usernameResult        = validateUsername(username);
+        const emailResult           = validateEmail(email);
+        const passwordResult        = validatePassword(password);
+        const confirmPasswordResult = validateConfirmPassword(password, confirmPassword);
 
         // Apply field-level visual feedback
         if (usernameResult.valid) {
@@ -252,9 +252,9 @@
      */
     function togglePasswordVisibility(e) {
         e.preventDefault();
-        var targetId = $(this).data("target");
-        var $input = $("#" + targetId);
-        var $icon = $(this).find("i");
+        const targetId = $(this).data("target");
+        const $input = $("#" + targetId);
+        const $icon = $(this).find("i");
 
         if ($input.attr("type") === "password") {
             $input.attr("type", "text");
@@ -269,13 +269,13 @@
      * Handle password input: update strength bar and requirements list
      */
     function handlePasswordInput() {
-        var password = $(this).val();
+        const password = $(this).val();
         updateStrengthBar(password);
         updateRequirementsList(password);
 
         // Re-validate confirm field if it already has a value
         if ($("#confirmPassword").val().length > 0) {
-            var result = validateConfirmPassword(password, $("#confirmPassword").val());
+            const result = validateConfirmPassword(password, $("#confirmPassword").val());
             if (result.valid) {
                 setValid($("#confirmPassword"));
             } else {
@@ -293,7 +293,7 @@
 
         if (!validateAll()) {
             // Scroll to first error so the user sees it
-            var $firstError = $(".is-invalid").first();
+            const $firstError = $(".is-invalid").first();
             if ($firstError.length) {
                 $("html, body").animate({ scrollTop: $firstError.offset().top - 80 }, 300);
             }
@@ -301,7 +301,7 @@
         }
 
         // All validation passed — save user to sessionStorage and redirect
-        var userData = {
+        const userData = {
             username: $("#username").val().trim(),
             email:    $("#email").val().trim()
         };
