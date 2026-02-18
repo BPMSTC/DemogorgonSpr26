@@ -70,15 +70,18 @@ object {
 	position: sticky;
 	top: 0;
 	z-index: 1000;
+	text-align: left;
+	display: block;
 }
 
-.nav-container {
+.navbar .nav-container {
 	max-width: 1200px;
 	margin: 0 auto;
 	padding: 0 var(--spacing-md);
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	width: 100%;
 }
 
 .navbar .logo {
