@@ -114,16 +114,44 @@
 	var visibleCount = ARTICLES_PER_PAGE;
 
 	/**
-	 * Get articles filtered by the active category
+	 * Get articles filtered by the active category, sorted by date descending
 	 * @returns {Array<Object>} Filtered articles sorted by date descending
 	 */
 	function getFilteredArticles() {
+		var filtered;
+
 		if (activeCategory === "all") {
-			return ARTICLES.slice();
+			filtered = ARTICLES.slice();
+		} else {
+			filtered = ARTICLES.filter(function (article) {
+				return article.category === activeCategory;
+			});
 		}
-		return ARTICLES.filter(function (article) {
-			return article.category === activeCategory;
+
+		// Sort by date descending (newest first). Dates are ISO strings (YYYY-MM-DD),
+		// so string comparison is sufficient for chronological ordering.
+		filtered.sort(function (a, b) {
+			return b.date.localeCompare(a.date);
 		});
+
+		return filtered;
+	}
+
+	/**
+	 * Escape a string for safe insertion into HTML
+	 * @param {string} str - Raw string to escape
+	 * @returns {string} HTML-escaped string
+	 */
+	function escapeHtml(str) {
+		if (str == null) {
+			return "";
+		}
+		return String(str)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
 	}
 
 	/**
@@ -151,27 +179,36 @@
 	 * @returns {string} HTML string for the card
 	 */
 	function buildCardHtml(article) {
+		var id = escapeHtml(article.id);
+		var category = escapeHtml(article.category);
+		var categoryLabel = escapeHtml(article.categoryLabel);
+		var title = escapeHtml(article.title);
+		var excerpt = escapeHtml(article.excerpt);
+		var fullText = escapeHtml(article.fullText);
+		var authorName = escapeHtml(article.authorName);
+		var date = escapeHtml(article.date);
+		var icon = escapeHtml(article.icon);
 		return (
-			'<article class="blog-card" data-category="' + article.category + '" aria-label="' + article.title + '">' +
-				'<div class="blog-card-thumb ' + article.category + '" aria-hidden="true">' +
-					'<span>' + article.icon + '</span>' +
-					'<span class="blog-card-category">' + article.categoryLabel + '</span>' +
+			'<article class="blog-card" data-category="' + category + '" aria-label="' + title + '">' +
+				'<div class="blog-card-thumb ' + category + '" aria-hidden="true">' +
+					'<span>' + icon + '</span>' +
+					'<span class="blog-card-category">' + categoryLabel + '</span>' +
 				'</div>' +
 				'<div class="blog-card-body">' +
-					'<h3 class="blog-card-title">' + article.title + '</h3>' +
-					'<p class="blog-card-excerpt">' + article.excerpt + '</p>' +
-					'<div class="blog-card-full" id="blogFull-' + article.id + '">' +
-						'<p>' + article.fullText + '</p>' +
+					'<h3 class="blog-card-title">' + title + '</h3>' +
+					'<p class="blog-card-excerpt">' + excerpt + '</p>' +
+					'<div class="blog-card-full" id="blogFull-' + id + '">' +
+						'<p>' + fullText + '</p>' +
 					'</div>' +
 					'<button class="blog-read-more" type="button" ' +
 						'aria-expanded="false" ' +
-						'aria-controls="blogFull-' + article.id + '" ' +
-						'data-article-id="' + article.id + '">' +
+						'aria-controls="blogFull-' + id + '" ' +
+						'data-article-id="' + id + '">' +
 						'Read More &rarr;' +
 					'</button>' +
 					'<div class="blog-card-meta">' +
-						'<span class="blog-card-author">' + article.authorName + '</span>' +
-						'<time class="blog-card-date" datetime="' + article.date + '">' +
+						'<span class="blog-card-author">' + authorName + '</span>' +
+						'<time class="blog-card-date" datetime="' + date + '">' +
 							formatDate(article.date) +
 						'</time>' +
 					'</div>' +
@@ -188,6 +225,7 @@
 		var $grid = $("#blogGrid");
 		var $empty = $("#blogEmpty");
 		var $loadMore = $("#blogLoadMore");
+		var $status = $("#blogStatus");
 
 		var filtered = getFilteredArticles();
 		var toShow = filtered.slice(0, visibleCount);
@@ -198,6 +236,7 @@
 		if (toShow.length === 0) {
 			$empty.removeAttr("hidden");
 			$loadMore.hide();
+			$status.text("No articles found.");
 			return;
 		}
 
@@ -209,6 +248,9 @@
 			html += buildCardHtml(toShow[i]);
 		}
 		$grid.html(html);
+
+		// Announce result count to screen readers
+		$status.text("Showing " + toShow.length + " of " + filtered.length + " articles.");
 
 		// Show/hide load more button
 		if (visibleCount >= filtered.length) {

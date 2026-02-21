@@ -37,9 +37,11 @@ should follow these conventions to maintain a consistent, accessible, and mainta
 | Double quotes for attributes | `class="hero-title"` |
 | Every `<img>` needs `alt` text | `<img src="photo.jpg" alt="Latte art on a cappuccino">` |
 | Every `<iframe>` needs a `title` | `<iframe title="Store location map">` |
-| IDs use camelCase | `id="blogFilter"` |
+| IDs use consistent, descriptive naming (kebab-case preferred) | `id="store-hours-heading"`, `id="home"` |
 | CSS classes use kebab-case | `class="blog-card"` |
 | Interactive elements need accessible names | `aria-label`, `aria-labelledby`, or visible `<label>` |
+
+> **Note:** Existing IDs in this project may use simple lowercase words (e.g., `home`, `about`), camelCase (e.g., `blogGrid`, `blogStatus`), or kebab-case (e.g., `store-hours-heading`). Prefer kebab-case for new IDs, and avoid renaming existing IDs just to change their style.
 
 ### Section Pattern
 
