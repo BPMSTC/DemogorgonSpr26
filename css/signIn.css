@@ -7,6 +7,10 @@
    Layout
    =================================== */
 
+body .row.min-vh-100 {
+    min-height: auto !important;
+}
+
 .branding-section {
     background-color: var(--maroon-dark);
     color: var(--color-white);
@@ -15,6 +19,7 @@
     justify-content: center;
     position: relative;
     overflow: hidden;
+    height: auto;
 }
 
 .branding-section::before {
@@ -52,6 +57,7 @@
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-2xl);
     font-size: 4rem;
+    color: gold;
 }
 
 .logo-container i {
@@ -79,8 +85,9 @@
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
     margin-bottom: var(--spacing-md);
-    color: var(--color-white);
+    color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 10px;
 }
 
 .brand-tagline {
@@ -108,6 +115,13 @@
     font-size: var(--font-size-xl);
 }
 
+.feature-item span {
+    color: gold;
+    font-weight: var(--font-weight-medium);
+    padding: 10px;
+    margin-top: 5pz;
+}
+
 /* ===================================
    Form Section
    =================================== */
@@ -118,6 +132,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: auto;
 }
 
 .form-container {
@@ -430,4 +445,14 @@
     75% {
         transform: translateX(5px);
     }
+}
+
+/* Fix footer spacing */
+.footer {
+    margin-top: 0;
+}
+
+.container-fluid {
+    display: flex;
+    flex-direction: column;
 }

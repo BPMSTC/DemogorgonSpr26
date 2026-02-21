@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Code & Brew</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/about.css">
+</head>
+<body>
+		<!-- Navigation -->
+		<nav class="navbar">
+			<div class="nav-container">
+				<div class="logo">
+					<span class="logo-icon">☕</span>
+					<span class="logo-text">Code & Brew</span>
+				</div>
+				<ul class="nav-menu" id="navMenu">
+                <li><a href="../index.html" class="nav-link">Home</a></li>
+                <li><a href="../pages/about.html" class="nav-link">About</a></li>
+                <li><a href="../index.html#menu" class="nav-link">Menu</a></li>
+                <li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+                <li><a href="../pages/signIn.html" class="nav-link">Sign In</a></li>
+				</ul>
+				<button
+					class="hamburger"
+					type="button"
+					aria-expanded="false"
+					aria-controls="navMenu"
+					aria-label="Toggle navigation menu">
+					<span></span>
+					<span></span>
+					<span></span>
+				</button>
+			</div>
+		</nav>
+		<!-- Overlay for closing mobile menu on outside click -->
+		<div class="nav-overlay" id="navOverlay" aria-hidden="true"></div>
+
+    <!-- Hero Section -->
+  <section id="aboutHero" class="about-hero" aria-labelledby="aboutHeroHeading">
+        <div class="hero-image-container">
+            <img src="../images/pexels-khoa-vo-2347168-5812847.jpg" alt="Code & Brew coffee shop interior with developers working" class="hero-background-image">
+            <div class="hero-content-wrapper">
+                <h1 id="aboutHeroHeading" class="hero-slogan">
+                    Where Coffee Meets Code
+                </h1>
+                <p class="hero-subtitle">Brewing innovation, one cup at a time since 2018</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Our Story Section -->
+    <section id="ourStory" class="our-story" aria-labelledby="ourStoryHeading">
+        <div class="container">
+            <h2 id="ourStoryHeading" class="section-title">
+                <i class="fas fa-book-open"></i>
+                Our Story
+            </h2>
+            
+            <div class="story-content">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="story-card">
+                            <h3>The Beginning</h3>
+                            <p>
+                                We were just five friends with a crazy idea: the best code is written over great coffee. 
+                                In 2018, five college friends found themselves spending countless late nights at various 
+                                coffee shops around Stevens Point, debugging code and building their first startup.
+                            </p>
+                            <p>
+                                But something was always missing. Traditional coffee shops didn't understand the needs 
+                                of developers: reliable power outlets at every seat, lightning-fast Wi-Fi, comfortable 
+                                seating for long coding sessions, and most importantly, staff who understood that "just 
+                                five more minutes" really meant "two more hours."
+                            </p>
+                        </div>
+                        
+                        <div class="story-card">
+                            <h3>The Vision Takes Shape</h3>
+                            <p>
+                                After their startup successfully launched, the group had a realization: they wanted to 
+                                create the space they had always wished existed. A place where developers, designers, 
+                                data scientists, and tech enthusiasts could feel at home. Where the baristas understood 
+                                the difference between Java the language and java the drink. Where the walls would 
+                                feature rotating artwork from local digital artists and the menu items would have names 
+                                like "The Debugger" and "Infinite Loop Latte."
+                            </p>
+                            <p>
+                                Code & Brew was born from this vision—not just a coffee shop, but a community hub for 
+                                the tech-minded. A third space between home and office where innovation happens over 
+                                perfectly pulled espresso shots.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Mission Section -->
+    <section id="mission" class="mission-section" aria-labelledby="missionHeading">
+        <div class="section-images">
+            <img src="../images/pexels-helenalopes-1015568.jpg" alt="Code & Brew coffee shop interior with developers working" class="mission-background-image">
+        </div>
+        <div class="container">
+            <h2 id="missionHeading" class="section-title">
+                <i class="fas fa-bullseye"></i>
+                Our Mission
+            </h2>
+            
+            <div class="mission-content">
+                <div class="mission-statement">
+                    <p class="lead">
+                        To create an inclusive, inspiring space where technology and coffee culture intersect, 
+                        empowering our community to build, learn, and connect.
+                    </p>
+                </div>
+                
+                <div class="row mt-5">
+                    <div class="col-md-4 mb-4">
+                        <div class="mission-card">
+                            <div class="mission-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>Community First</h3>
+                            <p>
+                                We believe great things happen when passionate people come together. From hosting 
+                                weekly hackathons to mentoring aspiring developers, we're committed to fostering 
+                                connections that last beyond a cup of coffee.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-4">
+                        <div class="mission-card">
+                            <div class="mission-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3>Learning & Growth</h3>
+                            <p>
+                                Education is at our core. We offer free coding workshops, host tech talks from 
+                                industry professionals, and provide a judgment-free zone where asking "how does 
+                                this work?" is always encouraged.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 mb-4">
+                        <div class="mission-card">
+                            <div class="mission-icon">
+                                <i class="fas fa-leaf"></i>
+                            </div>
+                            <h3>Quality & Sustainability</h3>
+                            <p>
+                                From our direct-trade, single-origin beans to our compostable cups, we're committed 
+                                to sustainability. Great code deserves great coffee, and great coffee deserves a 
+                                healthy planet.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Community Impact Section -->
+    <section id="impact" class="impact-section" aria-labelledby="impactHeading">
+        <div class="container">
+            <h2 id="impactHeading" class="section-title">
+                <i class="fas fa-hands-helping"></i>
+                Community Impact
+            </h2>
+            
+            <div class="impact-content">
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="impact-card">
+                            <h3>
+                                <i class="fas fa-code-branch"></i>
+                                Coding Bootcamp Scholarship
+                            </h3>
+                            <p>
+                                In 2022, we launched the Code & Brew Scholarship Program, providing full funding for 
+                                three students annually to attend coding bootcamps. To date, all nine recipients have 
+                                secured jobs in tech, with several becoming regular mentors at our weekly study sessions.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-4">
+                        <div class="impact-card">
+                            <h3>
+                                <i class="fas fa-laptop-code"></i>
+                                Saturday Code Club
+                            </h3>
+                            <p>
+                                Every Saturday morning, local high school students gather here for our free coding club. 
+                                Led by volunteer developers from the community, we've taught over 200 students the 
+                                fundamentals of programming, web development, and computational thinking.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-4">
+                        <div class="impact-card">
+                            <h3>
+                                <i class="fas fa-lightbulb"></i>
+                                Monthly Hackathons
+                            </h3>
+                            <p>
+                                Our 24-hour hackathons bring together developers, designers, and entrepreneurs to build 
+                                solutions for local nonprofits. We've helped create websites, databases, and custom tools 
+                                for 18 community organizations—all fueled by free coffee and pizza.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6 mb-4">
+                        <div class="impact-card">
+                            <h3>
+                                <i class="fas fa-briefcase"></i>
+                                Job Board & Networking
+                            </h3>
+                            <p>
+                                Our community job board has connected over 150 developers with local and remote 
+                                opportunities. Monthly networking events help job seekers practice technical interviews 
+                                and get resume feedback from experienced professionals.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Team Section -->
+    <section id="team" class="team-section" aria-labelledby="teamHeading">
+        <div class="container">
+            <h2 id="teamHeading" class="section-title">
+                <i class="fas fa-user-friends"></i>
+                Our Founders
+            </h2>
+            
+            <div class="row team-row">
+                <div class="col-lg-2-4 col-md-6 mb-4">
+                    <div class="team-card">
+                        <div class="team-image">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>Blue</h3>
+                        <p class="team-role">Co-Founder & Coffee Director</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2-4 col-md-6 mb-4">
+                    <div class="team-card">
+                        <div class="team-image">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>Seng</h3>
+                        <p class="team-role">Co-Founder & Experience Director</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-2-4 col-md-6 mb-4">
+                    <div class="team-card">
+                        <div class="team-image">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>Tyler</h3>
+                        <p class="team-role">Co-Founder & Community Director</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-2-4 col-md-6 mb-4">
+                    <div class="team-card">
+                        <div class="team-image">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <h3>Quinton</h3>
+                        <p class="team-role">Co-Founder & Operations Director</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo" aria-label="Site footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <span class="logo-icon">☕</span>
+                        <span class="logo-text">Code & Brew</span>
+                    </div>
+                    <p class="footer-tagline">Where Coffee Meets Code</p>
+
+                    <!-- DEM-24: Store Hours Section -->
+                    <section class="store-hours" aria-labelledby="store-hours-heading">
+                        <h3 id="store-hours-heading" class="footer-section-title">
+                            Store Hours
+                        </h3>
+                        <div class="hours-status" role="status" aria-live="polite">
+                            <span
+                                id="openStatus"
+                                class="status-badge"
+                                aria-label="Store status">
+                                <span class="status-icon" aria-hidden="true"></span>
+                                <span class="status-text">Checking...</span>
+                            </span>
+                        </div>
+                        <ul class="hours-list" aria-label="Weekly operating hours">
+                            <li>
+                                <span class="day-label">Monday - Friday:</span>
+                                <span class="time-label">7:00 AM - 7:00 PM</span>
+                            </li>
+                            <li>
+                                <span class="day-label">Saturday:</span>
+                                <span class="time-label">8:00 AM - 8:00 PM</span>
+                            </li>
+                            <li>
+                                <span class="day-label">Sunday:</span>
+                                <span class="time-label">9:00 AM - 6:00 PM</span>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <!-- DEM-24: Location Section with Map -->
+                    <section class="store-location" aria-labelledby="location-heading">
+                        <h3 id="location-heading" class="footer-section-title">
+                            Visit Us
+                        </h3>
+                        <address class="store-address">
+                            <strong>Code & Brew Coffee Shop</strong><br />
+                            5922 US Highway 10<br />
+                            Stevens Point, WI 54482
+                        </address>
+
+                        <!-- Google Maps Embed - Stevens Point Area -->
+                        <div class="map-container">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2856.789!2d-89.534!3d44.52!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDTCsDMxJzE0LjQiTiA4OcKwMzInMDIuNCJX!5e0!3m2!1sen!2sus!4v1234567890"
+                                width="100%"
+                                height="250"
+                                style="border: 0"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                title="Code & Brew location map - Stevens Point, Wisconsin"
+                                aria-label="Google Maps showing Code & Brew location at 5922 US Highway 10, Stevens Point, Wisconsin">
+                            </iframe>
+                        </div>
+                        <p class="map-link">
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query=5922+US+Highway+10+Stevens+Point+WI+54482"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label="Open Code & Brew location in Google Maps (opens in new window)">
+                                📍 Open in Google Maps
+                            </a>
+                        </p>
+                    </section>
+                </div>
+                <!-- Footer Navigation -->
+                <nav class="footer-links" aria-label="Footer navigation">
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="/pages/about.html">About Us</a></li>
+                            <li><a href="/pages/menu.html">Menu</a></li>
+                            <li><a href="/pages/contact.html">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Follow Us</h4>
+                        <ul>
+                            <li>
+                                <a href="#" aria-label="Visit us on Instagram">Instagram</a>
+                            </li>
+                            <li>
+                                <a href="#" aria-label="Visit us on Twitter">Twitter</a>
+                            </li>
+                            <li>
+                                <a href="#" aria-label="Visit us on Facebook">Facebook</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Code & Brew. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="../js/about.js"></script>
+    <script src="../js/script.js"></script>
+</body>
+</html>
