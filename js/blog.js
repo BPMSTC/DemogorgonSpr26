@@ -127,23 +127,12 @@
 				return article.category === activeCategory;
 			});
 		}
-		var filtered;
-
-		if (activeCategory === "all") {
-			filtered = ARTICLES.slice();
-		} else {
-			filtered = ARTICLES.filter(function (article) {
-				return article.category === activeCategory;
-			});
-		}
 
 		// Sort by date descending (newest first). Dates are ISO strings (YYYY-MM-DD),
 		// so string comparison is sufficient for chronological ordering.
 		filtered.sort(function (a, b) {
 			return b.date.localeCompare(a.date);
 		});
-
-		return filtered;
 
 		return filtered;
 	}
