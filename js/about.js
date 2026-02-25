@@ -53,70 +53,10 @@
     }
 
     /**
-     * Animate numbers counting up to their final value
-     */
-    function animateStats() {
-        var $stats = $(".stat-number");
-        var animated = false;
-        
-        function countUp($element) {
-            var target = $element.text();
-            var isPlus = target.includes("+");
-            var numericValue = parseInt(target.replace(/[^0-9]/g, ""), 10);
-            
-            if (isNaN(numericValue)) return;
-            
-            var current = 0;
-            var increment = Math.ceil(numericValue / 50);
-            var duration = 1500;
-            var steps = Math.ceil(duration / 30);
-            var stepIncrement = Math.ceil(numericValue / steps);
-            
-            var interval = setInterval(function() {
-                current += stepIncrement;
-                if (current >= numericValue) {
-                    current = numericValue;
-                    clearInterval(interval);
-                }
-                
-                var displayValue = current.toLocaleString();
-                if (isPlus && current === numericValue) {
-                    displayValue += "+";
-                }
-                
-                $element.text(displayValue);
-            }, 30);
-        }
-        
-        function checkStatsInView() {
-            if (animated) return;
-            
-            var $statsSection = $("#stats");
-            if ($statsSection.length === 0) return;
-            
-            var sectionTop = $statsSection.offset().top;
-            var sectionBottom = sectionTop + $statsSection.outerHeight();
-            var viewportTop = $(window).scrollTop();
-            var viewportBottom = viewportTop + $(window).height();
-            
-            if (sectionBottom > viewportTop && sectionTop < viewportBottom) {
-                animated = true;
-                $stats.each(function() {
-                    countUp($(this));
-                });
-            }
-        }
-        
-        $(window).on("scroll", checkStatsInView);
-        checkStatsInView(); // Check on page load
-    }
-
-    /**
      * Toggle mobile navigation menu
      */
     function handleMobileNav() {
-        $(".navbar-toggler").on("click", function() {
-            var $icon = $(this).find(".navbar-toggler-icon");
+        $(".hamburger").on("click", function() {
             var isExpanded = $(this).attr("aria-expanded") === "true";
             
             // Update aria-expanded for accessibility
@@ -188,9 +128,6 @@
         
         // Smooth scroll for anchor links
         $('a[href^="#"]').on("click", handleSmoothScroll);
-        
-        // Animate statistics
-        animateStats();
         
         // Mobile navigation
         handleMobileNav();
