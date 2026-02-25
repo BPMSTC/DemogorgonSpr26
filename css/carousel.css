@@ -1,0 +1,272 @@
+/**
+ * Code & Brew - Featured Items Carousel
+ * Styles for the homepage carousel component.
+ * Depends on :root variables defined in styles.css.
+ *
+ * @format
+ */
+
+/* ============================================================
+   Carousel Section
+   ============================================================ */
+.carousel-section {
+	padding: var(--spacing-xl) 0;
+	background-color: var(--off-white);
+}
+
+/* Carousel wrapper */
+.carousel {
+	position: relative;
+	overflow: hidden;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+	border: 2px solid var(--gold-dark);
+	/* Keyboard-focus outline is handled by :focus-visible globally */
+}
+
+/* Track holds all slides side-by-side */
+.carousel-track {
+	display: flex;
+	transition: transform 0.5s ease;
+	will-change: transform;
+}
+
+/* ============================================================
+   Individual Slide
+   ============================================================ */
+.carousel-slide {
+	min-width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: var(--spacing-xl) var(--spacing-lg);
+	gap: var(--spacing-xl);
+	background-color: var(--maroon-dark);
+}
+
+/* Visual "image" area - uses CSS gradient + emoji */
+.carousel-slide-visual {
+	flex: 0 0 220px;
+	height: 220px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 5rem;
+	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+	border: 4px solid var(--gold);
+	/* Each slide overrides the background via inline style or modifier class */
+	background: linear-gradient(135deg, var(--maroon-medium), var(--maroon-dark));
+	flex-shrink: 0;
+}
+
+/* Per-category gradient backgrounds for the visual circle */
+.carousel-slide-visual--espresso {
+	background: linear-gradient(135deg, #4a1a0a, #8b3a1f);
+}
+
+.carousel-slide-visual--cold-brew {
+	background: linear-gradient(135deg, #0a2a4a, #1a4a7a);
+}
+
+.carousel-slide-visual--pastry {
+	background: linear-gradient(135deg, #5a3a10, #9a6a20);
+}
+
+.carousel-slide-visual--specialty {
+	background: linear-gradient(135deg, #1a4a2a, #2a7a44);
+}
+
+/* Text content area */
+.carousel-slide-content {
+	flex: 1;
+	color: var(--white);
+	max-width: 540px;
+}
+
+.carousel-slide-category {
+	display: inline-block;
+	background-color: var(--gold-dark);
+	color: var(--black);
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	padding: 0.25rem 0.75rem;
+	border-radius: 12px;
+	margin-bottom: var(--spacing-sm);
+}
+
+.carousel-slide-name {
+	font-size: 2rem;
+	font-weight: 700;
+	color: var(--gold);
+	margin-bottom: var(--spacing-xs);
+	line-height: 1.2;
+}
+
+.carousel-slide-description {
+	font-size: 1.05rem;
+	color: rgba(255, 255, 255, 0.88);
+	line-height: 1.65;
+	margin-bottom: var(--spacing-md);
+}
+
+.carousel-slide-price {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: var(--gold-light);
+	margin-bottom: var(--spacing-md);
+}
+
+/* CTA link inside carousel */
+.carousel-slide-link {
+	display: inline-block;
+	padding: 0.7rem var(--spacing-md);
+	background-color: var(--gold-dark);
+	color: var(--black);
+	font-weight: 700;
+	font-size: 0.95rem;
+	text-decoration: none;
+	border-radius: 6px;
+	transition: background-color 0.3s ease, color 0.3s ease;
+	border: 2px solid var(--gold-dark);
+}
+
+.carousel-slide-link:hover,
+.carousel-slide-link:focus {
+	background-color: var(--gold);
+	border-color: var(--gold);
+	color: var(--black);
+	outline: 2px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+/* ============================================================
+   Prev / Next Buttons
+   ============================================================ */
+.carousel-btn {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	background-color: rgba(0, 0, 0, 0.55);
+	color: var(--gold);
+	border: 2px solid var(--gold-dark);
+	border-radius: 50%;
+	width: 48px;
+	height: 48px;
+	font-size: 1.4rem;
+	line-height: 1;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+	z-index: 10;
+	/* WCAG: minimum 44x44 touch target */
+}
+
+.carousel-btn:hover,
+.carousel-btn:focus {
+	background-color: var(--gold-dark);
+	color: var(--black);
+	border-color: var(--gold);
+	outline: 3px solid var(--gold-light);
+	outline-offset: 2px;
+}
+
+.carousel-btn--prev {
+	left: var(--spacing-sm);
+}
+
+.carousel-btn--next {
+	right: var(--spacing-sm);
+}
+
+/* ============================================================
+   Dot Indicators
+   ============================================================ */
+.carousel-dots {
+	display: flex;
+	justify-content: center;
+	gap: var(--spacing-xs);
+	padding: var(--spacing-sm) 0;
+	background-color: var(--maroon-dark);
+	border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.carousel-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	border: 2px solid var(--gold-dark);
+	background-color: transparent;
+	cursor: pointer;
+	padding: 0;
+	transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+	/* WCAG: padded click target */
+	margin: 4px;
+}
+
+.carousel-dot:hover,
+.carousel-dot:focus {
+	background-color: var(--gold-dark);
+	border-color: var(--gold);
+	outline: 2px solid var(--gold-light);
+	outline-offset: 3px;
+}
+
+.carousel-dot.active,
+.carousel-dot[aria-selected="true"] {
+	background-color: var(--gold);
+	border-color: var(--gold);
+	transform: scale(1.3);
+}
+
+/* ============================================================
+   Responsive Design
+   ============================================================ */
+@media (max-width: 768px) {
+	.carousel-slide {
+		flex-direction: column;
+		padding: var(--spacing-lg) var(--spacing-md);
+		gap: var(--spacing-md);
+		text-align: center;
+	}
+
+	.carousel-slide-visual {
+		flex: 0 0 150px;
+		height: 150px;
+		font-size: 3.5rem;
+	}
+
+	.carousel-slide-name {
+		font-size: 1.5rem;
+	}
+
+	.carousel-slide-description {
+		font-size: 0.95rem;
+	}
+
+	.carousel-slide-price {
+		font-size: 1.25rem;
+	}
+
+	.carousel-btn {
+		width: 40px;
+		height: 40px;
+		font-size: 1.1rem;
+	}
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+	.carousel-slide-visual {
+		flex: 0 0 180px;
+		height: 180px;
+		font-size: 4rem;
+	}
+
+	.carousel-slide-name {
+		font-size: 1.75rem;
+	}
+}
