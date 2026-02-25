@@ -34,6 +34,31 @@
 	--spacing-md: 1.5rem;
 	--spacing-lg: 2rem;
 	--spacing-xl: 3rem;
+	--spacing-2xl: 4rem;
+	--spacing-3xl: 5rem;
+	--spacing-4xl: 6rem;
+
+	/* Typography */
+	--font-size-sm: 0.875rem;
+	--font-size-base: 1rem;
+	--font-size-lg: 1.125rem;
+	--font-size-xl: 1.25rem;
+	--font-size-2xl: 1.5rem;
+	--font-size-3xl: 2rem;
+	--font-weight-medium: 500;
+	--font-weight-semibold: 600;
+	--font-weight-bold: 700;
+
+	/* Border Radius */
+	--radius-sm: 4px;
+	--radius-lg: 8px;
+	--radius-full: 9999px;
+
+	/* Transitions */
+	--transition-base: 0.3s ease;
+
+	/* Shadows */
+	--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
 }
 
 /* Base Styles */
