@@ -1,0 +1,116 @@
+{
+    "products": [
+      {
+        "id": "espresso",
+        "name": "Espresso",
+        "price": 3.00,
+        "description": "Rich, bold espresso shots crafted from our signature house blend.",
+        "category": "Espresso Drinks",
+        "icon": "☕",
+        "featured": false
+      },
+      {
+        "id": "cappuccino",
+        "name": "Cappuccino",
+        "price": 4.50,
+        "description": "Espresso with steamed milk and a thick layer of foam.",
+        "category": "Espresso Drinks",
+        "icon": "☕",
+        "featured": true,
+        "image": "https://placehold.co/800x400/3e2723/ffffff?text=Cappuccino"
+      },
+      {
+        "id": "latte",
+        "name": "Latte",
+        "price": 4.75,
+        "description": "Espresso with steamed milk and a light layer of foam.",
+        "category": "Espresso Drinks",
+        "icon": "☕",
+        "featured": false
+      },
+      {
+        "id": "classic-cold-brew",
+        "name": "Classic Cold Brew",
+        "price": 4.50,
+        "description": "Smooth, refreshing cold brew steeped for 24 hours.",
+        "category": "Cold Brew",
+        "icon": "🧊",
+        "featured": false
+      },
+      {
+        "id": "vanilla-cold-brew",
+        "name": "Vanilla Cold Brew",
+        "price": 5.00,
+        "description": "Cold brew with a splash of sweet vanilla.",
+        "category": "Cold Brew",
+        "icon": "🧊",
+        "featured": true,
+         "image": "https://placehold.co/800x400/3e2723/ffffff?text=Vanilla+Cold+Brew"
+      },
+      {
+        "id": "nitro-cold-brew",
+        "name": "Nitro Cold Brew",
+        "price": 5.50,
+        "description": "Cold brew infused with nitrogen for a creamy texture.",
+        "category": "Cold Brew",
+        "icon": "🧊",
+        "featured": false
+      },
+      {
+        "id": "croissant",
+        "name": "Croissant",
+        "price": 3.50,
+        "description": "Buttery, flaky, and freshly baked.",
+        "category": "Pastries",
+        "icon": "🥐",
+        "featured": false
+      },
+      {
+        "id": "muffin",
+        "name": "Blueberry Muffin",
+        "price": 3.00,
+        "description": "Daily selection of fresh muffins.",
+        "category": "Pastries",
+        "icon": "🥐",
+        "featured": false
+      },
+      {
+        "id": "cookie",
+        "name": "Choc Chip Cookie",
+        "price": 2.50,
+        "description": "Chewy, warm cookies baked throughout the day.",
+        "category": "Pastries",
+        "icon": "🥐",
+        "featured": true,
+         "image": "https://placehold.co/800x400/3e2723/ffffff?text=Choc+Chip+Cookie"
+      },
+      {
+        "id": "matcha",
+        "name": "Matcha Latte",
+        "price": 5.00,
+        "description": "Premium matcha green tea with steamed milk.",
+        "category": "Specialty Drinks",
+        "icon": "🍵",
+        "featured": false
+      },
+      {
+        "id": "chai",
+        "name": "Chai Latte",
+        "price": 4.50,
+        "description": "Spiced chai tea mixed with steamed milk.",
+        "category": "Specialty Drinks",
+        "icon": "🍵",
+        "featured": true,
+        "image": "https://placehold.co/800x400/3e2723/ffffff?text=Chai+Latte"
+      },
+      {
+        "id": "hot-cocoa",
+        "name": "Hot Chocolate",
+        "price": 4.00,
+        "description": "Rich chocolate milk topped with whipped cream.",
+        "category": "Specialty Drinks",
+        "icon": "🍵",
+        "featured": false
+      }
+    ]
+  }
