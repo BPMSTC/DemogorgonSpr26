@@ -1,0 +1,246 @@
+<!-- @format -->
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Blog - Code & Brew</title>
+		<link rel="stylesheet" href="../css/styles.css" />
+		<link rel="stylesheet" href="../css/blog.css" />
+	</head>
+
+	<body>
+		<!-- Navigation -->
+		<nav class="navbar">
+			<div class="nav-container">
+				<div class="logo">
+					<span class="logo-icon">☕</span>
+					<span class="logo-text">Code & Brew</span>
+				</div>
+				<ul class="nav-menu" id="navMenu">
+					<li><a href="../index.html" class="nav-link">Home</a></li>
+					<li><a href="../index.html#about" class="nav-link">About</a></li>
+					<li><a href="../index.html#menu" class="nav-link">Menu</a></li>
+					<li><a href="../index.html#contact" class="nav-link">Contact</a></li>
+					<li><a href="blog.html" class="nav-link" aria-current="page">Blog</a></li>
+					<li><a href="signUp.html" class="nav-link">Sign Up</a></li>
+				</ul>
+				<button
+					class="hamburger"
+					type="button"
+					aria-expanded="false"
+					aria-controls="navMenu"
+					aria-label="Toggle navigation menu">
+					<span></span>
+					<span></span>
+					<span></span>
+				</button>
+			</div>
+		</nav>
+		<!-- Overlay for closing mobile menu on outside click -->
+		<div class="nav-overlay" id="navOverlay" aria-hidden="true"></div>
+
+		<!-- Blog Page Hero -->
+		<header class="blog-page-hero">
+			<div class="container">
+				<h1 class="blog-page-title">
+					The <span class="gradient-text">Blog</span>
+				</h1>
+				<p class="blog-page-subtitle">
+					Coffee culture, brewing tips, and stories from our community
+				</p>
+			</div>
+		</header>
+
+		<!-- Blog Section -->
+		<main id="blog-main">
+			<section id="blog" class="blog" aria-labelledby="blog-heading">
+				<div class="container">
+					<h2 class="sr-only" id="blog-heading">Blog Articles</h2>
+
+					<!-- Category Filter -->
+					<div
+						class="blog-filters"
+						role="toolbar"
+						aria-label="Filter articles by category">
+						<button
+							class="blog-filter-btn active"
+							data-category="all"
+							type="button"
+							aria-pressed="true">
+							All
+						</button>
+						<button
+							class="blog-filter-btn"
+							data-category="coffee-culture"
+							type="button"
+							aria-pressed="false">
+							Coffee Culture
+						</button>
+						<button
+							class="blog-filter-btn"
+							data-category="brewing-tips"
+							type="button"
+							aria-pressed="false">
+							Brewing Tips
+						</button>
+						<button
+							class="blog-filter-btn"
+							data-category="customer-stories"
+							type="button"
+							aria-pressed="false">
+							Customer Stories
+						</button>
+					</div>
+
+					<!-- Articles Grid -->
+					<p
+						id="blogStatus"
+						class="sr-only"
+						aria-live="polite"
+						aria-atomic="true"></p>
+					<div
+						class="blog-grid"
+						id="blogGrid"
+						role="feed"
+						aria-label="Blog articles">
+						<!-- Articles rendered by js/blog.js -->
+					</div>
+
+					<!-- Empty State (hidden by default) -->
+					<div class="blog-empty" id="blogEmpty" hidden>
+						<p>No articles found in this category. Check back soon!</p>
+					</div>
+
+					<!-- Load More -->
+					<div class="blog-load-more" id="blogLoadMore">
+						<button class="btn btn-outline" id="loadMoreBtn" type="button">
+							Load More Articles
+						</button>
+					</div>
+				</div>
+			</section>
+		</main>
+
+		<!-- Footer -->
+		<footer class="footer" role="contentinfo" aria-label="Site footer">
+			<div class="container">
+				<div class="footer-content">
+					<div class="footer-brand">
+						<div class="logo">
+							<span class="logo-icon">☕</span>
+							<span class="logo-text">Code & Brew</span>
+						</div>
+						<p class="footer-tagline">Where Coffee Meets Code</p>
+
+						<!-- Store Hours Section -->
+						<section class="store-hours" aria-labelledby="store-hours-heading">
+							<h3 id="store-hours-heading" class="footer-section-title">
+								Store Hours
+							</h3>
+							<div class="hours-status" role="status" aria-live="polite">
+								<span
+									id="openStatus"
+									class="status-badge"
+									aria-label="Store status">
+									<span class="status-icon" aria-hidden="true"></span>
+									<span class="status-text">Checking...</span>
+								</span>
+							</div>
+							<ul class="hours-list" aria-label="Weekly operating hours">
+								<li>
+									<span class="day-label">Monday - Friday:</span>
+									<span class="time-label">7:00 AM - 7:00 PM</span>
+								</li>
+								<li>
+									<span class="day-label">Saturday:</span>
+									<span class="time-label">8:00 AM - 8:00 PM</span>
+								</li>
+								<li>
+									<span class="day-label">Sunday:</span>
+									<span class="time-label">9:00 AM - 6:00 PM</span>
+								</li>
+							</ul>
+						</section>
+
+						<!-- Location Section with Map -->
+						<section class="store-location" aria-labelledby="location-heading">
+							<h3 id="location-heading" class="footer-section-title">
+								Visit Us
+							</h3>
+							<address class="store-address">
+								<strong>Code & Brew Coffee Shop</strong><br />
+								5922 US Highway 10<br />
+								Stevens Point, WI 54482
+							</address>
+
+							<!-- Google Maps Embed - Stevens Point Area -->
+							<div class="map-container">
+								<iframe
+									src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2856.789!2d-89.534!3d44.52!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDTCsDMxJzE0LjQiTiA4OcKwMzInMDIuNCJX!5e0!3m2!1sen!2sus!4v1234567890"
+									width="100%"
+									height="250"
+									style="border: 0"
+									allowfullscreen=""
+									loading="lazy"
+									referrerpolicy="no-referrer-when-downgrade"
+									title="Code & Brew location map - Stevens Point, Wisconsin"
+									aria-label="Google Maps showing Code & Brew location at 5922 US Highway 10, Stevens Point, Wisconsin">
+								</iframe>
+							</div>
+							<p class="map-link">
+								<a
+									href="https://www.google.com/maps/search/?api=1&query=5922+US+Highway+10+Stevens+Point+WI+54482"
+									target="_blank"
+									rel="noopener noreferrer"
+									aria-label="Open Code & Brew location in Google Maps (opens in new window)">
+									📍 Open in Google Maps
+								</a>
+							</p>
+						</section>
+					</div>
+
+					<!-- Footer Navigation -->
+					<nav class="footer-links" aria-label="Footer navigation">
+						<div class="footer-column">
+							<h4>Quick Links</h4>
+							<ul>
+								<li><a href="../index.html#about">About Us</a></li>
+								<li><a href="../index.html#menu">Menu</a></li>
+								<li><a href="../index.html#contact">Contact</a></li>
+								<li><a href="blog.html" aria-current="page">Blog</a></li>
+							</ul>
+						</div>
+						<div class="footer-column">
+							<h4>Follow Us</h4>
+							<ul>
+								<li>
+									<a href="#" aria-label="Visit us on Instagram">Instagram</a>
+								</li>
+								<li>
+									<a href="#" aria-label="Visit us on Twitter">Twitter</a>
+								</li>
+								<li>
+									<a href="#" aria-label="Visit us on Facebook">Facebook</a>
+								</li>
+							</ul>
+						</div>
+					</nav>
+				</div>
+
+				<div class="footer-bottom">
+					<p>&copy; 2026 Code & Brew. All rights reserved.</p>
+				</div>
+			</div>
+		</footer>
+
+		<!-- jQuery CDN for DOM interactions (team standard) -->
+		<script
+			src="https://code.jquery.com/jquery-3.7.1.min.js"
+			integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+			crossorigin="anonymous"></script>
+		<script src="../js/script.js"></script>
+		<script src="../js/blog.js"></script>
+	</body>
+</html>
