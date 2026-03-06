@@ -24,6 +24,23 @@
 	--gray-dark: #333333;
 	--black: #1a1a1a;
 
+	/* Extended Maroon Palette */
+	--maroon-deep: #5a0000; /* Very dark maroon for gradients */
+	--maroon-deepest: #3a0000; /* Darkest maroon for gradients */
+
+	/* Neutral Colors (extended) */
+	--charcoal: #2c2c2c; /* Dark charcoal for closed-status badge */
+
+	/* Carousel Category Gradient Colors */
+	--espresso-gradient-start: #4a1a0a;
+	--espresso-gradient-end: #8b3a1f;
+	--cold-brew-gradient-start: #0a2a4a;
+	--cold-brew-gradient-end: #1a4a7a;
+	--pastry-gradient-start: #5a3a10;
+	--pastry-gradient-end: #9a6a20;
+	--specialty-gradient-start: #1a4a2a;
+	--specialty-gradient-end: #2a7a44;
+
 	/* Status Colors (WCAG Compliant) */
 	--status-open: #2e7d32; /* Dark green - 4.5:1 contrast on white */
 	--status-closed: #c62828; /* Dark red - 4.5:1 contrast on white */
@@ -584,7 +601,7 @@ object {
    background creating a red-on-red-on-red problem. Charcoal pops visually
    and still meets WCAG AA contrast for white text (14.4:1). */
 .status-badge.closed {
-	background-color: #2c2c2c;
+	background-color: var(--charcoal);
 	color: var(--white);
 	border: 2px solid var(--gold-dark);
 }
@@ -779,8 +796,8 @@ object {
 	background: linear-gradient(
 		135deg,
 		var(--maroon-dark) 0%,
-		#5a0000 40%,
-		#3a0000 100%
+		var(--maroon-deep) 40%,
+		var(--maroon-deepest) 100%
 	);
 	z-index: 0;
 }
@@ -1034,7 +1051,7 @@ object {
    Blog Page Hero (blog.html standalone page header)
    ============================================================ */
 .blog-page-hero {
-	background: linear-gradient(135deg, var(--maroon-dark), #5a0000);
+	background: linear-gradient(135deg, var(--maroon-dark), var(--maroon-deep));
 	padding: var(--spacing-xl) 0;
 	text-align: center;
 }

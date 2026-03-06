@@ -14,7 +14,7 @@
   /**
    * Featured menu items data shown in the carousel.
    * Add or edit entries here to change what appears on the homepage.
-   * Each item must include: name, description, price, emoji, category, visualClass, menuAnchor.
+   * Each item must include: name, description, price, emoji, category, visualClass.
    * @type {Array<Object>}
    */
   var CAROUSEL_ITEMS = [
