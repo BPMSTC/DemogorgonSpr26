@@ -42,9 +42,3 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
-
-# AI Assistant files
-.claude/
-.copilot-agent/
-.copilot/
-.copilot-agent/.copilot/
