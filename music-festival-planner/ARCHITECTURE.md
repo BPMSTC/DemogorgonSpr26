@@ -239,8 +239,8 @@ FestivalService  (providedIn: 'root' — singleton across the app)
 
 | Method | Signature | Returns | Description |
 |---|---|---|---|
-| `getFestivals` | `(): Festival[]` | `Festival[]` | Returns a **shallow copy** of the full list |
-| `getFestivalById` | `(id: string): Festival \| undefined` | `Festival \| undefined` | Finds a single festival by ID |
+| `getFestivals` | `(): Festival[]` | `Festival[]` | Returns an array of **independent copies** (each element spread) |
+| `getFestivalById` | `(id: string): Festival \| undefined` | `Festival \| undefined` | Returns a copy of the matching festival, or `undefined` |
 | `createFestival` | `(data: Omit<Festival, 'id'>): Festival` | `Festival` | Creates a new festival, assigns the next ID, returns a copy |
 | `updateFestival` | `(id: string, updates: Partial<Omit<Festival, 'id'>>): Festival \| null` | `Festival \| null` | Merges updates into the matching festival; returns `null` if not found |
 | `deleteFestival` | `(id: string): boolean` | `boolean` | Removes a festival by ID; returns `true` on success, `false` if not found |
@@ -257,7 +257,7 @@ FestivalService  ──(mutates)──▶  private festivals[]
 Component updates its local view
 ```
 
-> **Note:** The service returns copies (`[...this.festivals]` and `{ ...festival }`) so external code cannot mutate the internal list directly. Future work may replace the in-memory array with HTTP calls or a state management library.
+> **Note:** The service returns copies (`this.festivals.map(f => ({ ...f }))` and `{ ...found }`) so external code cannot mutate the internal list or its elements directly. All `Festival` fields are primitives (`string`/`number`), so a shallow spread is a full copy. Future work may replace the in-memory array with HTTP calls or a state management library.
 
 ---
 
