@@ -1,59 +1,77 @@
-# MusicFestivalPlanner
+# Music Festival Planner
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.1.
+An Angular 21 single-page application for browsing music festivals and managing a personal schedule.
 
-## Development server
+> **New team member?** Start with [ARCHITECTURE.md](./ARCHITECTURE.md) for a full overview of the folder structure, components, services, and routing.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Quick Start
 
 ```bash
-ng generate component component-name
+# Install dependencies
+npm install
+
+# Start dev server (http://localhost:4200)
+npm start
+
+# Run unit tests
+npm test
+
+# Production build (output → dist/)
+npm run build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
+
+## Tech Stack
+
+| Tool | Version | Purpose |
+|---|---|---|
+| Angular | 21.2.x | Framework |
+| TypeScript | ~5.9.x | Language |
+| Bootstrap | 5.3.x | UI / layout |
+| Vitest | 4.x | Unit testing |
+| Angular CLI | 21.2.x | Scaffolding & build |
+
+---
+
+## Project Structure (summary)
+
+```
+src/app/
+├── app-module.ts           # Root NgModule
+├── app-routing-module.ts   # Route definitions
+├── app.ts / app.html       # Root shell + navbar
+├── components/
+│   ├── home/               # Landing page  (/))
+│   ├── festivals/          # Festival listing  (/festivals)
+│   └── my-schedule/        # Personal schedule  (/my-schedule)
+├── models/
+│   └── festival.model.ts   # Festival interface
+└── services/
+    └── festival.service.ts # In-memory CRUD service
+```
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for full details including component inputs/outputs, service API, data flow diagrams, and planned routes.
+
+---
+
+## Generating Code
 
 ```bash
-ng generate --help
+# New component (add to AppModule.declarations afterward)
+ng generate component components/<name>
+
+# New service (providedIn: 'root' by default)
+ng generate service services/<name>
 ```
 
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
 ## Additional Resources
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- [Angular CLI documentation](https://angular.dev/tools/cli)
+- [Angular 21 docs](https://angular.dev)
+- [Bootstrap 5 docs](https://getbootstrap.com/docs/5.3/)
+- Project coding standards: `codeAndBrew/CODING-STANDARDS.md`

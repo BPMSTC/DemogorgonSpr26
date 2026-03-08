@@ -129,6 +129,15 @@ describe('FestivalService', () => {
       expect(service.getFestivalById(first.id)!.name).toBe(SAMPLE_DATA.name);
       expect(service.getFestivalById(second.id)!.name).toBe(SAMPLE_DATA_2.name);
     });
+
+    it('should return a copy so mutations do not affect stored data', () => {
+      const created = service.createFestival(SAMPLE_DATA);
+      const found = service.getFestivalById(created.id)!;
+      found.name = 'Mutated Name';
+      const stored = service.getFestivalById(created.id)!;
+
+      expect(stored.name).toBe(SAMPLE_DATA.name);
+    });
   });
 
   // ---------------------------------------------------------------------------
