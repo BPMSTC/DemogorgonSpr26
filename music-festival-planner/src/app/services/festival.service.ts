@@ -9,11 +9,12 @@ export class FestivalService {
   private nextId = 1;
 
   getFestivals(): Festival[] {
-    return [...this.festivals];
+    return this.festivals.map((f) => ({ ...f }));
   }
 
   getFestivalById(id: string): Festival | undefined {
-    return this.festivals.find((f) => f.id === id);
+    const found = this.festivals.find((f) => f.id === id);
+    return found ? { ...found } : undefined;
   }
 
   createFestival(data: Omit<Festival, 'id'>): Festival {
