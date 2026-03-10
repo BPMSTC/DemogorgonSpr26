@@ -1,1 +1,159 @@
-/* You can add global styles to this file, and also import other style files */
+/* ============================================================
+   MUSIC FESTIVAL PLANNER — Global Styles
+   Theme: Neon Festival Poster
+   ============================================================ */
+
+/* --- CSS Custom Properties (Neon Palette) --- */
+:root {
+  --neon-cyan:    #00f5ff;
+  --neon-magenta: #ff2d78;
+  --neon-yellow:  #f5ff00;
+  --neon-purple:  #bf00ff;
+
+  --bg-dark:      #0a0a0f;
+  --bg-card:      #12121c;
+  --bg-surface:   #1a1a2e;
+
+  --text-primary:   #f0f0f0;
+  --text-secondary: #a0a0b8;
+  --text-muted:     #5a5a72;
+
+  --border-subtle: rgba(0, 245, 255, 0.15);
+
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  --glow-cyan:    0 0 8px rgba(0, 245, 255, 0.6), 0 0 20px rgba(0, 245, 255, 0.2);
+  --glow-magenta: 0 0 8px rgba(255, 45, 120, 0.6), 0 0 20px rgba(255, 45, 120, 0.2);
+  --glow-yellow:  0 0 8px rgba(245, 255, 0, 0.6),  0 0 20px rgba(245, 255, 0, 0.2);
+
+  --radius-card: 8px;
+  --transition:  0.2s ease;
+}
+
+/* --- Reset & Base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Subtle scanline texture for poster feel */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+  margin-top: 0;
+}
+
+a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  color: var(--neon-magenta);
+}
+
+/* --- Bootstrap overrides for dark theme --- */
+.container {
+  padding-top: 2rem;
+  padding-bottom: 3rem;
+}
+
+/* Neon text utility classes */
+.text-neon-cyan    { color: var(--neon-cyan);    text-shadow: var(--glow-cyan); }
+.text-neon-magenta { color: var(--neon-magenta); text-shadow: var(--glow-magenta); }
+.text-neon-yellow  { color: var(--neon-yellow);  text-shadow: var(--glow-yellow); }
+
+/* Neon border utility */
+.border-neon-cyan    { border: 1px solid var(--neon-cyan);    box-shadow: var(--glow-cyan); }
+.border-neon-magenta { border: 1px solid var(--neon-magenta); box-shadow: var(--glow-magenta); }
+
+/* Badge overrides */
+.badge {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badge-genre {
+  background-color: transparent;
+  border: 1px solid var(--neon-purple);
+  color: var(--neon-purple);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* Neon button */
+.btn-neon {
+  background: transparent;
+  color: var(--neon-cyan);
+  border: 2px solid var(--neon-cyan);
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  font-size: 1rem;
+  padding: 0.4rem 1.2rem;
+  border-radius: 4px;
+  transition: background var(--transition), box-shadow var(--transition), color var(--transition);
+  cursor: pointer;
+}
+
+.btn-neon:hover,
+.btn-neon:focus {
+  background: var(--neon-cyan);
+  color: var(--bg-dark);
+  box-shadow: var(--glow-cyan);
+}
+
+.btn-neon-magenta {
+  color: var(--neon-magenta);
+  border-color: var(--neon-magenta);
+}
+
+.btn-neon-magenta:hover,
+.btn-neon-magenta:focus {
+  background: var(--neon-magenta);
+  color: var(--bg-dark);
+  box-shadow: var(--glow-magenta);
+}
+
+/* --- Scrollbar styling --- */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track { background: var(--bg-dark); }
+::-webkit-scrollbar-thumb {
+  background: var(--neon-cyan);
+  border-radius: 3px;
+}
