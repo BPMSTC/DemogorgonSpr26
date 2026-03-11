@@ -10,8 +10,8 @@
       class="summary-stat"
       [style.borderColor]="day === selectedDay ? 'var(--neon-cyan)' : 'var(--border-subtle)'"
       [style.cursor]="'pointer'">
-      <strong>{{ day | date:'EEEE' }}</strong>
-      {{ day | date:'MMM d' }}
+      <strong>{{ day | date:'EEEE':'UTC' }}</strong>
+      {{ day | date:'MMM d':'UTC' }}
     </button>
   }
 </div>

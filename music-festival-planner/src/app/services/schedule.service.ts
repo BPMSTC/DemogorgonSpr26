@@ -13,6 +13,8 @@ export class ScheduleService {
   ];
 
   getPerformancesByFestival(festivalId: string): Performance[] {
-    return this.mockPerformances.filter(p => p.festivalId === festivalId);
+    return this.mockPerformances
+      .filter(p => p.festivalId === festivalId)
+      .map(p => ({ ...p }));
   }
 }

@@ -7,10 +7,10 @@ import { Performance } from '../../models/performance.model';
   selector: 'app-my-schedule',
   standalone: false,
   templateUrl: './my-schedule.html',
-  styleUrls: ['./my-schedule.css'],
+  styleUrl: './my-schedule.css',
 })
 export class MySchedule implements OnInit {
-  festivalId: string | null = null;
+  festivalId: string = '';
   allPerformances: Performance[] = [];
   
   festivalDays: string[] = [];
@@ -21,7 +21,7 @@ export class MySchedule implements OnInit {
   filteredPerformances: Performance[] = [];
 
   // NEW: Dictionary for lightning-fast template lookups
-  performanceGrid: Record<string, Performance> = {};
+  performanceGrid: Record<string, Performance | undefined> = {};
 
   constructor(
     private route: ActivatedRoute,
@@ -29,13 +29,10 @@ export class MySchedule implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.festivalId = this.route.snapshot.paramMap.get('id') || '1'; 
+    this.festivalId = this.route.snapshot.paramMap.get('id') ?? '1';
     this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
     
     this.festivalDays = [...new Set(this.allPerformances.map(p => p.date))].sort();
-    
-    // Add dummy day to test empty state
-    this.festivalDays.push('2026-08-03'); 
     
     if (this.festivalDays.length > 0) {
       this.selectDay(this.festivalDays[0]);
