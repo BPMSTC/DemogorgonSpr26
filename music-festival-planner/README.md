@@ -71,6 +71,7 @@ ng generate service services/<name>
 
 ## Additional Resources
 
+- GitHub Pages deployment plan (pre-workflow): [GITHUB_PAGES_WORKFLOW_PLAN.md](./GITHUB_PAGES_WORKFLOW_PLAN.md)
 - [Angular CLI documentation](https://angular.dev/tools/cli)
 - [Angular 21 docs](https://angular.dev)
 - [Bootstrap 5 docs](https://getbootstrap.com/docs/5.3/)
