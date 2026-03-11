@@ -1,0 +1,200 @@
+/* ============================================================
+   My Schedule Component — Timetable Grid + Conflict Alerts
+   ============================================================ */
+
+.schedule-header {
+  margin-bottom: 2rem;
+}
+
+.schedule-header h1 {
+  font-size: 3rem;
+  color: var(--neon-yellow);
+  text-shadow: var(--glow-yellow);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+/* ---- Conflict Alert Banner -------------------------------- */
+.conflict-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background-color: rgba(255, 45, 120, 0.1);
+  border: 1px solid var(--neon-magenta);
+  border-radius: var(--radius-card);
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--glow-magenta);
+  animation: conflict-pulse 2s ease-in-out infinite;
+}
+
+@keyframes conflict-pulse {
+  0%, 100% { box-shadow: var(--glow-magenta); }
+  50%       { box-shadow: 0 0 18px rgba(255, 45, 120, 0.8), 0 0 40px rgba(255, 45, 120, 0.3); }
+}
+
+.conflict-alert .conflict-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.conflict-alert .conflict-text {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.conflict-alert .conflict-text strong {
+  color: var(--neon-magenta);
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* ---- Timetable Grid --------------------------------------- */
+.timetable {
+  display: grid;
+  /* First column = time labels, remaining = stage columns */
+  grid-template-columns: 60px repeat(var(--stage-count, 3), 1fr);
+  gap: 2px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  font-size: 0.82rem;
+}
+
+/* Header row — stage names */
+.timetable-header {
+  display: contents;
+}
+
+.timetable-stage-label {
+  background-color: var(--bg-surface);
+  color: var(--neon-cyan);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 0.6rem 0.4rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Empty top-left corner cell */
+.timetable-corner {
+  background-color: var(--bg-dark);
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+}
+
+/* Time label cells */
+.timetable-time {
+  background-color: var(--bg-dark);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-align: right;
+  padding: 4px 8px 0 0;
+  border-right: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+/* Each stage slot (empty) */
+.timetable-slot {
+  background-color: var(--bg-card);
+  min-height: 40px;
+  position: relative;
+}
+
+/* An event block placed inside a slot */
+.timetable-event {
+  background-color: var(--bg-surface);
+  border-left: 3px solid var(--neon-cyan);
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease;
+  overflow: hidden;
+  /* Spans rows via inline style: grid-row: span N */
+}
+
+.timetable-event:hover {
+  filter: brightness(1.2);
+  transform: scale(1.01);
+  z-index: 1;
+}
+
+.timetable-event .event-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timetable-event .event-time {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+/* Conflict state — event overlaps with another */
+.timetable-event.has-conflict {
+  border-left-color: var(--neon-magenta);
+  background-color: rgba(255, 45, 120, 0.08);
+}
+
+.timetable-event.has-conflict .event-name {
+  color: var(--neon-magenta);
+}
+
+/* Conflict icon badge on event */
+.timetable-event .conflict-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 0.75rem;
+  color: var(--neon-magenta);
+}
+
+/* ---- Schedule Empty State --------------------------------- */
+.schedule-empty {
+  text-align: center;
+  padding: 5rem 1rem;
+  color: var(--text-muted);
+}
+
+.schedule-empty .empty-icon {
+  font-size: 3.5rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.schedule-empty p {
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- Schedule summary row --------------------------------- */
+.schedule-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.summary-stat {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.summary-stat strong {
+  color: var(--neon-cyan);
+  font-size: 1.1rem;
+  display: block;
+}

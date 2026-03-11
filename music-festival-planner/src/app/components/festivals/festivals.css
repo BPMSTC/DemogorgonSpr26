@@ -1,0 +1,133 @@
+/* ============================================================
+   Festivals Component — Festival Cards
+   ============================================================ */
+
+.festivals-header {
+  margin-bottom: 2rem;
+}
+
+.festivals-header h1 {
+  font-size: 3rem;
+  color: var(--neon-magenta);
+  text-shadow: var(--glow-magenta);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.festivals-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* --- Filter Bar --- */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-chip {
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-chip:hover,
+.filter-chip.active {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+/* --- Festival Card Grid --- */
+.festival-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.festival-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left accent bar — color indicates genre category */
+.festival-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--neon-cyan);
+  border-radius: var(--radius-card) 0 0 var(--radius-card);
+}
+
+.festival-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-2px);
+}
+
+.festival-card-name {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.festival-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.festival-card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.festival-card-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- Genre accent color variants --- */
+.festival-card.genre-rock::before    { background: var(--neon-magenta); }
+.festival-card.genre-electronic::before { background: var(--neon-cyan); }
+.festival-card.genre-pop::before     { background: var(--neon-yellow); }
+.festival-card.genre-indie::before   { background: var(--neon-purple); }
+
+/* --- Empty state --- */
+.festivals-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+}
+
+.festivals-empty .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}

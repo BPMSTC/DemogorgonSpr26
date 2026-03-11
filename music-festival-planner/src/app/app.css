@@ -1,0 +1,51 @@
+/* ============================================================
+   App Shell — Navbar
+   ============================================================ */
+
+.navbar {
+  background-color: rgba(10, 10, 15, 0.95) !important;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 1.5rem;
+}
+
+.navbar-brand {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+  color: var(--neon-cyan) !important;
+  text-shadow: var(--glow-cyan);
+  text-transform: uppercase;
+}
+
+.navbar-brand:hover {
+  color: var(--neon-magenta) !important;
+  text-shadow: var(--glow-magenta);
+}
+
+.nav-link {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary) !important;
+  padding: 0.4rem 1rem !important;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--neon-cyan) !important;
+  border-bottom-color: var(--neon-cyan);
+}
+
+/* Mobile toggler */
+.navbar-toggler {
+  border-color: var(--neon-cyan);
+}
+
+.navbar-toggler-icon {
+  filter: invert(1) sepia(1) saturate(5) hue-rotate(155deg);
+}
