@@ -1,1 +1,51 @@
-<p>my-schedule works!</p>
+<div class="schedule-header">
+  <button routerLink="/festivals" style="background: none; border: none; color: var(--neon-cyan); cursor: pointer; margin-bottom: 1rem; padding: 0;">← Back to Festivals</button>
+  <h1>Festival Schedule</h1>
+</div>
+
+<div class="schedule-summary">
+  @for (day of festivalDays; track day) {
+    <button 
+      (click)="selectDay(day)"
+      class="summary-stat"
+      [style.borderColor]="day === selectedDay ? 'var(--neon-cyan)' : 'var(--border-subtle)'"
+      [style.cursor]="'pointer'">
+      <strong>{{ day | date:'EEEE' }}</strong>
+      {{ day | date:'MMM d' }}
+    </button>
+  }
+</div>
+
+@if (filteredPerformances.length > 0) {
+  <div class="timetable" [style.--stage-count]="stages.length">
+    
+    <div class="timetable-corner"></div>
+    
+    @for (stage of stages; track stage) {
+      <div class="timetable-stage-label">
+        {{ stage }}
+      </div>
+    }
+
+    @for (time of times; track time) {
+      <div class="timetable-time">{{ time }}</div>
+      
+      @for (stage of stages; track stage) {
+        <div class="timetable-slot">
+          
+          @if (performanceGrid[time + '-' + stage]; as perf) {
+            <div class="timetable-event">
+              <div class="event-name">{{ perf.artistName }}</div>
+              <div class="event-time">{{ perf.startTime }} - {{ perf.endTime }}</div>
+            </div>
+          }
+
+        </div>
+      }
+    }
+  </div>
+} @else {
+  <div class="schedule-empty">
+    <p>No performances scheduled for this day yet.</p>
+  </div>
+}
