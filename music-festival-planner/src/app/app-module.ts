@@ -6,10 +6,12 @@ import { App } from './app';
 import { Home } from './components/home/home';
 import { Festivals } from './components/festivals/festivals';
 import { MySchedule } from './components/my-schedule/my-schedule';
+import { FestivalCreateComponent } from './components/festival-create/festival-create';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
-  declarations: [App, Home, Festivals, MySchedule],
-  imports: [BrowserModule, AppRoutingModule],
+  declarations: [App, Home, Festivals, MySchedule, FestivalCreateComponent],
+  imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],
 })

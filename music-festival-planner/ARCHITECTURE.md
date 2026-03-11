@@ -71,9 +71,10 @@ AppModule (bootstraps)
 └── App  [selector: app-root]          ← mounted in index.html
     ├── <nav>  (Bootstrap navbar, defined inline in app.html)
     └── <router-outlet>                ← swaps in routed views
-        ├── Home          [route: /]
-        ├── Festivals     [route: /festivals]
-        └── MySchedule    [route: /my-schedule]
+        ├── Home               [route: /]
+        ├── Festivals          [route: /festivals]
+        ├── FestivalCreate     [route: /festivals/create]
+        └── MySchedule         [route: /my-schedule]
 ```
 
 **Dependency injection tree (services)**
@@ -269,12 +270,13 @@ Component updates its local view
 
 ```typescript
 export interface Festival {
-  id: string;        // Unique identifier (assigned by FestivalService)
-  name: string;      // Display name of the festival
-  date: string;      // ISO 8601 date string (e.g. "2026-07-15")
-  location: string;  // City/venue name
-  genre: string;     // Primary music genre
-  capacity: number;  // Maximum attendee count
+  id: string;         // Unique identifier (assigned by FestivalService)
+  name: string;       // Display name of the festival
+  startDate: string;  // ISO 8601 start date string (e.g. "2026-07-15")
+  endDate: string;    // ISO 8601 end date string (e.g. "2026-07-18")
+  location: string;   // City/venue name
+  genre?: string;     // Optional primary music genre
+  capacity?: number;  // Optional maximum attendee count
 }
 ```
 
@@ -290,6 +292,7 @@ export interface Festival {
 |---|---|---|
 | `` (empty string) | `Home` | Default landing page |
 | `festivals` | `Festivals` | Festival listing and management |
+| `festivals/create` | `FestivalCreate` | Create a new festival |
 | `my-schedule` | `MySchedule` | Personal schedule view |
 
 The router is initialized with `RouterModule.forRoot(routes)` and uses the default **HTML5 `pushState`** strategy (`<base href="/">` in `index.html`).
@@ -297,9 +300,10 @@ The router is initialized with `RouterModule.forRoot(routes)` and uses the defau
 ### 7.2 Navigation Hierarchy
 
 ```
-/                    ← Home (default)
-├── /festivals       ← Festival listing
-└── /my-schedule     ← Personal schedule
+/                        ← Home (default)
+├── /festivals           ← Festival listing
+│   └── /festivals/create  ← Create new festival
+└── /my-schedule         ← Personal schedule
 ```
 
 ### 7.3 Planned Routes

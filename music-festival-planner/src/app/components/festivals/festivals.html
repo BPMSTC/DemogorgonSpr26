@@ -1,1 +1,20 @@
-<p>festivals works!</p>
+<div class="festivals-container">
+  <nav class="page-nav">
+    <h1>Music Festivals</h1>
+    <button class="btn-primary" routerLink="/festivals/create">
+      + Add New Festival
+    </button>
+  </nav>
+
+  <div class="card-grid">
+    <div class="card" *ngFor="let festival of festivalsList">
+      <h3>{{ festival.name }}</h3>
+      <p><strong>Location:</strong> {{ festival.location }}</p>
+      <p><strong>Dates:</strong> {{ festival.startDate }} to {{ festival.endDate }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="festivalsList.length === 0" class="empty-state">
+    <p>No festivals created yet. Click the button above to add one!</p>
+  </div>
+</div>
