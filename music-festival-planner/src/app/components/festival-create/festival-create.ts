@@ -8,7 +8,7 @@ import { Festival } from '../../models/festival.model';
   selector: 'app-festival-create',
   standalone: false,
   templateUrl: './festival-create.html',
-  styleUrls: ['./festival-create.css']
+  styleUrl: './festival-create.css'
 })
 export class FestivalCreateComponent implements OnInit {
   festivalForm!: FormGroup;
@@ -25,9 +25,7 @@ export class FestivalCreateComponent implements OnInit {
       name: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: ['', Validators.required],
-      location: ['', Validators.required],
-      genre: [''],
-      capacity: ['']
+      location: ['', Validators.required]
     });
   }
 

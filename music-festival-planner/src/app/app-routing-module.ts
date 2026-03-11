@@ -9,7 +9,6 @@ const routes: Routes = [
   { path: '', component: Home },
   { path: 'festivals', component: Festivals },
   { path: 'festivals/create', component: FestivalCreateComponent },
-  { path: '', redirectTo: '/festivals', pathMatch: 'full' },
   { path: 'my-schedule', component: MySchedule },
 ];
 
