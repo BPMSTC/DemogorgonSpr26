@@ -6,7 +6,7 @@ import { Festival } from '../../models/festival.model';
   selector: 'app-festivals',
   standalone: false,
   templateUrl: './festivals.html',
-  styleUrls: ['./festivals.css'],
+  styleUrl: './festivals.css',
 })
 export class Festivals implements OnInit {
   festivalsList: Festival[] = [];
