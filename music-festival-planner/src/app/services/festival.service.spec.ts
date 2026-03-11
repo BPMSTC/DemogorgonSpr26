@@ -4,7 +4,8 @@ import { Festival } from '../models/festival.model';
 
 const SAMPLE_DATA: Omit<Festival, 'id'> = {
   name: 'Lollapalooza',
-  date: '2025-08-01',
+  startDate: '2025-08-01',
+  endDate: '2025-08-04',
   location: 'Chicago, IL',
   genre: 'Rock',
   capacity: 100000,
@@ -12,7 +13,8 @@ const SAMPLE_DATA: Omit<Festival, 'id'> = {
 
 const SAMPLE_DATA_2: Omit<Festival, 'id'> = {
   name: 'Coachella',
-  date: '2025-04-11',
+  startDate: '2025-04-11',
+  endDate: '2025-04-14',
   location: 'Indio, CA',
   genre: 'Indie',
   capacity: 125000,
@@ -39,7 +41,8 @@ describe('FestivalService', () => {
 
       expect(created.id).toBeDefined();
       expect(created.name).toBe(SAMPLE_DATA.name);
-      expect(created.date).toBe(SAMPLE_DATA.date);
+      expect(created.startDate).toBe(SAMPLE_DATA.startDate);
+      expect(created.endDate).toBe(SAMPLE_DATA.endDate);
       expect(created.location).toBe(SAMPLE_DATA.location);
       expect(created.genre).toBe(SAMPLE_DATA.genre);
       expect(created.capacity).toBe(SAMPLE_DATA.capacity);
