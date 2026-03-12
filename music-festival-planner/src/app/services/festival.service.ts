@@ -1,15 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Festival } from '../models/festival.model';
+import * as festivalData from '../data/festivals.json';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FestivalService {
-  private festivals: Festival[] = [];
-  private nextId = 1;
+  private festivals: Festival[] = (festivalData as any).default || festivalData;
+  private nextId = this.getNextId();
 
   getFestivals(): Festival[] {
     return this.festivals.map((f) => ({ ...f }));
+  }
+
+  private getNextId(): number {
+    const maxId = Math.max(...this.festivals.map(f => parseInt(f.id, 10)), 0);
+    return maxId + 1;
   }
 
   getFestivalById(id: string): Festival | undefined {

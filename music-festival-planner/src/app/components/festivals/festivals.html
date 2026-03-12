@@ -1,1 +1,37 @@
-<p>festivals works!</p>
+<div class="festivals-container">
+  <h1 class="page-title">All Festivals</h1>
+  
+  <!-- Festival List -->
+  <div *ngIf="festivals.length > 0; else emptyState" class="festivals-list">
+    <div *ngFor="let festival of festivals" class="festival-card">
+      <div class="festival-header">
+        <h2 class="festival-name">{{ festival.name }}</h2>
+        <span class="festival-genre">{{ festival.genre }}</span>
+      </div>
+      
+      <div class="festival-details">
+        <div class="detail-item">
+          <strong>Start Date:</strong> {{ formatDate(festival.startDate) }}
+        </div>
+        <div class="detail-item">
+          <strong>End Date:</strong> {{ formatDate(festival.endDate) }}
+        </div>
+        <div class="detail-item">
+          <strong>Location:</strong> {{ festival.location }}
+        </div>
+        <div class="detail-item">
+          <strong>Capacity:</strong> {{ festival.capacity | number }} attendees
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Empty State -->
+  <ng-template #emptyState>
+    <div class="empty-state">
+      <div class="empty-state-icon">🎪</div>
+      <h2>No Festivals Found</h2>
+      <p>There are currently no festivals in the system. Create your first festival to get started!</p>
+    </div>
+  </ng-template>
+</div>

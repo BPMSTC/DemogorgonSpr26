@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "name": "Zara Larsson: Midnight Sun Tour",
+    "startDate": "2026-03-14",
+    "endDate": "2026-03-14",
+    "location": "The Eagles Ballroom, Milwaukee, WI",
+    "genre": "Pop",
+    "capacity": 3500
+  },
+  {
+    "id": "2",
+    "name": "Helloween: 40th Anniversary Tour",
+    "startDate": "2026-04-21",
+    "endDate": "2026-04-21",
+    "location": "The Eagles Ballroom, Milwaukee, WI",
+    "genre": "Heavy Metal",
+    "capacity": 3500
+  },
+  {
+    "id": "3",
+    "name": "Tech N9ne & E-40: Strange Wid’ It Tour",
+    "startDate": "2026-04-25",
+    "endDate": "2026-04-25",
+    "location": "The Rave Hall, Milwaukee, WI",
+    "genre": "Hip-Hop",
+    "capacity": 1800
+  },
+  {
+    "id": "4",
+    "name": "Avatar: Don’t Go In The Forest Tour",
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-01",
+    "location": "The Rave Hall, Milwaukee, WI",
+    "genre": "Metal",
+    "capacity": 1800
+  },
+  {
+    "id": "5",
+    "name": "DaBaby: Be More Grateful Tour",
+    "startDate": "2026-05-03",
+    "endDate": "2026-05-03",
+    "location": "The Eagles Ballroom, Milwaukee, WI",
+    "genre": "Hip-Hop",
+    "capacity": 3500
+  },
+  {
+    "id": "6",
+    "name": "Milwaukee Metal Fest 2026",
+    "startDate": "2026-06-05",
+    "endDate": "2026-06-07",
+    "location": "The Rave/Eagles Club, Milwaukee, WI",
+    "genre": "Metal",
+    "capacity": 4000
+  },
+  {
+    "id": "7",
+    "name": "Harrison - Surf Gang",
+    "startDate": "2026-06-22",
+    "endDate": "2026-06-22",
+    "location": "The Rave Bar, Milwaukee, WI",
+    "genre": "Hip-Hop",
+    "capacity": 500
+  },
+  {
+    "id": "8",
+    "name": "Kamelot: Dark Asylum World Tour",
+    "startDate": "2026-09-15",
+    "endDate": "2026-09-15",
+    "location": "The Rave Hall, Milwaukee, WI",
+    "genre": "Power Metal",
+    "capacity": 1800
+  }
+]
