@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Angular Dev Server (music-festival-planner)",
+            "type": "shell",
+            "command": "ng serve",
+            "options": {
+                "cwd": "${workspaceFolder}/music-festival-planner"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "angular",
+                "pattern": {
+                    "regexp": "^ERROR in (.*)$",
+                    "file": 1
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "Building\\.\\.\\.",
+                    "endsPattern": "compiled successfully"
+                }
+            }
+        }
+    ]
+}
