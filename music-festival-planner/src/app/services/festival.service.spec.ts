@@ -4,7 +4,8 @@ import { Festival } from '../models/festival.model';
 
 const SAMPLE_DATA: Omit<Festival, 'id'> = {
   name: 'Lollapalooza',
-  date: '2025-08-01',
+  startDate: '2025-08-01',
+  endDate: '2025-08-04',
   location: 'Chicago, IL',
   genre: 'Rock',
   capacity: 100000,
@@ -12,7 +13,8 @@ const SAMPLE_DATA: Omit<Festival, 'id'> = {
 
 const SAMPLE_DATA_2: Omit<Festival, 'id'> = {
   name: 'Coachella',
-  date: '2025-04-11',
+  startDate: '2025-04-11',
+  endDate: '2025-04-13',
   location: 'Indio, CA',
   genre: 'Indie',
   capacity: 125000,
@@ -24,6 +26,8 @@ describe('FestivalService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(FestivalService);
+    // Clear seeded mock data for isolated tests
+    service.getFestivals().forEach((f) => service.deleteFestival(f.id));
   });
 
   it('should be created', () => {
@@ -39,7 +43,8 @@ describe('FestivalService', () => {
 
       expect(created.id).toBeDefined();
       expect(created.name).toBe(SAMPLE_DATA.name);
-      expect(created.date).toBe(SAMPLE_DATA.date);
+      expect(created.startDate).toBe(SAMPLE_DATA.startDate);
+      expect(created.endDate).toBe(SAMPLE_DATA.endDate);
       expect(created.location).toBe(SAMPLE_DATA.location);
       expect(created.genre).toBe(SAMPLE_DATA.genre);
       expect(created.capacity).toBe(SAMPLE_DATA.capacity);
@@ -119,7 +124,7 @@ describe('FestivalService', () => {
     });
 
     it('should return undefined when storage is empty', () => {
-      expect(service.getFestivalById('1')).toBeUndefined();
+      expect(service.getFestivalById('9999')).toBeUndefined();
     });
 
     it('should return the correct festival when multiple exist', () => {

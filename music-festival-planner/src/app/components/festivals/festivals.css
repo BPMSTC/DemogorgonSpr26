@@ -1,0 +1,18 @@
+.festivals-page {
+  padding: 1.5rem 0;
+}
+
+.festivals-title {
+  margin-bottom: 1.5rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.festivals-table {
+  width: 100%;
+}

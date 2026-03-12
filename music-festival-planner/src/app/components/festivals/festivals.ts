@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Festival } from '../../models/festival.model';
+import { FestivalService } from '../../services/festival.service';
 
 @Component({
   selector: 'app-festivals',
@@ -6,4 +8,12 @@ import { Component } from '@angular/core';
   templateUrl: './festivals.html',
   styleUrl: './festivals.css',
 })
-export class Festivals {}
+export class Festivals implements OnInit {
+  festivals: Festival[] = [];
+
+  constructor(private festivalService: FestivalService) {}
+
+  ngOnInit(): void {
+    this.festivals = this.festivalService.getFestivals();
+  }
+}

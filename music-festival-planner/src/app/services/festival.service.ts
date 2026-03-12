@@ -5,8 +5,36 @@ import { Festival } from '../models/festival.model';
   providedIn: 'root',
 })
 export class FestivalService {
-  private festivals: Festival[] = [];
-  private nextId = 1;
+  private festivals: Festival[] = [
+    {
+      id: '1',
+      name: 'Lollapalooza',
+      startDate: '2025-08-01',
+      endDate: '2025-08-04',
+      location: 'Chicago, IL',
+      genre: 'Rock',
+      capacity: 100000,
+    },
+    {
+      id: '2',
+      name: 'Coachella',
+      startDate: '2025-04-11',
+      endDate: '2025-04-13',
+      location: 'Indio, CA',
+      genre: 'Indie',
+      capacity: 125000,
+    },
+    {
+      id: '3',
+      name: 'Bonnaroo',
+      startDate: '2025-06-12',
+      endDate: '2025-06-15',
+      location: 'Manchester, TN',
+      genre: 'Multi-genre',
+      capacity: 80000,
+    },
+  ];
+  private nextId = 4;
 
   getFestivals(): Festival[] {
     return this.festivals.map((f) => ({ ...f }));

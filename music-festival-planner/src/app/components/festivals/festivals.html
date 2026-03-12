@@ -1,1 +1,26 @@
-<p>festivals works!</p>
+<div class="festivals-page">
+  <h1 class="festivals-title">Festivals</h1>
+
+  <div *ngIf="festivals.length === 0" class="empty-state">
+    <p>No festivals found. Create one to get started!</p>
+  </div>
+
+  <table *ngIf="festivals.length > 0" class="table table-striped festivals-table">
+    <thead>
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">End Date</th>
+        <th scope="col">Location</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let festival of festivals">
+        <td>{{ festival.name }}</td>
+        <td>{{ festival.startDate }}</td>
+        <td>{{ festival.endDate }}</td>
+        <td>{{ festival.location }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
