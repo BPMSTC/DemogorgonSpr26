@@ -271,7 +271,8 @@ Component updates its local view
 export interface Festival {
   id: string;        // Unique identifier (assigned by FestivalService)
   name: string;      // Display name of the festival
-  date: string;      // ISO 8601 date string (e.g. "2026-07-15")
+  startDate: string; // ISO 8601 start date string (e.g. "2026-07-15")
+  endDate: string;   // ISO 8601 end date string (e.g. "2026-07-18")
   location: string;  // City/venue name
   genre: string;     // Primary music genre
   capacity: number;  // Maximum attendee count
