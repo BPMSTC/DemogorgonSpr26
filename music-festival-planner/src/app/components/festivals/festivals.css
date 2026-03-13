@@ -35,11 +35,12 @@
   background-color: #004494; 
 }
 
-/* Card Grid */
+/* Card Grid — flex so cards don't stretch each other's height */
 .card-grid { 
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-  gap: 1.5rem; 
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-start;
 }
 
 .card { 
@@ -47,21 +48,285 @@
   border-radius: 8px; 
   padding: 1.5rem; 
   box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
-  transition: transform 0.2s; 
   background: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  /* Each card takes up ~1 column worth of space, min 250px */
+  flex: 1 1 250px;
+  max-width: 100%;
+  box-sizing: border-box;
+  /* Critical: cards size to their own content only */
+  align-self: flex-start;
 }
 
 .card:hover { 
-  transform: translateY(-3px); 
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-color: var(--neon-cyan, #00e5ff);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.12);
+}
+
+.card-expanded {
+  border-color: var(--neon-cyan, #00e5ff);
 }
 
 .empty-state { 
-  grid-column: 1 / -1; 
+  width: 100%;
   text-align: center; 
   padding: 3rem; 
   color: #666; 
   background-color: #f8f9fa;
   border-radius: 8px;
   border: 1px dashed #ccc;
+}
+
+/* ── Card header row ── */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.card-title-group h3 {
+  margin: 0;
+}
+
+.card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+/* ── Stage count pill ── */
+.stage-count-badge {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  color: var(--neon-cyan, #00e5ff);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── Chevron ── */
+.chevron {
+  font-size: 1.2rem;
+  color: var(--text-muted, #aaa);
+  display: inline-block;
+  transform: rotate(0deg);
+  transition: transform 0.2s ease;
+  line-height: 1;
+  user-select: none;
+}
+
+.chevron-open {
+  transform: rotate(90deg);
+}
+
+/* ── Card meta lines ── */
+.card-meta {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
+  color: var(--text-muted, #aaa);
+}
+
+/* ── Card actions (kept for backwards compat) ── */
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid var(--neon-cyan, #00e5ff);
+  color: var(--neon-cyan, #00e5ff);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  background: var(--neon-cyan, #00e5ff);
+  color: #000;
+}
+
+/* ── Kebab menu ── */
+.kebab-menu {
+  position: relative;
+}
+
+.kebab-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted, #aaa);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  line-height: 1;
+  transition: background 0.15s, color 0.15s;
+}
+
+.kebab-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-primary, #fff);
+}
+
+.kebab-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--surface-raised, #1e1e2e);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 8px;
+  min-width: 160px;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.kebab-item {
+  display: block;
+  padding: 0.65rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary, #fff);
+  text-decoration: none;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.kebab-item:hover {
+  background: rgba(0, 229, 255, 0.08);
+  color: var(--neon-cyan, #00e5ff);
+}
+
+/* ── Expanded stage panel ── */
+.stage-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle, #333);
+  cursor: default;
+}
+
+.no-stages {
+  font-size: 0.875rem;
+  color: var(--text-muted, #aaa);
+  margin: 0;
+}
+
+.no-stages a {
+  color: var(--neon-cyan, #00e5ff);
+  text-decoration: none;
+  margin-left: 0.25rem;
+}
+
+.stage-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.stage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.45rem 0.65rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle, #2a2a3a);
+  font-size: 0.85rem;
+}
+
+.stage-row-left {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stage-row-name {
+  font-weight: 500;
+  color: var(--text-primary, #fff);
+}
+
+.stage-row-env {
+  font-size: 0.9rem;
+}
+
+.stage-row-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stage-row-cap {
+  font-size: 0.78rem;
+  color: var(--text-muted, #888);
+}
+
+/* ── Stage panel footer ── */
+.stage-panel-footer {
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-subtle, #2a2a3a);
+}
+
+.link-subtle {
+  font-size: 0.82rem;
+  color: var(--text-muted, #888);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.link-subtle:hover {
+  color: var(--neon-cyan, #00e5ff);
+}
+
+/* ── Status badges ── */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.badge-sm {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
+}
+
+.badge-active {
+  background: rgba(0, 230, 118, 0.12);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.3);
+}
+
+.badge-inactive {
+  background: rgba(180, 180, 180, 0.08);
+  color: #aaa;
+  border: 1px solid rgba(180, 180, 180, 0.2);
+}
+
+.badge-repair {
+  background: rgba(255, 180, 0, 0.1);
+  color: #ffb400;
+  border: 1px solid rgba(255, 180, 0, 0.3);
 }

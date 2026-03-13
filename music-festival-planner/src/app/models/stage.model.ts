@@ -1,9 +1,12 @@
+export type StageStatus = 'active' | 'inactive' | 'under-repair';
+export type StageEnvironment = 'indoor' | 'outdoor';
+ 
 export interface Stage {
   id: string;
-  type: string; // e.g., 'main', 'indie', 'side'
-  festivalId: string; // Reference to the associated festival
-  capacity?: number;
-  artist: string;
-  status: string; // e.g., 'active', 'inactive', 'maintenance'
-  environment?: string; // e.g., 'outdoor', 'indoor'
+  festivalId: string;
+  name: string;
+  capacity: number;
+  environment: StageEnvironment;
+  status: StageStatus;
+  notes?: string;
 }

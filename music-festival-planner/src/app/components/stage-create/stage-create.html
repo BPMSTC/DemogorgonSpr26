@@ -1,0 +1,131 @@
+<div class="create-container">
+
+  <button type="button" class="back-link" (click)="onCancel()">← Back to Stages</button>
+
+  <h2>Add a New Stage</h2>
+  @if (festival) {
+    <p class="festival-context">for <strong>{{ festival.name }}</strong></p>
+  }
+
+  <!-- Existing stages summary -->
+  @if (existingStages.length > 0) {
+    <div class="existing-stages">
+      <h3>Current Stages</h3>
+      <div class="stage-chips">
+        @for (stage of existingStages; track stage.id) {
+          <span class="stage-chip" [ngClass]="getStatusBadgeClass(stage.status)">
+            {{ stage.name }}
+            <em>({{ stage.capacity | number }} cap · {{ stage.environment }})</em>
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Server-level error -->
+  @if (serverError) {
+    <div class="error-banner" role="alert">{{ serverError }}</div>
+  }
+
+  <form [formGroup]="stageForm" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- Stage Name (combobox) -->
+    <div class="form-group">
+      <label for="name">Stage Name <span aria-hidden="true">*</span></label>
+      <select
+        id="name"
+        formControlName="name"
+        aria-required="true"
+        [attr.aria-invalid]="(submitted || f['name'].touched) && f['name'].errors ? true : null">
+        <option value="" disabled>— Select a stage —</option>
+        @for (stage of STAGE_NAMES; track stage) {
+          <option [value]="stage" [disabled]="isNameTaken(stage)">
+            {{ stage }}{{ isNameTaken(stage) ? ' (already added)' : '' }}
+          </option>
+        }
+      </select>
+      <div *ngIf="submitted || f['name'].touched" class="error-messages">
+        <small *ngIf="f['name'].errors?.['required']" class="error-text">Stage name is required.</small>
+      </div>
+      @if (f['name'].value && isNameTaken(f['name'].value)) {
+        <small class="error-text">This stage already exists for this festival.</small>
+      }
+    </div>
+
+    <!-- Capacity -->
+    <div class="form-group">
+      <label for="capacity">Capacity <span aria-hidden="true">*</span></label>
+      <input
+        type="number"
+        id="capacity"
+        formControlName="capacity"
+        min="1"
+        placeholder="e.g. 5000"
+        aria-required="true"
+        [attr.aria-invalid]="(submitted || f['capacity'].touched) && f['capacity'].errors ? true : null">
+      <div *ngIf="submitted || f['capacity'].touched" class="error-messages">
+        <small *ngIf="f['capacity'].errors?.['required']"        class="error-text">Capacity is required.</small>
+        <small *ngIf="f['capacity'].errors?.['positiveInteger']" class="error-text">Capacity must be a positive whole number.</small>
+      </div>
+    </div>
+
+    <!-- Indoor / Outdoor -->
+    <div class="form-group">
+      <label>Environment <span aria-hidden="true">*</span></label>
+      <div class="radio-group" role="radiogroup" aria-label="Stage environment">
+        @for (opt of ENVIRONMENT_OPTIONS; track opt.value) {
+          <label class="radio-label">
+            <input
+              type="radio"
+              formControlName="environment"
+              [value]="opt.value"
+              [attr.aria-checked]="f['environment'].value === opt.value">
+            {{ opt.label }}
+          </label>
+        }
+      </div>
+      <div *ngIf="submitted || f['environment'].touched" class="error-messages">
+        <small *ngIf="f['environment'].errors?.['required']" class="error-text">Environment is required.</small>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="form-group">
+      <label for="status">Status <span aria-hidden="true">*</span></label>
+      <select
+        id="status"
+        formControlName="status"
+        aria-required="true"
+        [attr.aria-invalid]="(submitted || f['status'].touched) && f['status'].errors ? true : null">
+        @for (opt of STATUS_OPTIONS; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+      <div *ngIf="submitted || f['status'].touched" class="error-messages">
+        <small *ngIf="f['status'].errors?.['required']" class="error-text">Status is required.</small>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-group">
+      <label for="notes">Notes <span class="optional-label">(optional)</span></label>
+      <textarea
+        id="notes"
+        formControlName="notes"
+        rows="3"
+        placeholder="Any special setup, equipment notes, or restrictions..."
+        [attr.aria-invalid]="(submitted || f['notes'].touched) && f['notes'].errors ? true : null">
+      </textarea>
+      <div *ngIf="submitted || f['notes'].touched" class="error-messages">
+        <small *ngIf="f['notes'].errors?.['maxlength']" class="error-text">Notes cannot exceed 300 characters.</small>
+      </div>
+      <small class="char-count">{{ f['notes'].value?.length ?? 0 }} / 300</small>
+    </div>
+
+    <div class="button-group">
+      <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="btn-submit" [disabled]="stageForm.invalid && submitted">Save Stage</button>
+    </div>
+
+  </form>
+</div>

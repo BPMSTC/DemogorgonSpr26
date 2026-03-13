@@ -1,4 +1,5 @@
-<div class="festivals-container">
+<div class="festivals-container" (click)="closeMenus()">
+
   <nav class="page-nav">
     <h1>Music Festivals</h1>
     <button class="btn-primary" routerLink="/festivals/create">
@@ -7,15 +8,100 @@
   </nav>
 
   <div class="card-grid">
-    <div class="card" *ngFor="let festival of festivalsList">
-      <h3>{{ festival.name }}</h3>
-      <p><strong>Location:</strong> {{ festival.location }}</p>
-      <p><strong>Dates:</strong> {{ festival.startDate }} to {{ festival.endDate }}</p>
-    </div>
+    @for (festival of festivalsList; track festival.id) {
+      <div
+        class="card"
+        [class.card-expanded]="expandedId === festival.id"
+        (click)="toggleCard(festival.id, $event)">
+
+        <!-- ── Card Header ── -->
+        <div class="card-header">
+          <div class="card-title-group">
+            <h3>{{ festival.name }}</h3>
+            <span class="stage-count-badge">
+              {{ getStages(festival.id).length }}
+              {{ getStages(festival.id).length === 1 ? 'stage' : 'stages' }}
+            </span>
+          </div>
+
+          <div class="card-header-right">
+            <span class="chevron" [class.chevron-open]="expandedId === festival.id">›</span>
+
+            @if (isOrganizer) {
+              <div class="kebab-menu">
+                <button
+                  class="kebab-btn"
+                  (click)="toggleMenu(festival.id, $event)"
+                  [attr.aria-expanded]="isMenuOpen(festival.id)"
+                  aria-label="Festival options">
+                  ⋮
+                </button>
+
+                @if (openMenuId === festival.id) {
+                  <div class="kebab-dropdown">
+                    <a
+                      class="kebab-item"
+                      [routerLink]="['/festivals', festival.id, 'stages', 'new']"
+                      (click)="$event.stopPropagation()">
+                      + Add Stage
+                    </a>
+                    <a
+                      class="kebab-item"
+                      [routerLink]="['/festivals', festival.id, 'stages']"
+                      (click)="$event.stopPropagation()">
+                      Manage Stages
+                    </a>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- ── Card Meta ── -->
+        <p class="card-meta"><strong>Location:</strong> {{ festival.location }}</p>
+        <p class="card-meta"><strong>Dates:</strong> {{ festival.startDate }} - {{ festival.endDate }}</p>
+
+        <!-- ── Expanded: Stage List ── -->
+        @if (expandedId === festival.id) {
+          <div class="stage-panel" (click)="$event.stopPropagation()">
+
+            @if (getStages(festival.id).length === 0) {
+              <p class="no-stages">
+                No stages yet.
+              </p>
+            } @else {
+              <div class="stage-rows">
+                @for (stage of getStages(festival.id); track stage.id) {
+                  <div class="stage-row">
+                    <div class="stage-row-left">
+                      <span class="stage-row-name">{{ stage.name }}</span>
+                      <span class="stage-row-env">
+                        {{ stage.environment === 'indoor' ? '🏠' : '🌳' }}
+                      </span>
+                    </div>
+                    <div class="stage-row-right">
+                      <span class="stage-row-cap">{{ stage.capacity | number }} cap</span>
+                      <span class="badge badge-sm" [ngClass]="getStatusClass(stage.status)">
+                        {{ stage.status }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        }
+
+      </div>
+    }
   </div>
 
-@if (festivalsList.length === 0) {
-  <div class="empty-state">
-    <p>No festivals Planned. Check again soon!</p>
-  </div>
-}
+  @if (festivalsList.length === 0) {
+    <div class="empty-state">
+      <p>No festivals planned. Check again soon!</p>
+    </div>
+  }
+
+</div>
