@@ -14,7 +14,8 @@
     </div>
   </div>
 
-  <div *ngIf="festivalsList.length === 0" class="empty-state">
-    <p>No festivals created yet. Click the button above to add one!</p>
+@if (festivalsList.length === 0) {
+  <div class="empty-state">
+    <p>No festivals Planned. Check again soon!</p>
   </div>
-</div>
+}
