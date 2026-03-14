@@ -22,6 +22,10 @@
   font-size: 0.95rem;
 }
 
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
 /* ── Existing stages chips ── */
 .existing-stages {
   margin-bottom: 1.5rem;
@@ -64,6 +68,10 @@
   border-radius: 6px;
   margin-bottom: 1.25rem;
   font-size: 0.9rem;
+}
+
+.error-text{
+  color: var(--neon-cyan);
 }
 
 /* ── Radio group ── */
