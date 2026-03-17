@@ -5,7 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 describe('StageCreateComponent', () => {
   let component: StageCreateComponent;
-  let fixture: ComponentFixture<StageCreateComponent  >;
+  let fixture: ComponentFixture<StageCreateComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

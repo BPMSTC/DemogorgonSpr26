@@ -58,7 +58,7 @@ export class StageService {
   }
 
   createStage(data: Omit<Stage, 'id'>): Stage {
-    // Enforce: only one performance slot at a time per stage (name uniqueness per festival)
+    // Enforce unique stage names per festival (case-insensitive).
     const duplicate = this.stages.find(
       (s) => s.festivalId === data.festivalId &&
              s.name.toLowerCase() === data.name.toLowerCase()

@@ -43,10 +43,6 @@ export class Festivals implements OnInit {
     this.expandedId = this.expandedId === festivalId ? null : festivalId;
   }
 
-  isExpanded(festivalId: string): boolean {
-    return this.expandedId === festivalId;
-  }
-
   toggleMenu(festivalId: string, event: MouseEvent): void {
     event.stopPropagation();
     this.openMenuId = this.openMenuId === festivalId ? null : festivalId;

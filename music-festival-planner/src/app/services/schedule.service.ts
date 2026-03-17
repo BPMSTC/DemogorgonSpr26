@@ -14,6 +14,20 @@ export class ScheduleService {
 
   private nextId = 5;
 
+  private toMinutes(time: string): number | null {
+    const match = /^(\d{1,2}):(\d{2})$/.exec(time.trim());
+    if (!match) return null;
+
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+
+    if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
+    if (hours < 0 || hours > 23) return null;
+    if (minutes < 0 || minutes > 59) return null;
+
+    return hours * 60 + minutes;
+  }
+
   getPerformancesByFestival(festivalId: string): Performance[] {
     return this.mockPerformances
       .filter((p) => p.festivalId === festivalId)
@@ -32,17 +46,43 @@ export class ScheduleService {
     endTime: string,
     excludeId?: string
   ): boolean {
+    const newStartMinutes = this.toMinutes(startTime);
+    const newEndMinutes = this.toMinutes(endTime);
+
+    if (newStartMinutes === null || newEndMinutes === null) return false;
+    if (newStartMinutes >= newEndMinutes) return false;
+
     return this.mockPerformances.some((p) => {
       if (p.festivalId !== festivalId) return false;
       if (p.stageName !== stageName) return false;
       if (p.date !== date) return false;
       if (excludeId && p.id === excludeId) return false;
+
+      const existingStartMinutes = this.toMinutes(p.startTime);
+      const existingEndMinutes = this.toMinutes(p.endTime);
+      if (existingStartMinutes === null || existingEndMinutes === null) return false;
+
       // Overlap: new start < existing end AND new end > existing start
-      return startTime < p.endTime && endTime > p.startTime;
+      return newStartMinutes < existingEndMinutes && newEndMinutes > existingStartMinutes;
     });
   }
 
   createPerformance(data: Omit<Performance, 'id'>): Performance | { error: string } {
+    const startMinutes = this.toMinutes(data.startTime);
+    const endMinutes = this.toMinutes(data.endTime);
+
+    if (startMinutes === null || endMinutes === null) {
+      return {
+        error: 'Start and end times must be valid 24-hour times (H:mm or HH:mm).',
+      };
+    }
+
+    if (startMinutes >= endMinutes) {
+      return {
+        error: 'End time must be later than start time.',
+      };
+    }
+
     if (
       this.isStageOccupied(
         data.festivalId,

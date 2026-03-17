@@ -80,11 +80,14 @@
 }
 
 /* ── Card header row ── */
-.card-header, h3 {
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.5rem;
+}
+
+.card-header h3 {
   color: var(--text-dark);
 }
 
