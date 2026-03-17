@@ -1,0 +1,59 @@
+<div class="create-container">
+
+  <button type="button" class="back-link" (click)="goBack()">← Back to Festivals</button>
+
+  <div class="list-header">
+    <div>
+      <h2>Stages</h2>
+      @if (festival) {
+        <p class="festival-context">{{ festival.name }}</p>
+      }
+    </div>
+    <button class="btn-submit" (click)="addStage()">+ Add Stage</button>
+  </div>
+
+  @if (stages.length === 0) {
+    <div class="schedule-empty">
+      <p>No stages added yet. Click <strong>+ Add Stage</strong> to get started.</p>
+    </div>
+  } @else {
+    <div class="stage-list">
+      @for (stage of stages; track stage.id) {
+        <div class="stage-card">
+
+          <div class="stage-card-header">
+            <span class="stage-name">{{ stage.name }}</span>
+            <span class="badge" [ngClass]="getStatusClass(stage.status)">
+              {{ getStatusLabel(stage.status) }}
+            </span>
+          </div>
+
+          <div class="stage-meta">
+            <span class="meta-item">
+              <strong>Capacity:</strong> {{ stage.capacity | number }}
+            </span>
+            <span class="meta-item">
+              <strong>Environment:</strong>
+              {{ stage.environment === 'indoor' ? '🏠 Indoor' : '🌳 Outdoor' }}
+            </span>
+          </div>
+
+          @if (stage.notes) {
+            <p class="stage-notes">{{ stage.notes }}</p>
+          }
+
+          <div class="stage-card-actions">
+            <button
+              class="btn-cancel btn-sm"
+              (click)="deleteStage(stage.id)"
+              [attr.aria-label]="'Remove ' + stage.name">
+              Remove
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

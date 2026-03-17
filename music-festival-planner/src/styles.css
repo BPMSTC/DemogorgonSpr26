@@ -17,6 +17,7 @@
   --text-primary:   #f0f0f0;
   --text-secondary: #a0a0b8;
   --text-muted:     #5a5a72;
+  --text-dark:     #000;
 
   --border-subtle: rgba(0, 245, 255, 0.15);
 
@@ -156,4 +157,92 @@ a:hover {
 ::-webkit-scrollbar-thumb {
   background: var(--neon-cyan);
   border-radius: 3px;
+}
+
+/* --- Shared stage component styles --- */
+.back-link {
+  background: none;
+  border: none;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  margin-bottom: 1rem;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.festival-context {
+  color: var(--text-muted, #aaa);
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.existing-stages {
+  margin-bottom: 1.5rem;
+}
+
+.existing-stages h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #aaa);
+  margin-bottom: 0.5rem;
+}
+
+.stage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.stage-chip {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-subtle, #444);
+  background: var(--surface-raised, #1e1e2e);
+}
+
+.stage-chip em {
+  font-style: normal;
+  color: var(--text-muted, #888);
+  margin-left: 0.25rem;
+}
+
+.error-banner {
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  color: #ff6b6b;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.create-container .badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.create-container .badge-active {
+  background: rgba(0, 230, 118, 0.15);
+  color: #00e676;
+  border: 1px solid rgba(0, 230, 118, 0.35);
+}
+
+.create-container .badge-inactive {
+  background: rgba(180, 180, 180, 0.1);
+  color: #aaa;
+  border: 1px solid rgba(180, 180, 180, 0.25);
+}
+
+.create-container .badge-repair {
+  background: rgba(255, 180, 0, 0.12);
+  color: #ffb400;
+  border: 1px solid rgba(255, 180, 0, 0.35);
 }
