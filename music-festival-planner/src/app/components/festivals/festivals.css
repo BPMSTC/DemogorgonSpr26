@@ -109,6 +109,24 @@
   flex-shrink: 0;
 }
 
+/* ── View Schedule link ── */
+.view-schedule-btn {
+  font-size: 0.78rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--neon-cyan, #00e5ff);
+  color: var(--neon-cyan, #00e5ff);
+  background: transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.view-schedule-btn:hover {
+  background: rgba(0, 229, 255, 0.1);
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+}
+
 /* ── Stage count pill ── */
 .stage-count-badge {
   font-size: 0.72rem;

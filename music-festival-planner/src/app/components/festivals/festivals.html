@@ -27,6 +27,13 @@
           <div class="card-header-right">
             <span class="chevron" [class.chevron-open]="expandedId === festival.id">></span>
 
+            <a
+              class="view-schedule-btn"
+              [routerLink]="['/festivals', festival.id, 'schedule']"
+              (click)="$event.stopPropagation()">
+              View Schedule
+            </a>
+
             @if (isOrganizer) {
               <div class="kebab-menu">
                 <button
