@@ -67,20 +67,16 @@ export class ScheduleService {
     });
   }
 
-  createPerformance(data: Omit<Performance, 'id'>): Performance | { error: string } {
+  createPerformance(data: Omit<Performance, 'id'>): Performance {
     const startMinutes = this.toMinutes(data.startTime);
     const endMinutes = this.toMinutes(data.endTime);
 
     if (startMinutes === null || endMinutes === null) {
-      return {
-        error: 'Start and end times must be valid 24-hour times (H:mm or HH:mm).',
-      };
+      throw new Error('Start and end times must be valid 24-hour times (H:mm or HH:mm).');
     }
 
     if (startMinutes >= endMinutes) {
-      return {
-        error: 'End time must be later than start time.',
-      };
+      throw new Error('End time must be later than start time.');
     }
 
     if (
@@ -92,9 +88,7 @@ export class ScheduleService {
         data.endTime
       )
     ) {
-      return {
-        error: `"${data.stageName}" is already booked during that time slot.`,
-      };
+      throw new Error(`"${data.stageName}" is already booked during that time slot.`);
     }
     const performance: Performance = { id: String(this.nextId++), ...data };
     this.mockPerformances.push(performance);

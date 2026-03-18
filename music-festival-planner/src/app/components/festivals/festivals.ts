@@ -43,6 +43,15 @@ export class Festivals implements OnInit {
     this.expandedId = this.expandedId === festivalId ? null : festivalId;
   }
 
+  toggleCardKey(festivalId: string, event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      const target = event.target as HTMLElement;
+      if (target.closest('.kebab-menu')) return;
+      this.expandedId = this.expandedId === festivalId ? null : festivalId;
+    }
+  }
+
   toggleMenu(festivalId: string, event: MouseEvent): void {
     event.stopPropagation();
     this.openMenuId = this.openMenuId === festivalId ? null : festivalId;
