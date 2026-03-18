@@ -19,6 +19,15 @@ function endAfterStart(group: AbstractControl): ValidationErrors | null {
   return toMin(end) > toMin(start) ? null : { endNotAfterStart: true };
 }
 
+/** Custom validator: rejects whitespace-only strings */
+function noWhitespaceOnly(control: AbstractControl): ValidationErrors | null {
+  const value = control.value as string;
+  if (value != null && typeof value === 'string' && value.trim().length === 0) {
+    return { whitespaceOnly: true };
+  }
+  return null;
+}
+
 @Component({
   selector: 'app-performance-create',
   standalone: false,
@@ -50,7 +59,7 @@ export class PerformanceCreateComponent implements OnInit {
 
     this.performanceForm = this.fb.group(
       {
-        artistName: ['', [Validators.required, Validators.maxLength(100)]],
+        artistName: ['', [Validators.required, noWhitespaceOnly, Validators.maxLength(100)]],
         stageName:  ['', Validators.required],
         date:       ['', Validators.required],
         startTime:  ['', Validators.required],

@@ -30,11 +30,15 @@ export class PerformanceListComponent implements OnInit {
   }
 
   loadPerformances(): void {
+    const toMinutes = (t: string): number => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
     this.performances = this.scheduleService
       .getPerformancesByFestival(this.festivalId)
       .sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date);
-        return a.startTime.localeCompare(b.startTime);
+        return toMinutes(a.startTime) - toMinutes(b.startTime);
       });
   }
 
