@@ -12,6 +12,7 @@ const routes: Routes = [
   { path: 'festivals', component: Festivals },
   { path: 'festivals/create', component: FestivalCreateComponent },
   { path: 'my-schedule', component: MySchedule },
+  { path: 'festivals/:id/schedule',    component: MySchedule },
   { path: 'festivals/:id/stages',      component: StageListComponent },
   { path: 'festivals/:id/stages/new',  component: StageCreateComponent },
 ];

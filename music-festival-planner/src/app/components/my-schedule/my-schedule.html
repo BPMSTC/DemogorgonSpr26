@@ -3,24 +3,45 @@
   <h1>Festival Schedule</h1>
 </div>
 
+<!-- Day selector tabs -->
 <div class="schedule-summary">
   @for (day of festivalDays; track day) {
-    <button 
+    <button
       (click)="selectDay(day)"
       class="summary-stat"
-      [style.borderColor]="day === selectedDay ? 'var(--neon-cyan)' : 'var(--border-subtle)'"
-      [style.cursor]="'pointer'">
+      [class.day-active]="day === selectedDay">
       <strong>{{ day | date:'EEEE':'UTC' }}</strong>
       {{ day | date:'MMM d':'UTC' }}
     </button>
   }
 </div>
 
+<!-- Stage filter tabs -->
+@if (festivalDays.length > 0) {
+  <div class="stage-filter">
+    <span class="stage-filter-label">Stage:</span>
+    <button
+      class="stage-filter-btn"
+      [class.stage-filter-active]="selectedStage === ALL_STAGES"
+      (click)="selectStage(ALL_STAGES)">
+      All Stages
+    </button>
+    @for (stage of allStagesForDay; track stage) {
+      <button
+        class="stage-filter-btn"
+        [class.stage-filter-active]="selectedStage === stage"
+        (click)="selectStage(stage)">
+        {{ stage }}
+      </button>
+    }
+  </div>
+}
+
 @if (filteredPerformances.length > 0) {
   <div class="timetable" [style.--stage-count]="stages.length">
-    
+
     <div class="timetable-corner"></div>
-    
+
     @for (stage of stages; track stage) {
       <div class="timetable-stage-label">
         {{ stage }}
@@ -29,14 +50,15 @@
 
     @for (time of times; track time) {
       <div class="timetable-time">{{ time }}</div>
-      
+
       @for (stage of stages; track stage) {
         <div class="timetable-slot">
-          
+
           @if (performanceGrid[time + '-' + stage]; as perf) {
             <div class="timetable-event">
               <div class="event-name">{{ perf.artistName }}</div>
-              <div class="event-time">{{ perf.startTime }} - {{ perf.endTime }}</div>
+              <div class="event-stage">{{ perf.stageName }}</div>
+              <div class="event-time">{{ perf.startTime }} – {{ perf.endTime }}</div>
             </div>
           }
 
@@ -46,6 +68,15 @@
   </div>
 } @else {
   <div class="schedule-empty">
-    <p>No performances scheduled for this day yet.</p>
+    <span class="empty-icon" aria-hidden="true">🎵</span>
+    @if (selectedStage !== ALL_STAGES) {
+      <p>No performances scheduled for {{ selectedStage }}
+        @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
+      </p>
+    } @else if (selectedDay) {
+      <p>No performances scheduled for {{ selectedDay | date:'EEEE, MMM d':'UTC' }} yet.</p>
+    } @else {
+      <p>No performances scheduled.</p>
+    }
   </div>
 }
