@@ -12,8 +12,8 @@ export interface Performance {
   stageName: string;
   /** Performance date in ISO 8601 format (YYYY-MM-DD). */
   date: string;
-  /** Start time in 24-hour H:mm or HH:mm format (e.g. "18:00" or "9:00"). */
+  /** Start time in 24-hour H:mm or HH:mm format (e.g. "9:00" or "18:00"). */
   startTime: string;
-  /** End time in 24-hour H:mm or HH:mm format (e.g. "19:30" or "9:30"). Must be after startTime. */
+  /** End time in 24-hour H:mm or HH:mm format (e.g. "10:30" or "19:30"). Must be after startTime. */
   endTime: string;
 }
