@@ -12,7 +12,12 @@
       <div
         class="card"
         [class.card-expanded]="expandedId === festival.id"
-        (click)="toggleCard(festival.id, $event)">
+        role="button"
+        tabindex="0"
+        [attr.aria-expanded]="expandedId === festival.id"
+        [attr.aria-label]="festival.name + ' — ' + (expandedId === festival.id ? 'collapse' : 'expand') + ' details'"
+        (click)="toggleCard(festival.id, $event)"
+        (keydown)="toggleCardKey(festival.id, $event)">
 
         <!-- ── Card Header ── -->
         <div class="card-header">
