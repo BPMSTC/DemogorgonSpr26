@@ -32,8 +32,9 @@
         aria-required="true"
         [attr.aria-invalid]="(submitted || f['artistName'].touched) && f['artistName'].errors ? true : null">
       <div *ngIf="submitted || f['artistName'].touched" class="error-messages">
-        <small *ngIf="f['artistName'].errors?.['required']"   class="error-text">Artist name is required.</small>
-        <small *ngIf="f['artistName'].errors?.['maxlength']"  class="error-text">Artist name cannot exceed 100 characters.</small>
+        <small *ngIf="f['artistName'].errors?.['required']"        class="error-text">Artist name is required.</small>
+        <small *ngIf="f['artistName'].errors?.['whitespaceOnly']"  class="error-text">Artist name cannot be blank.</small>
+        <small *ngIf="f['artistName'].errors?.['maxlength']"       class="error-text">Artist name cannot exceed 100 characters.</small>
       </div>
     </div>
 
@@ -102,7 +103,7 @@
 
     <!-- Cross-field time error -->
     @if ((submitted || (f['startTime'].touched && f['endTime'].touched)) && performanceForm.errors?.['endNotAfterStart']) {
-      <div class="error-messages" style="margin-top: -0.75rem; margin-bottom: 1rem;">
+      <div class="error-messages cross-field-error">
         <small class="error-text">End time must be later than start time.</small>
       </div>
     }

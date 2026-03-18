@@ -7,6 +7,15 @@ import { FestivalService } from '../../services/festival.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
 
+/** Custom validator: rejects strings that are non-empty but entirely whitespace */
+function noWhitespaceOnly(control: AbstractControl): ValidationErrors | null {
+  const value = control.value as string;
+  if (value != null && typeof value === 'string' && value.trim().length === 0) {
+    return { whitespaceOnly: true };
+  }
+  return null;
+}
+
 /** Custom validator: end time must be later than start time */
 function endAfterStart(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startTime')?.value as string;
@@ -50,7 +59,7 @@ export class PerformanceCreateComponent implements OnInit {
 
     this.performanceForm = this.fb.group(
       {
-        artistName: ['', [Validators.required, Validators.maxLength(100)]],
+        artistName: ['', [Validators.required, noWhitespaceOnly, Validators.maxLength(100)]],
         stageName:  ['', Validators.required],
         date:       ['', Validators.required],
         startTime:  ['', Validators.required],
