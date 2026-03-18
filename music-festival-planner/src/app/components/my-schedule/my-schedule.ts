@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { ScheduleService } from '../../services/schedule.service';
 import { Performance } from '../../models/performance.model';
 
+export const ALL_STAGES = 'All Stages';
+
 @Component({
   selector: 'app-my-schedule',
   standalone: false,
@@ -12,15 +14,19 @@ import { Performance } from '../../models/performance.model';
 export class MySchedule implements OnInit {
   festivalId: string = '';
   allPerformances: Performance[] = [];
-  
+
   festivalDays: string[] = [];
   selectedDay: string = '';
+
+  allStagesForDay: string[] = [];
+  selectedStage: string = ALL_STAGES;
+  readonly ALL_STAGES = ALL_STAGES;
 
   stages: string[] = [];
   times: string[] = [];
   filteredPerformances: Performance[] = [];
 
-  // NEW: Dictionary for lightning-fast template lookups
+  // Dictionary for lightning-fast template lookups
   performanceGrid: Record<string, Performance | undefined> = {};
 
   constructor(
@@ -31,9 +37,9 @@ export class MySchedule implements OnInit {
   ngOnInit(): void {
     this.festivalId = this.route.snapshot.paramMap.get('id') ?? '1';
     this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
-    
+
     this.festivalDays = [...new Set(this.allPerformances.map(p => p.date))].sort();
-    
+
     if (this.festivalDays.length > 0) {
       this.selectDay(this.festivalDays[0]);
     }
@@ -41,13 +47,33 @@ export class MySchedule implements OnInit {
 
   selectDay(day: string): void {
     this.selectedDay = day;
-    this.filteredPerformances = this.allPerformances.filter(p => p.date === day);
+    this.selectedStage = ALL_STAGES;
+    const dayPerformances = this.allPerformances.filter(p => p.date === day);
+    this.allStagesForDay = [...new Set(dayPerformances.map(p => p.stageName))].sort();
+    this.applyFilters();
+  }
+
+  selectStage(stage: string): void {
+    this.selectedStage = stage;
+    this.applyFilters();
+  }
+
+  private applyFilters(): void {
+    const dayPerformances = this.allPerformances.filter(p => p.date === this.selectedDay);
+
+    this.filteredPerformances = this.selectedStage === ALL_STAGES
+      ? dayPerformances
+      : dayPerformances.filter(p => p.stageName === this.selectedStage);
 
     this.stages = [...new Set(this.filteredPerformances.map(p => p.stageName))].sort();
-    this.times = [...new Set(this.filteredPerformances.map(p => p.startTime))].sort();
+    const timeToMinutes = (t: string): number => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+    this.times = [...new Set(this.filteredPerformances.map(p => p.startTime))]
+      .sort((a, b) => timeToMinutes(a) - timeToMinutes(b));
 
-    // NEW: Build the lookup dictionary. 
-    // Key format: "18:00-Main Stage"
+    // Build the lookup dictionary. Key format: "18:00-Main Stage"
     this.performanceGrid = {};
     for (const perf of this.filteredPerformances) {
       const gridKey = `${perf.startTime}-${perf.stageName}`;

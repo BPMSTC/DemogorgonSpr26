@@ -8,9 +8,11 @@ import { Festivals } from './components/festivals/festivals';
 import { MySchedule } from './components/my-schedule/my-schedule';
 import { FestivalCreateComponent } from './components/festival-create/festival-create';
 import { ReactiveFormsModule } from '@angular/forms';
+import { StageCreateComponent } from './components/stage-create/stage-create';
+import { StageListComponent } from './components/stage-list/stage-list';
 
 @NgModule({
-  declarations: [App, Home, Festivals, MySchedule, FestivalCreateComponent],
+  declarations: [App, Home, Festivals, MySchedule, FestivalCreateComponent, StageCreateComponent, StageListComponent],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
   providers: [provideBrowserGlobalErrorListeners()],
   bootstrap: [App],

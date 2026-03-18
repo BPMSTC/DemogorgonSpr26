@@ -133,6 +133,15 @@
   text-overflow: ellipsis;
 }
 
+.timetable-event .event-stage {
+  font-size: 0.72rem;
+  color: var(--neon-magenta);
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .timetable-event .event-time {
   font-size: 0.72rem;
   color: var(--text-secondary);
@@ -191,10 +200,56 @@
   padding: 0.6rem 1rem;
   font-size: 0.85rem;
   color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
 }
 
 .summary-stat strong {
   color: var(--neon-cyan);
   font-size: 1.1rem;
   display: block;
+}
+
+.summary-stat.day-active {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.25);
+}
+
+/* ---- Stage filter bar ------------------------------------- */
+.stage-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.stage-filter-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 0.25rem;
+}
+
+.stage-filter-btn {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stage-filter-btn:hover {
+  border-color: var(--neon-magenta);
+  color: var(--text-primary);
+}
+
+.stage-filter-btn.stage-filter-active {
+  border-color: var(--neon-magenta);
+  color: var(--neon-magenta);
+  box-shadow: 0 0 8px rgba(255, 45, 120, 0.25);
 }
