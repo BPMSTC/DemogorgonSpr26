@@ -14,7 +14,7 @@ export interface Stage {
   festivalId: string;
   /** Display name of the stage (unique per festival, case-insensitive). */
   name: string;
-  /** Maximum number of attendees the stage can hold. Must be a positive integer. */
+  /** Maximum number of attendees the stage can hold. Must be a positive integer (enforced by StageService). */
   capacity: number;
   /** Whether the stage is indoors or outdoors. */
   environment: StageEnvironment;

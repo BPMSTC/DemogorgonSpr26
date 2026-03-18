@@ -8,7 +8,7 @@ export interface Festival {
   name: string;
   /** Opening date in ISO 8601 format (YYYY-MM-DD). */
   startDate: string;
-  /** Closing date in ISO 8601 format (YYYY-MM-DD). Should be >= startDate. */
+  /** Closing date in ISO 8601 format (YYYY-MM-DD). Must be >= startDate (enforced by FestivalService). */
   endDate: string;
   /** City, venue, or region where the festival takes place. */
   location: string;

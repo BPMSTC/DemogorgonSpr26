@@ -25,4 +25,47 @@ describe('FestivalCreateComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('endDate cross-field validation', () => {
+    it('should be invalid when endDate is before startDate', () => {
+      component.festivalForm.setValue({
+        name: 'Test Festival',
+        startDate: '2025-08-04',
+        endDate: '2025-08-01',
+        location: 'Chicago',
+      });
+      expect(component.festivalForm.errors?.['endBeforeStart']).toBeTruthy();
+    });
+
+    it('should be valid when endDate equals startDate', () => {
+      component.festivalForm.setValue({
+        name: 'Test Festival',
+        startDate: '2025-08-01',
+        endDate: '2025-08-01',
+        location: 'Chicago',
+      });
+      expect(component.festivalForm.errors).toBeNull();
+    });
+
+    it('should be valid when endDate is after startDate', () => {
+      component.festivalForm.setValue({
+        name: 'Test Festival',
+        startDate: '2025-08-01',
+        endDate: '2025-08-04',
+        location: 'Chicago',
+      });
+      expect(component.festivalForm.errors).toBeNull();
+    });
+
+    it('should not produce endBeforeStart error when dates are empty', () => {
+      component.festivalForm.setValue({
+        name: 'Test Festival',
+        startDate: '',
+        endDate: '',
+        location: 'Chicago',
+      });
+      expect(component.festivalForm.errors?.['endBeforeStart']).toBeFalsy();
+    });
+  });
 });
+

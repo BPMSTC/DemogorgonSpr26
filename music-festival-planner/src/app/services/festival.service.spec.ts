@@ -73,6 +73,28 @@ describe('FestivalService', () => {
       expect(all[1].name).toBe(SAMPLE_DATA_2.name);
     });
 
+    it('should throw when endDate is before startDate', () => {
+      expect(() =>
+        service.createFestival({ ...SAMPLE_DATA, startDate: '2025-08-04', endDate: '2025-08-01' })
+      ).toThrowError('endDate must be on or after startDate.');
+    });
+
+    it('should allow endDate equal to startDate (single-day festival)', () => {
+      const created = service.createFestival({ ...SAMPLE_DATA, startDate: '2025-08-01', endDate: '2025-08-01' });
+      expect(created.id).toBeDefined();
+    });
+
+    it('should not persist a festival when date validation fails', () => {
+      try {
+        service.createFestival({ ...SAMPLE_DATA, startDate: '2025-08-04', endDate: '2025-08-01' });
+      } catch {
+        // expected
+      }
+      expect(service.getFestivals().length).toBe(0);
+    });
+
+
+
     it('should return a copy so mutations do not affect stored data', () => {
       const created = service.createFestival(SAMPLE_DATA);
       created.name = 'Mutated Name';
