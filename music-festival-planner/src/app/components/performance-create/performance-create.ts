@@ -28,6 +28,15 @@ function endAfterStart(group: AbstractControl): ValidationErrors | null {
   return toMin(end) > toMin(start) ? null : { endNotAfterStart: true };
 }
 
+/** Custom validator: rejects whitespace-only strings */
+function noWhitespaceOnly(control: AbstractControl): ValidationErrors | null {
+  const value = control.value as string;
+  if (value != null && typeof value === 'string' && value.trim().length === 0) {
+    return { whitespaceOnly: true };
+  }
+  return null;
+}
+
 @Component({
   selector: 'app-performance-create',
   standalone: false,
