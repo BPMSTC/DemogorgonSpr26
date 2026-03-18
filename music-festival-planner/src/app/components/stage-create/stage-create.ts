@@ -143,8 +143,8 @@ export class StageCreateComponent implements OnInit {
       });
 
       this.router.navigate(['/festivals', this.festivalId, 'stages']);
-    } catch (err: any) {
-      this.serverError = err.message ?? 'An unexpected error occurred.';
+    } catch (err: unknown) {
+      this.serverError = err instanceof Error ? err.message : 'An unexpected error occurred.';
     }
   }
 

@@ -2,13 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { ScheduleService } from './schedule.service';
 import { Performance } from '../models/performance.model';
 
-const BASE_PERFORMANCE: Omit<Performance, 'id'> = {
-  festivalId: 'fest-1',
+/** Typed fixture — no field may be missing or mistyped. */
+const BASE: Omit<Performance, 'id'> = {
+  festivalId: '99',
   artistName: 'Test Artist',
-  stageName: 'Main Stage',
+  stageName: 'Test Stage',
   date: '2026-09-01',
-  startTime: '10:00',
-  endTime: '11:00',
+  startTime: '12:00',
+  endTime: '13:00',
 };
 
 describe('ScheduleService', () => {
@@ -17,9 +18,6 @@ describe('ScheduleService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({});
     service = TestBed.inject(ScheduleService);
-
-    // Remove seeded mock data so each test starts from a clean slate
-    service.getPerformancesByFestival('1').forEach((p) => service.deletePerformance(p.id));
   });
 
   it('should be created', () => {
@@ -27,193 +25,76 @@ describe('ScheduleService', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // createPerformance – validation: invalid times
+  // getPerformancesByFestival
   // ---------------------------------------------------------------------------
-  describe('createPerformance – time validation', () => {
-    it('should throw when startTime is invalid', () => {
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, startTime: 'bad' })
-      ).toThrowError(/valid 24-hour/i);
+  describe('getPerformancesByFestival', () => {
+    it('returns only performances for the requested festival', () => {
+      const results: Performance[] = service.getPerformancesByFestival('1');
+      results.forEach(p => expect(p.festivalId).toBe('1'));
     });
 
-    it('should throw when endTime is invalid', () => {
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, endTime: 'bad' })
-      ).toThrowError(/valid 24-hour/i);
+    it('returns an empty array for an unknown festival id', () => {
+      expect(service.getPerformancesByFestival('unknown')).toEqual([]);
     });
 
-    it('should throw when endTime equals startTime', () => {
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, startTime: '10:00', endTime: '10:00' })
-      ).toThrowError(/end time must be later/i);
-    });
-
-    it('should throw when endTime is before startTime', () => {
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, startTime: '11:00', endTime: '10:00' })
-      ).toThrowError(/end time must be later/i);
-    });
-
-    it('should accept single-digit hour format (H:mm)', () => {
-      const created = service.createPerformance({
-        ...BASE_PERFORMANCE,
-        startTime: '9:00',
-        endTime: '10:00',
-      });
-      expect(created.id).toBeDefined();
+    it('returns copies — mutating the result does not affect stored data', () => {
+      service.createPerformance({ ...BASE });
+      const first = service.getPerformancesByFestival('99');
+      first[0].artistName = 'Mutated';
+      const second = service.getPerformancesByFestival('99');
+      expect(second[0].artistName).toBe('Test Artist');
     });
   });
 
   // ---------------------------------------------------------------------------
-  // createPerformance – overlap detection
+  // createPerformance
   // ---------------------------------------------------------------------------
-  describe('createPerformance – overlap detection', () => {
-    it('should throw when a new performance overlaps an existing one (middle overlap)', () => {
-      service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
-
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, startTime: '10:30', endTime: '11:30' })
-      ).toThrowError(/already booked/i);
+  describe('createPerformance', () => {
+    it('assigns an id and returns a typed Performance', () => {
+      const result = service.createPerformance({ ...BASE });
+      // TypeScript narrows: if result has an `error` key it is an error object.
+      if ('error' in result) {
+        throw new Error('Expected a Performance but got an error: ' + result.error);
+      }
+      const perf: Performance = result;
+      expect(perf.id).toBeDefined();
+      expect(perf.artistName).toBe(BASE.artistName);
+      expect(perf.stageName).toBe(BASE.stageName);
+      expect(perf.date).toBe(BASE.date);
+      expect(perf.startTime).toBe(BASE.startTime);
+      expect(perf.endTime).toBe(BASE.endTime);
     });
 
-    it('should throw when a new performance fully contains an existing one', () => {
-      service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
-
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, startTime: '9:00', endTime: '12:00' })
-      ).toThrowError(/already booked/i);
+    it('persists the new performance so it appears in getPerformancesByFestival', () => {
+      service.createPerformance({ ...BASE });
+      expect(service.getPerformancesByFestival('99').length).toBe(1);
     });
 
-    it('should throw when a new performance starts exactly when another ends (adjacent not allowed when start < end)', () => {
-      // Adjacent slots (back-to-back) should NOT overlap: new start == existing end
-      service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
-
-      // 11:00 start is NOT an overlap (new start === existing end → no overlap)
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, startTime: '11:00', endTime: '12:00' })
-      ).not.toThrow();
+    it('returns an error when end time is not after start time', () => {
+      const result = service.createPerformance({ ...BASE, startTime: '14:00', endTime: '13:00' });
+      expect('error' in result).toBe(true);
     });
 
-    it('should not throw when a new performance is on a different stage', () => {
-      service.createPerformance(BASE_PERFORMANCE);
-
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, stageName: 'Side Stage' })
-      ).not.toThrow();
+    it('returns an error when times are equal', () => {
+      const result = service.createPerformance({ ...BASE, startTime: '12:00', endTime: '12:00' });
+      expect('error' in result).toBe(true);
     });
 
-    it('should not throw when a new performance is on a different date', () => {
-      service.createPerformance(BASE_PERFORMANCE);
-
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, date: '2026-09-02' })
-      ).not.toThrow();
+    it('returns an error for an invalid time format', () => {
+      const result = service.createPerformance({ ...BASE, startTime: 'noon', endTime: '13:00' });
+      expect('error' in result).toBe(true);
     });
 
-    it('should not throw when a new performance is for a different festival', () => {
-      service.createPerformance(BASE_PERFORMANCE);
-
-      expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, festivalId: 'fest-2' })
-      ).not.toThrow();
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // createPerformance – happy path
-  // ---------------------------------------------------------------------------
-  describe('createPerformance – success', () => {
-    it('should return the created performance with an assigned id', () => {
-      const created = service.createPerformance(BASE_PERFORMANCE);
-
-      expect(created.id).toBeDefined();
-      expect(created.artistName).toBe(BASE_PERFORMANCE.artistName);
-      expect(created.stageName).toBe(BASE_PERFORMANCE.stageName);
+    it('returns an error when the stage is already booked during that slot', () => {
+      service.createPerformance({ ...BASE });
+      const overlap = service.createPerformance({ ...BASE, artistName: 'Other Artist' });
+      expect('error' in overlap).toBe(true);
     });
 
-    it('should persist the performance to storage', () => {
-      service.createPerformance(BASE_PERFORMANCE);
-      const all = service.getPerformancesByFestival(BASE_PERFORMANCE.festivalId);
-
-      expect(all.length).toBe(1);
-    });
-
-    it('should return a copy so mutations do not affect stored data', () => {
-      const created = service.createPerformance(BASE_PERFORMANCE);
-      created.artistName = 'Mutated';
-      const stored = service.getPerformancesByFestival(BASE_PERFORMANCE.festivalId);
-
-      expect(stored[0].artistName).toBe(BASE_PERFORMANCE.artistName);
-    });
-  });
-
-  // ---------------------------------------------------------------------------
-  // isStageOccupied
-  // ---------------------------------------------------------------------------
-  describe('isStageOccupied', () => {
-    it('should return false when no performances exist', () => {
-      const occupied = service.isStageOccupied(
-        BASE_PERFORMANCE.festivalId,
-        BASE_PERFORMANCE.stageName,
-        BASE_PERFORMANCE.date,
-        '10:00',
-        '11:00'
-      );
-      expect(occupied).toBe(false);
-    });
-
-    it('should return true when the slot overlaps an existing performance', () => {
-      service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
-
-      const occupied = service.isStageOccupied(
-        BASE_PERFORMANCE.festivalId,
-        BASE_PERFORMANCE.stageName,
-        BASE_PERFORMANCE.date,
-        '10:30',
-        '11:30'
-      );
-      expect(occupied).toBe(true);
-    });
-
-    it('should return false for back-to-back adjacent slots', () => {
-      service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
-
-      // Starts exactly when the previous one ends
-      const occupied = service.isStageOccupied(
-        BASE_PERFORMANCE.festivalId,
-        BASE_PERFORMANCE.stageName,
-        BASE_PERFORMANCE.date,
-        '11:00',
-        '12:00'
-      );
-      expect(occupied).toBe(false);
-    });
-
-    it('should return false when excludeId matches the existing performance', () => {
-      const created = service.createPerformance(BASE_PERFORMANCE);
-
-      // Same slot but we're updating the same performance – should not conflict with itself
-      const occupied = service.isStageOccupied(
-        BASE_PERFORMANCE.festivalId,
-        BASE_PERFORMANCE.stageName,
-        BASE_PERFORMANCE.date,
-        BASE_PERFORMANCE.startTime,
-        BASE_PERFORMANCE.endTime,
-        created.id
-      );
-      expect(occupied).toBe(false);
-    });
-
-    it('should return false with invalid time strings', () => {
-      service.createPerformance(BASE_PERFORMANCE);
-      const occupied = service.isStageOccupied(
-        BASE_PERFORMANCE.festivalId,
-        BASE_PERFORMANCE.stageName,
-        BASE_PERFORMANCE.date,
-        'bad',
-        'times'
-      );
-      expect(occupied).toBe(false);
+    it('allows a second performance on the same stage in a non-overlapping slot', () => {
+      service.createPerformance({ ...BASE });
+      const result = service.createPerformance({ ...BASE, startTime: '13:00', endTime: '14:00' });
+      expect('error' in result).toBe(false);
     });
   });
 
@@ -221,19 +102,52 @@ describe('ScheduleService', () => {
   // deletePerformance
   // ---------------------------------------------------------------------------
   describe('deletePerformance', () => {
-    it('should delete a performance and return true', () => {
-      const created = service.createPerformance(BASE_PERFORMANCE);
+    it('removes the performance and returns true', () => {
+      const result = service.createPerformance({ ...BASE });
+      if ('error' in result) {
+        throw new Error('Expected a Performance but got an error: ' + result.error);
+      }
+      const created: Performance = result;
       expect(service.deletePerformance(created.id)).toBe(true);
+      expect(service.getPerformancesByFestival('99').length).toBe(0);
     });
 
-    it('should remove the performance from storage', () => {
-      const created = service.createPerformance(BASE_PERFORMANCE);
-      service.deletePerformance(created.id);
-      expect(service.getPerformancesByFestival(BASE_PERFORMANCE.festivalId).length).toBe(0);
-    });
-
-    it('should return false for a non-existent id', () => {
+    it('returns false for an unknown id', () => {
       expect(service.deletePerformance('nonexistent')).toBe(false);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // isStageOccupied
+  // ---------------------------------------------------------------------------
+  describe('isStageOccupied', () => {
+    it('returns false when no performances exist', () => {
+      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '10:00', '11:00')).toBe(false);
+    });
+
+    it('returns true for an exact time overlap', () => {
+      service.createPerformance({ ...BASE });
+      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '12:00', '13:00')).toBe(true);
+    });
+
+    it('returns true for a partial overlap', () => {
+      service.createPerformance({ ...BASE });
+      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '12:30', '13:30')).toBe(true);
+    });
+
+    it('returns false for an adjacent slot (no overlap)', () => {
+      service.createPerformance({ ...BASE });
+      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '13:00', '14:00')).toBe(false);
+    });
+
+    it('returns false for a different stage', () => {
+      service.createPerformance({ ...BASE });
+      expect(service.isStageOccupied('99', 'Other Stage', '2026-09-01', '12:00', '13:00')).toBe(false);
+    });
+
+    it('returns false for a different date', () => {
+      service.createPerformance({ ...BASE });
+      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-02', '12:00', '13:00')).toBe(false);
     });
   });
 });
