@@ -1,0 +1,118 @@
+<div class="create-container">
+
+  <button type="button" class="back-link" (click)="onCancel()">← Back to Performances</button>
+
+  <h2>Add a Performance</h2>
+  @if (festival) {
+    <p class="festival-context">for <strong>{{ festival.name }}</strong></p>
+  }
+
+  @if (serverError) {
+    <div class="error-banner" role="alert">{{ serverError }}</div>
+  }
+
+  @if (stages.length === 0) {
+    <div class="error-banner" role="alert">
+      This festival has no stages yet. Please
+      <a [routerLink]="['/festivals', festivalId, 'stages', 'new']">add a stage</a>
+      before scheduling a performance.
+    </div>
+  }
+
+  <form [formGroup]="performanceForm" (ngSubmit)="onSubmit()" novalidate>
+
+    <!-- Artist Name -->
+    <div class="form-group">
+      <label for="artistName">Artist Name <span aria-hidden="true">*</span></label>
+      <input
+        type="text"
+        id="artistName"
+        formControlName="artistName"
+        placeholder="e.g. The Neon Shadows"
+        aria-required="true"
+        [attr.aria-invalid]="(submitted || f['artistName'].touched) && f['artistName'].errors ? true : null">
+      <div *ngIf="submitted || f['artistName'].touched" class="error-messages">
+        <small *ngIf="f['artistName'].errors?.['required']"   class="error-text">Artist name is required.</small>
+        <small *ngIf="f['artistName'].errors?.['maxlength']"  class="error-text">Artist name cannot exceed 100 characters.</small>
+      </div>
+    </div>
+
+    <!-- Stage -->
+    <div class="form-group">
+      <label for="stageName">Stage <span aria-hidden="true">*</span></label>
+      <select
+        id="stageName"
+        formControlName="stageName"
+        aria-required="true"
+        [attr.aria-invalid]="(submitted || f['stageName'].touched) && f['stageName'].errors ? true : null">
+        <option value="" disabled>— Select a stage —</option>
+        @for (stage of stages; track stage.id) {
+          <option [value]="stage.name">{{ stage.name }}</option>
+        }
+      </select>
+      <div *ngIf="submitted || f['stageName'].touched" class="error-messages">
+        <small *ngIf="f['stageName'].errors?.['required']" class="error-text">Stage is required.</small>
+      </div>
+    </div>
+
+    <!-- Date -->
+    <div class="form-group">
+      <label for="date">Date <span aria-hidden="true">*</span></label>
+      <input
+        type="date"
+        id="date"
+        formControlName="date"
+        aria-required="true"
+        [attr.aria-invalid]="(submitted || f['date'].touched) && f['date'].errors ? true : null">
+      <div *ngIf="submitted || f['date'].touched" class="error-messages">
+        <small *ngIf="f['date'].errors?.['required']" class="error-text">Date is required.</small>
+      </div>
+    </div>
+
+    <!-- Start Time / End Time -->
+    <div class="time-row">
+
+      <div class="form-group">
+        <label for="startTime">Start Time <span aria-hidden="true">*</span></label>
+        <input
+          type="time"
+          id="startTime"
+          formControlName="startTime"
+          aria-required="true"
+          [attr.aria-invalid]="(submitted || f['startTime'].touched) && f['startTime'].errors ? true : null">
+        <div *ngIf="submitted || f['startTime'].touched" class="error-messages">
+          <small *ngIf="f['startTime'].errors?.['required']" class="error-text">Start time is required.</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="endTime">End Time <span aria-hidden="true">*</span></label>
+        <input
+          type="time"
+          id="endTime"
+          formControlName="endTime"
+          aria-required="true"
+          [attr.aria-invalid]="(submitted || f['endTime'].touched) && f['endTime'].errors ? true : null">
+        <div *ngIf="submitted || f['endTime'].touched" class="error-messages">
+          <small *ngIf="f['endTime'].errors?.['required']" class="error-text">End time is required.</small>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Cross-field time error -->
+    @if ((submitted || (f['startTime'].touched && f['endTime'].touched)) && performanceForm.errors?.['endNotAfterStart']) {
+      <div class="error-messages" style="margin-top: -0.75rem; margin-bottom: 1rem;">
+        <small class="error-text">End time must be later than start time.</small>
+      </div>
+    }
+
+    <div class="button-group">
+      <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+      <button type="submit" class="btn-submit" [disabled]="performanceForm.invalid && submitted">
+        Save Performance
+      </button>
+    </div>
+
+  </form>
+</div>

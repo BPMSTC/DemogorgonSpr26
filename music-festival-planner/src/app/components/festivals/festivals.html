@@ -53,6 +53,18 @@
                   <div class="kebab-dropdown">
                     <a
                       class="kebab-item"
+                      [routerLink]="['/festivals', festival.id, 'performances', 'new']"
+                      (click)="$event.stopPropagation()">
+                      + Add Performance
+                    </a>
+                    <a
+                      class="kebab-item"
+                      [routerLink]="['/festivals', festival.id, 'performances']"
+                      (click)="$event.stopPropagation()">
+                      Manage Performances
+                    </a>
+                    <a
+                      class="kebab-item"
                       [routerLink]="['/festivals', festival.id, 'stages', 'new']"
                       (click)="$event.stopPropagation()">
                       + Add Stage
