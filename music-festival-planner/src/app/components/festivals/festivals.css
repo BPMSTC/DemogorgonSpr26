@@ -114,8 +114,8 @@
   font-size: 0.78rem;
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
-  border: 1px solid var(--neon-cyan, #00f5ff);
-  color: var(--neon-cyan, #00f5ff);
+  border: 1px solid var(--neon-cyan, #00e5ff);
+  color: var(--neon-cyan, #00e5ff);
   background: transparent;
   text-decoration: none;
   white-space: nowrap;

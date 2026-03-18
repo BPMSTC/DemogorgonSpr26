@@ -103,7 +103,11 @@ describe('ScheduleService', () => {
   // ---------------------------------------------------------------------------
   describe('deletePerformance', () => {
     it('removes the performance and returns true', () => {
-      const created = service.createPerformance({ ...BASE }) as Performance;
+      const result = service.createPerformance({ ...BASE });
+      if ('error' in result) {
+        throw new Error('Expected a Performance but got an error: ' + result.error);
+      }
+      const created: Performance = result;
       expect(service.deletePerformance(created.id)).toBe(true);
       expect(service.getPerformancesByFestival('99').length).toBe(0);
     });
