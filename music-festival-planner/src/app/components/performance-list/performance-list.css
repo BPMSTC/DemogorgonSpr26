@@ -1,0 +1,66 @@
+.list-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.performance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.performance-card {
+  background: var(--surface-card, #1a1a2e);
+  border: 1px solid var(--border-subtle, #333);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.performance-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.artist-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+}
+
+.stage-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: var(--neon-purple, #7c3aed);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.performance-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted, #aaa);
+  margin-bottom: 0.75rem;
+}
+
+.meta-item strong {
+  color: var(--text-secondary, #ccc);
+}
+
+.performance-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn-sm {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.75rem;
+}
