@@ -58,6 +58,9 @@ export class StageService {
   }
 
   createStage(data: Omit<Stage, 'id'>): Stage {
+    if (!Number.isInteger(data.capacity) || data.capacity <= 0) {
+      throw new Error('capacity must be a positive integer.');
+    }
     // Enforce unique stage names per festival (case-insensitive).
     const duplicate = this.stages.find(
       (s) => s.festivalId === data.festivalId &&

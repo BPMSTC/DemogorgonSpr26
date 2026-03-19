@@ -18,6 +18,9 @@ export class FestivalService {
   }
 
   createFestival(data: Omit<Festival, 'id'>): Festival {
+    if (data.endDate < data.startDate) {
+      throw new Error('endDate must be on or after startDate.');
+    }
     const festival: Festival = { id: String(this.nextId++), ...data };
     this.festivals.push(festival);
     return { ...festival };

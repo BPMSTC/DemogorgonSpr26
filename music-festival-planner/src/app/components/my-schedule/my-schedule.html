@@ -68,7 +68,7 @@
   </div>
 } @else {
   <div class="schedule-empty">
-    <span class="empty-icon">🎵</span>
+    <span class="empty-icon" aria-hidden="true">🎵</span>
     @if (selectedStage !== ALL_STAGES) {
       <p>No performances scheduled for {{ selectedStage }}
         @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
