@@ -5,8 +5,16 @@ import { Festival } from '../models/festival.model';
   providedIn: 'root',
 })
 export class FestivalService {
-  private festivals: Festival[] = [];
-  private nextId = 1;
+  private festivals: Festival[] = [
+    {
+      id: '1',
+      name: 'Neon Horizon Festival',
+      startDate: '2026-08-01',
+      endDate: '2026-08-03',
+      location: 'Riverside Park, Austin TX',
+    },
+  ];
+  private nextId = 2;
 
   getFestivals(): Festival[] {
     return this.festivals.map((f) => ({ ...f }));
