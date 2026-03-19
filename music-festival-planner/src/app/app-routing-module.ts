@@ -6,15 +6,19 @@ import { MySchedule } from './components/my-schedule/my-schedule';
 import { FestivalCreateComponent } from './components/festival-create/festival-create';
 import { StageListComponent } from './components/stage-list/stage-list';
 import { StageCreateComponent } from './components/stage-create/stage-create';
+import { PerformanceListComponent } from './components/performance-list/performance-list';
+import { PerformanceCreateComponent } from './components/performance-create/performance-create';
 
 const routes: Routes = [
   { path: '', component: Home },
   { path: 'festivals', component: Festivals },
   { path: 'festivals/create', component: FestivalCreateComponent },
   { path: 'my-schedule', component: MySchedule },
-  { path: 'festivals/:id/schedule',    component: MySchedule },
-  { path: 'festivals/:id/stages',      component: StageListComponent },
-  { path: 'festivals/:id/stages/new',  component: StageCreateComponent },
+  { path: 'festivals/:id/schedule',          component: MySchedule },
+  { path: 'festivals/:id/stages',            component: StageListComponent },
+  { path: 'festivals/:id/stages/new',        component: StageCreateComponent },
+  { path: 'festivals/:id/performances',      component: PerformanceListComponent },
+  { path: 'festivals/:id/performances/new',  component: PerformanceCreateComponent },
 ];
 
 @NgModule({
