@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Demogorgon Music Festival Logo">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#00f5ff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="noteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"  stop-color="#00f5ff"/>
+      <stop offset="50%" stop-color="#ff2d78"/>
+      <stop offset="100%" stop-color="#f5ff00"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"  stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#bf00ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer glow ring -->
+  <circle cx="100" cy="100" r="95" fill="url(#bgGlow)" stroke="url(#ringGrad)" stroke-width="2" opacity="0.8"/>
+
+  <!-- Inner ring -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="url(#ringGrad)" stroke-width="1" opacity="0.4"/>
+
+  <!-- Music note symbol -->
+  <!-- Note head -->
+  <ellipse cx="82" cy="130" rx="13" ry="10" transform="rotate(-15 82 130)" fill="url(#noteGrad)"/>
+  <!-- Note stem -->
+  <rect x="93" y="65" width="5" height="68" fill="url(#noteGrad)"/>
+  <!-- Note flag -->
+  <path d="M98 65 Q130 75 125 95 Q120 110 98 105" fill="url(#noteGrad)"/>
+
+  <!-- Second smaller note -->
+  <ellipse cx="120" cy="138" rx="10" ry="8" transform="rotate(-15 120 138)" fill="url(#noteGrad)" opacity="0.8"/>
+  <rect x="129" y="82" width="4" height="58" fill="url(#noteGrad)" opacity="0.8"/>
+
+  <!-- Star accents -->
+  <circle cx="50"  cy="55"  r="2" fill="#00f5ff" opacity="0.9"/>
+  <circle cx="148" cy="50"  r="2" fill="#f5ff00" opacity="0.9"/>
+  <circle cx="155" cy="145" r="2" fill="#ff2d78" opacity="0.9"/>
+  <circle cx="42"  cy="148" r="2" fill="#bf00ff" opacity="0.9"/>
+</svg>
