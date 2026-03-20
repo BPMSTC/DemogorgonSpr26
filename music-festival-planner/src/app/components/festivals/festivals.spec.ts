@@ -32,7 +32,7 @@ describe('Festivals', () => {
     function makeEvent(key: string, target: HTMLElement): KeyboardEvent {
       const event = new KeyboardEvent('keydown', { key, bubbles: true });
       Object.defineProperty(event, 'target', { value: target });
-      spyOn(event, 'preventDefault');
+      vi.spyOn(event, 'preventDefault');
       return event;
     }
 
