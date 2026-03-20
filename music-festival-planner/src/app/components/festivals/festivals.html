@@ -11,27 +11,28 @@
     @for (festival of festivalsList; track festival.id) {
       <div
         class="card"
-        [class.card-expanded]="expandedId === festival.id"
-        role="button"
-        tabindex="0"
-        [attr.aria-expanded]="expandedId === festival.id"
-        [attr.aria-label]="festival.name + ' — ' + (expandedId === festival.id ? 'collapse' : 'expand') + ' details'"
-        (click)="toggleCard(festival.id, $event)"
-        (keydown)="toggleCardKey(festival.id, $event)">
+        [class.card-expanded]="expandedId === festival.id">
 
         <!-- ── Card Header ── -->
         <div class="card-header">
-          <div class="card-title-group">
-            <h3>{{ festival.name }}</h3>
-            <span class="stage-count-badge">
-              {{ getStages(festival.id).length }}
-              {{ getStages(festival.id).length === 1 ? 'stage' : 'stages' }}
-            </span>
-          </div>
+          <button
+            class="card-toggle-btn"
+            type="button"
+            [attr.aria-expanded]="expandedId === festival.id"
+            [attr.aria-controls]="'stage-panel-' + festival.id"
+            [attr.aria-label]="festival.name + ' — ' + (expandedId === festival.id ? 'collapse' : 'expand') + ' details'"
+            (click)="toggleCard(festival.id)">
+            <div class="card-title-group">
+              <h3>{{ festival.name }}</h3>
+              <span class="stage-count-badge">
+                {{ getStages(festival.id).length }}
+                {{ getStages(festival.id).length === 1 ? 'stage' : 'stages' }}
+              </span>
+            </div>
+            <span class="chevron" [class.chevron-open]="expandedId === festival.id">></span>
+          </button>
 
           <div class="card-header-right">
-            <span class="chevron" [class.chevron-open]="expandedId === festival.id">></span>
-
             <a
               class="view-schedule-btn"
               [routerLink]="['/festivals', festival.id, 'schedule']"
@@ -88,7 +89,7 @@
 
         <!-- ── Expanded: Stage List ── -->
         @if (expandedId === festival.id) {
-          <div class="stage-panel" (click)="$event.stopPropagation()">
+          <div class="stage-panel" [id]="'stage-panel-' + festival.id" (click)="$event.stopPropagation()">
 
             @if (getStages(festival.id).length === 0) {
               <p class="no-stages">
