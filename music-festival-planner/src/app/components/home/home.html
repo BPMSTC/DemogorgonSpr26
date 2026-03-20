@@ -1,1 +1,42 @@
-<p>home works!</p>
+<section class="home-hero">
+  <img
+    src="assets/festival-logo.svg"
+    alt="Demogorgon Music Festival official logo"
+    class="hero-logo"
+    width="120"
+    height="120"
+  />
+
+  <h1>Demogorgon<br/>Music Festival</h1>
+
+  <p class="subtitle">
+    The official home of Demogorgon Music Festival — your destination for
+    live stages, curated line-ups, and unforgettable performances.
+  </p>
+
+  <div class="hero-date-badge">
+    <span class="date-label">Official Event Dates</span>
+    <span class="date-value">April 25 – 26, 2026</span>
+    <span class="date-location">Neon Grounds, Springfield</span>
+  </div>
+</section>
+
+<section class="home-actions">
+  <a routerLink="/festivals" class="action-card">
+    <span class="action-icon" aria-hidden="true">🎪</span>
+    <h3>Browse Festivals</h3>
+    <p>Explore all official stages and events</p>
+  </a>
+
+  <a routerLink="/festivals/create" class="action-card">
+    <span class="action-icon" aria-hidden="true">➕</span>
+    <h3>Add Festival</h3>
+    <p>Register a new festival</p>
+  </a>
+
+  <a routerLink="/my-schedule" class="action-card">
+    <span class="action-icon" aria-hidden="true">📅</span>
+    <h3>My Schedule</h3>
+    <p>View and manage your personal line-up</p>
+  </a>
+</section>

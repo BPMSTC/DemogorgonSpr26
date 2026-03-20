@@ -9,9 +9,15 @@ import { Stage } from '../../models/stage.model';
 
 /** Custom validator: rejects strings that are non-empty but entirely whitespace */
 function noWhitespaceOnly(control: AbstractControl): ValidationErrors | null {
-  const value = control.value as string;
-  if (value != null && typeof value === 'string' && value.trim().length === 0) {
-    return { whitespaceOnly: true };
+  const value = control.value;
+  if (typeof value === 'string') {
+    // Let Validators.required handle empty strings; only flag non-empty whitespace-only values
+    if (value.length === 0) {
+      return null;
+    }
+    if (value.trim().length === 0) {
+      return { whitespaceOnly: true };
+    }
   }
   return null;
 }
