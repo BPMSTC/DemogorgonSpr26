@@ -84,7 +84,7 @@ describe('ScheduleService', () => {
       ).toThrowError(/already booked/i);
     });
 
-    it('should throw when a new performance starts exactly when another ends (adjacent not allowed when start < end)', () => {
+    it('should allow a new performance that starts exactly when another ends (back-to-back adjacent slots are permitted)', () => {
       // Adjacent slots (back-to-back) should NOT overlap: new start == existing end
       service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
 
