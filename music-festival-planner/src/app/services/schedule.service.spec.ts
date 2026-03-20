@@ -71,24 +71,28 @@ describe('ScheduleService', () => {
     });
 
     it('returns an error when end time is not after start time', () => {
-      const result = service.createPerformance({ ...BASE, startTime: '14:00', endTime: '13:00' });
-      expect('error' in result).toBe(true);
+      expect(() =>
+        service.createPerformance({ ...BASE, startTime: '14:00', endTime: '13:00' })
+      ).toThrowError('End time must be later than start time.');
     });
 
     it('returns an error when times are equal', () => {
-      const result = service.createPerformance({ ...BASE, startTime: '12:00', endTime: '12:00' });
-      expect('error' in result).toBe(true);
+      expect(() =>
+        service.createPerformance({ ...BASE, startTime: '12:00', endTime: '12:00' })
+      ).toThrowError('End time must be later than start time.');
     });
 
     it('returns an error for an invalid time format', () => {
-      const result = service.createPerformance({ ...BASE, startTime: 'noon', endTime: '13:00' });
-      expect('error' in result).toBe(true);
+      expect(() =>
+        service.createPerformance({ ...BASE, startTime: 'noon', endTime: '13:00' })
+      ).toThrowError('Start and end times must be valid 24-hour times (H:mm or HH:mm).');
     });
 
     it('returns an error when the stage is already booked during that slot', () => {
       service.createPerformance({ ...BASE });
-      const overlap = service.createPerformance({ ...BASE, artistName: 'Other Artist' });
-      expect('error' in overlap).toBe(true);
+      expect(() =>
+        service.createPerformance({ ...BASE, artistName: 'Other Artist' })
+      ).toThrowError('"Test Stage" is already booked during that time slot.');
     });
 
     it('allows a second performance on the same stage in a non-overlapping slot', () => {

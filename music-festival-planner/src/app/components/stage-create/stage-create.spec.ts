@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { StageCreateComponent } from './stage-create';
+import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { StageCreateComponent } from './stage-create';
 
 describe('StageCreateComponent', () => {
   let component: StageCreateComponent;
@@ -10,9 +11,7 @@ describe('StageCreateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [StageCreateComponent],
-      imports: [ReactiveFormsModule],
-      providers: [provideRouter([])],
-
+      imports: [CommonModule, ReactiveFormsModule, RouterModule.forRoot([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StageCreateComponent);

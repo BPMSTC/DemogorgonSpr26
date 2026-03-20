@@ -66,7 +66,12 @@ export class MySchedule implements OnInit {
       : dayPerformances.filter(p => p.stageName === this.selectedStage);
 
     this.stages = [...new Set(this.filteredPerformances.map(p => p.stageName))].sort();
-    this.times = [...new Set(this.filteredPerformances.map(p => p.startTime))].sort();
+    const timeToMinutes = (t: string): number => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+    this.times = [...new Set(this.filteredPerformances.map(p => p.startTime))]
+      .sort((a, b) => timeToMinutes(a) - timeToMinutes(b));
 
     // Build the lookup dictionary. Key format: "18:00-Main Stage"
     this.performanceGrid = {};

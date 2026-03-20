@@ -1,0 +1,52 @@
+<div class="create-container">
+
+  <button type="button" class="back-link" (click)="goBack()">← Back to Festivals</button>
+
+  <div class="list-header">
+    <div>
+      <h2>Performances</h2>
+      @if (festival) {
+        <p class="festival-context">{{ festival.name }}</p>
+      }
+    </div>
+    <button class="btn-submit" (click)="addPerformance()">+ Add Performance</button>
+  </div>
+
+  @if (performances.length === 0) {
+    <div class="schedule-empty">
+      <p>No performances scheduled yet. Click <strong>+ Add Performance</strong> to build the lineup.</p>
+    </div>
+  } @else {
+    <div class="performance-list">
+      @for (perf of performances; track perf.id) {
+        <div class="performance-card">
+
+          <div class="performance-card-header">
+            <span class="artist-name">{{ perf.artistName }}</span>
+            <span class="stage-badge">{{ perf.stageName }}</span>
+          </div>
+
+          <div class="performance-meta">
+            <span class="meta-item">
+              <strong>Date:</strong> {{ perf.date }}
+            </span>
+            <span class="meta-item">
+              <strong>Time:</strong> {{ perf.startTime }} – {{ perf.endTime }}
+            </span>
+          </div>
+
+          <div class="performance-card-actions">
+            <button
+              class="btn-cancel btn-sm"
+              (click)="deletePerformance(perf.id)"
+              [attr.aria-label]="'Remove ' + perf.artistName + ' from lineup'">
+              Remove
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { StageListComponent } from './stage-list';
-import { provideRouter } from '@angular/router';
 
 describe('StageListComponent', () => {
   let component: StageListComponent;
@@ -9,7 +10,7 @@ describe('StageListComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [StageListComponent],
-      providers: [provideRouter([])],
+      imports: [CommonModule, RouterModule.forRoot([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(StageListComponent);
