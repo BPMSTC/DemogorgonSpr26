@@ -94,6 +94,12 @@ describe('ScheduleService', () => {
         service.createPerformance({ ...BASE, artistName: 'Other Artist' })
       ).toThrowError('"Test Stage" is already booked during that time slot.');
     });
+
+    it('allows a second performance on the same stage in a non-overlapping slot', () => {
+      service.createPerformance({ ...BASE });
+      const result = service.createPerformance({ ...BASE, startTime: '13:00', endTime: '14:00' });
+      expect('error' in result).toBe(false);
+    });
   });
 
   // ---------------------------------------------------------------------------
