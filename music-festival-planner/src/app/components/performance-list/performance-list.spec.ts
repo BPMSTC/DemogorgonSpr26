@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { PerformanceListComponent } from './performance-list';
 import { ScheduleService } from '../../services/schedule.service';
@@ -45,7 +46,7 @@ class MockFestivalService {
 function makeTestBed(festivalId = '1') {
   return TestBed.configureTestingModule({
     declarations: [PerformanceListComponent],
-    imports: [CommonModule],
+    imports: [CommonModule, RouterModule.forRoot([])],
     providers: [
       {
         provide: ActivatedRoute,
@@ -102,7 +103,13 @@ describe('PerformanceListComponent', () => {
   });
 
   it('should reload performances after deletePerformance is called', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const scheduleService = TestBed.inject(ScheduleService);
+    const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance');
+
     component.deletePerformance('1');
+
+    expect(deleteSpy).toHaveBeenCalledWith('1');
     expect(component.performances.length).toBe(2);
     expect(component.performances.find((p) => p.id === '1')).toBeUndefined();
   });

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PerformanceCreateComponent } from './performance-create';
@@ -41,14 +42,10 @@ class MockFestivalService {
   }
 }
 
-class MockRouter {
-  navigate = vi.fn();
-}
-
 function makeTestBed(festivalId = '1') {
   return TestBed.configureTestingModule({
     declarations: [PerformanceCreateComponent],
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule.forRoot([])],
     providers: [
       {
         provide: ActivatedRoute,
@@ -57,7 +54,6 @@ function makeTestBed(festivalId = '1') {
       { provide: ScheduleService, useClass: MockScheduleService },
       { provide: StageService, useClass: MockStageService },
       { provide: FestivalService, useClass: MockFestivalService },
-      { provide: Router, useClass: MockRouter },
     ],
   }).compileComponents();
 }
@@ -245,6 +241,7 @@ describe('PerformanceCreateComponent', () => {
       endTime: '15:30',
     });
     const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
     component.performanceForm.setValue({
       artistName: 'Test Artist',
@@ -256,7 +253,7 @@ describe('PerformanceCreateComponent', () => {
 
     component.onSubmit();
 
-    expect(router.navigate).toHaveBeenCalledWith(['/festivals', '1', 'performances']);
+    expect(navigateSpy).toHaveBeenCalledWith(['/festivals', '1', 'performances']);
   });
 });
 
