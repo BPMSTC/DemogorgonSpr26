@@ -67,6 +67,10 @@ describe('PerformanceListComponent', () => {
   });
 
   describe('deletePerformance', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
     it('calls deletePerformance and reloads list when confirmed', () => {
       vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
       const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance').mockReturnValue(true);
@@ -76,8 +80,6 @@ describe('PerformanceListComponent', () => {
 
       expect(deleteSpy).toHaveBeenCalledWith('42');
       expect(loadSpy).toHaveBeenCalled();
-
-      vi.unstubAllGlobals();
     });
 
     it('does not call deletePerformance when cancelled', () => {
@@ -87,8 +89,6 @@ describe('PerformanceListComponent', () => {
       component.deletePerformance('42');
 
       expect(deleteSpy).not.toHaveBeenCalled();
-
-      vi.unstubAllGlobals();
     });
   });
 });

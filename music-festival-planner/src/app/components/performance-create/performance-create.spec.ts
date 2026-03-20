@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 
 import { PerformanceCreateComponent } from './performance-create';
@@ -13,6 +13,7 @@ describe('PerformanceCreateComponent', () => {
   let component: PerformanceCreateComponent;
   let fixture: ComponentFixture<PerformanceCreateComponent>;
   let scheduleService: ScheduleService;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -32,6 +33,7 @@ describe('PerformanceCreateComponent', () => {
     fixture = TestBed.createComponent(PerformanceCreateComponent);
     component = fixture.componentInstance;
     scheduleService = TestBed.inject(ScheduleService);
+    router = TestBed.inject(Router);
     fixture.detectChanges();
     await fixture.whenStable();
   });
@@ -130,6 +132,7 @@ describe('PerformanceCreateComponent', () => {
         startTime: '10:00',
         endTime: '11:00',
       });
+      vi.spyOn(router, 'navigate').mockResolvedValue(true);
       component.onSubmit();
       expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({ artistName: 'Test Artist' })
