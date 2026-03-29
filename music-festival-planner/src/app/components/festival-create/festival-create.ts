@@ -4,59 +4,93 @@ import { Router } from '@angular/router';
 import { FestivalService } from '../../services/festival.service';
 import { Festival } from '../../models/festival.model';
 
-/** Cross-field validator: endDate must be on or after startDate. */
-function endDateAfterStart(group: AbstractControl): ValidationErrors | null {
-  const start = group.get('startDate')?.value;
-  const end = group.get('endDate')?.value;
-  if (start && end && end < start) {
-    return { endBeforeStart: true };
+// ---- Custom Validator ------------------------------------------------------
+
+/**
+ * Cross-field group validator: the festival end date must fall on or after
+ * the start date.  Applied to the parent FormGroup so it can read both fields.
+ */
+function validateEndDateOnOrAfterStartDate(formGroup: AbstractControl): ValidationErrors | null {
+  const startDateValue = formGroup.get('startDate')?.value;
+  const endDateValue   = formGroup.get('endDate')?.value;
+
+  // Only validate when both dates are filled in; individual Validators.required
+  // will flag the empty cases.
+  if (startDateValue && endDateValue && endDateValue < startDateValue) {
+    return { endBeforeStart: true }; // triggers the cross-field error message
   }
-  return null;
+
+  return null; // dates are valid (or one is still empty)
 }
+
+// ---- Component -------------------------------------------------------------
 
 @Component({
   selector: 'app-festival-create',
   standalone: false,
   templateUrl: './festival-create.html',
-  styleUrl: './festival-create.css'
+  styleUrl: './festival-create.css',
 })
 export class FestivalCreateComponent implements OnInit {
+  /** The reactive form group controlling all festival creation fields. */
   festivalForm!: FormGroup;
-  submitted = false;
-  serverError = '';
+
+  /** Tracks whether the user has tried to submit (triggers full error display). */
+  hasAttemptedSubmit = false;
+
+  /** Holds any server-side or service-thrown error to display above the form. */
+  serviceErrorMessage = '';
 
   constructor(
-    private fb: FormBuilder,
+    private formBuilder: FormBuilder,
     private festivalService: FestivalService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.festivalForm = this.fb.group({
-      name: ['', Validators.required],
-      startDate: ['', Validators.required],
-      endDate: ['', Validators.required],
-      location: ['', Validators.required]
-    }, { validators: endDateAfterStart });
+    // Build the form with individual field validators and the cross-field date validator.
+    this.festivalForm = this.formBuilder.group(
+      {
+        name:      ['', Validators.required], // festival display name is mandatory
+        startDate: ['', Validators.required], // opening day is mandatory
+        endDate:   ['', Validators.required], // closing day is mandatory
+        location:  ['', Validators.required], // city or venue is mandatory
+      },
+      {
+        validators: validateEndDateOnOrAfterStartDate, // cross-field check on the group
+      }
+    );
   }
 
-  get f() { return this.festivalForm.controls; }
+  /**
+   * Shorthand accessor for individual form controls.
+   * Used in the template as `fields['name'].errors` etc.
+   */
+  get fields() {
+    return this.festivalForm.controls;
+  }
 
+  /** Handles form submission: validates, saves via service, then navigates to the festivals list. */
   onSubmit(): void {
-    this.submitted = true;
-    this.serverError = '';
+    this.hasAttemptedSubmit  = true;
+    this.serviceErrorMessage = '';
 
-    if (this.festivalForm.invalid) {
-      return;
-    }
+    // Abort if any field or the cross-field validator is still failing.
+    if (this.festivalForm.invalid) return;
 
     try {
-      const newFestival: Omit<Festival, 'id'> = this.festivalForm.value;
-      this.festivalService.createFestival(newFestival);
-      // Route back to the main festivals page after saving
+      // Cast the raw form value to the expected shape (id is assigned by the service).
+      const newFestivalData = this.festivalForm.value as Omit<Festival, 'id'>;
+      this.festivalService.createFestival(newFestivalData);
+
+      // Navigate back to the festivals list after a successful save.
       this.router.navigate(['/festivals']);
-    } catch (err: unknown) {
-      this.serverError = err instanceof Error ? err.message : 'An unexpected error occurred.';
+    } catch (submissionError: unknown) {
+      // Surface any service-level validation errors (e.g. date range) in the banner.
+      this.serviceErrorMessage =
+        submissionError instanceof Error
+          ? submissionError.message
+          : 'An unexpected error occurred.';
     }
   }
 }

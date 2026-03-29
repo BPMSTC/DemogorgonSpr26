@@ -90,6 +90,97 @@ a:hover {
   padding-bottom: 3rem;
 }
 
+/* ---- Form inputs & selects (shared across components) ---- */
+input[type="text"],
+input[type="email"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.15);
+}
+
+label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
+}
+
+/* Shared form submit / cancel buttons */
+.btn-submit {
+  background: var(--neon-cyan);
+  color: var(--bg-dark);
+  border: none;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  padding: 0.55rem 1.5rem;
+  cursor: pointer;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: var(--glow-cyan);
+}
+
+.btn-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--neon-magenta);
+  border: 1px solid var(--neon-magenta);
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  padding: 0.55rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 45, 120, 0.1);
+  box-shadow: var(--glow-magenta);
+}
+
+.btn-cancel.btn-sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+/* ---- Responsive layout ---- */
+@media (max-width: 768px) {
+  .container {
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+  }
+}
+
 /* Neon text utility classes */
 .text-neon-cyan    { color: var(--neon-cyan);    text-shadow: var(--glow-cyan); }
 .text-neon-magenta { color: var(--neon-magenta); text-shadow: var(--glow-magenta); }

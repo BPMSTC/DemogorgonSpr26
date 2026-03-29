@@ -1,51 +1,69 @@
+<!-- ============================================================
+     stage-list.html
+     Lists all stages for a festival with their status, capacity,
+     and environment. Provides "Add Stage" and per-card "Remove".
+     ============================================================ -->
+
 <div class="create-container">
 
-  <button type="button" class="back-link" (click)="goBack()">← Back to Festivals</button>
+  <!-- Back link: returns to the festivals overview -->
+  <button type="button" class="back-link" (click)="navigateBackToFestivals()">← Back to Festivals</button>
 
+  <!-- ---- Page Header -------------------------------------------------- -->
   <div class="list-header">
     <div>
       <h2>Stages</h2>
-      @if (festival) {
-        <p class="festival-context">{{ festival.name }}</p>
+      <!-- Show parent festival name as a subtitle -->
+      @if (currentFestival) {
+        <p class="festival-context">{{ currentFestival.name }}</p>
       }
     </div>
-    <button class="btn-submit" (click)="addStage()">+ Add Stage</button>
+    <button class="btn-submit" (click)="navigateToAddStage()">+ Add Stage</button>
   </div>
 
-  @if (stages.length === 0) {
+  <!-- ---- Empty State -------------------------------------------------- -->
+  @if (stageList.length === 0) {
     <div class="schedule-empty">
       <p>No stages added yet. Click <strong>+ Add Stage</strong> to get started.</p>
     </div>
+
+  <!-- ---- Stage Cards -------------------------------------------------- -->
   } @else {
     <div class="stage-list">
-      @for (stage of stages; track stage.id) {
+      @for (stage of stageList; track stage.id) {
         <div class="stage-card">
 
+          <!-- Card header: stage name and status badge -->
           <div class="stage-card-header">
             <span class="stage-name">{{ stage.name }}</span>
-            <span class="badge" [ngClass]="getStatusClass(stage.status)">
-              {{ getStatusLabel(stage.status) }}
+            <!-- Status badge CSS class is determined by getStatusBadgeClass() -->
+            <span class="badge" [ngClass]="getStatusBadgeClass(stage.status)">
+              {{ getStatusDisplayLabel(stage.status) }}
             </span>
           </div>
 
+          <!-- Card meta: capacity (formatted with comma separators) and environment -->
           <div class="stage-meta">
             <span class="meta-item">
               <strong>Capacity:</strong> {{ stage.capacity | number }}
             </span>
             <span class="meta-item">
               <strong>Environment:</strong>
+              <!-- Emoji icon makes indoor/outdoor scannable at a glance -->
               {{ stage.environment === 'indoor' ? '🏠 Indoor' : '🌳 Outdoor' }}
             </span>
           </div>
 
+          <!-- Optional notes: only rendered if the stage has notes set -->
           @if (stage.notes) {
             <p class="stage-notes">{{ stage.notes }}</p>
           }
 
+          <!-- Card action: remove this stage -->
           <div class="stage-card-actions">
             <button
               class="btn-cancel btn-sm"
-              (click)="deleteStage(stage.id)"
+              (click)="confirmAndDeleteStage(stage.id)"
               [attr.aria-label]="'Remove ' + stage.name">
               Remove
             </button>
