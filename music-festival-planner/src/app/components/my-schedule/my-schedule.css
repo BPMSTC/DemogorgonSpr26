@@ -215,13 +215,20 @@
   box-shadow: 0 0 8px rgba(0, 245, 255, 0.25);
 }
 
-/* ---- Stage filter bar ------------------------------------- */
+/* ---- Filter row (stage + genre side-by-side) -------------- */
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ---- Stage / Genre filter bars ---------------------------- */
 .stage-filter {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
 }
 
 .stage-filter-label {
@@ -252,4 +259,82 @@
   border-color: var(--neon-magenta);
   color: var(--neon-magenta);
   box-shadow: 0 0 8px rgba(255, 45, 120, 0.25);
+}
+
+/* Genre filter buttons use cyan accent */
+.stage-filter-btn--genre.stage-filter-active {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.25);
+}
+
+/* ---- Event genre label ------------------------------------ */
+.timetable-event .event-genre {
+  font-size: 0.68rem;
+  color: var(--neon-cyan);
+  opacity: 0.7;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ---- Responsive breakpoints ------------------------------- */
+@media (max-width: 768px) {
+  .schedule-header h1 {
+    font-size: 2rem;
+  }
+
+  .timetable {
+    font-size: 0.75rem;
+  }
+
+  .timetable-stage-label {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .timetable-event .event-name {
+    font-size: 0.85rem;
+  }
+
+  .schedule-summary {
+    gap: 0.5rem;
+  }
+
+  .summary-stat {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .timetable {
+    grid-template-columns: 48px repeat(var(--stage-count, 1), 1fr);
+    font-size: 0.7rem;
+  }
+
+  .timetable-time {
+    font-size: 0.65rem;
+    padding: 4px 4px 0 0;
+  }
+
+  .timetable-event {
+    padding: 4px 5px;
+  }
+
+  .timetable-event .event-stage,
+  .timetable-event .event-time,
+  .timetable-event .event-genre {
+    display: none;
+  }
+
+  .stage-filter-btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+  }
+
+  .conflict-alert {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
 }

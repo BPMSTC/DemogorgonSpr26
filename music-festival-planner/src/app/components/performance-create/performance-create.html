@@ -8,7 +8,7 @@
   }
 
   @if (serverError) {
-    <div class="error-banner" role="alert">{{ serverError }}</div>
+    <div class="error-banner" role="alert" aria-live="assertive">{{ serverError }}</div>
   }
 
   @if (stages.length === 0) {
@@ -19,7 +19,7 @@
     </div>
   }
 
-  <form [formGroup]="performanceForm" (ngSubmit)="onSubmit()" novalidate>
+  <form [formGroup]="performanceForm" (ngSubmit)="onSubmit()" novalidate aria-label="Add performance form">
 
     <!-- Artist Name -->
     <div class="form-group">
@@ -28,13 +28,14 @@
         type="text"
         id="artistName"
         formControlName="artistName"
-        placeholder="e.g. The Neon Shadows"
+        [placeholder]="artistPlaceholder"
         aria-required="true"
-        [attr.aria-invalid]="(submitted || f['artistName'].touched) && f['artistName'].errors ? true : null">
-      <div *ngIf="submitted || f['artistName'].touched" class="error-messages">
-        <small *ngIf="f['artistName'].errors?.['required']"        class="error-text">Artist name is required.</small>
-        <small *ngIf="f['artistName'].errors?.['whitespaceOnly']"  class="error-text">Artist name cannot be blank.</small>
-        <small *ngIf="f['artistName'].errors?.['maxlength']"       class="error-text">Artist name cannot exceed 100 characters.</small>
+        [attr.aria-invalid]="(submitted || f['artistName'].touched) && f['artistName'].errors ? true : null"
+        aria-describedby="artistName-errors">
+      <div id="artistName-errors" aria-live="polite" *ngIf="submitted || f['artistName'].touched" class="error-messages">
+        <small *ngIf="f['artistName'].errors?.['required']"       class="error-text">Artist name is required.</small>
+        <small *ngIf="f['artistName'].errors?.['whitespaceOnly']" class="error-text">Artist name cannot be blank.</small>
+        <small *ngIf="f['artistName'].errors?.['maxlength']"      class="error-text">Artist name cannot exceed 100 characters.</small>
       </div>
     </div>
 
@@ -45,15 +46,27 @@
         id="stageName"
         formControlName="stageName"
         aria-required="true"
-        [attr.aria-invalid]="(submitted || f['stageName'].touched) && f['stageName'].errors ? true : null">
+        [attr.aria-invalid]="(submitted || f['stageName'].touched) && f['stageName'].errors ? true : null"
+        aria-describedby="stageName-errors">
         <option value="" disabled>— Select a stage —</option>
         @for (stage of stages; track stage.id) {
           <option [value]="stage.name">{{ stage.name }}</option>
         }
       </select>
-      <div *ngIf="submitted || f['stageName'].touched" class="error-messages">
+      <div id="stageName-errors" aria-live="polite" *ngIf="submitted || f['stageName'].touched" class="error-messages">
         <small *ngIf="f['stageName'].errors?.['required']" class="error-text">Stage is required.</small>
       </div>
+    </div>
+
+    <!-- Genre -->
+    <div class="form-group">
+      <label for="genre">Genre <span class="optional-label">(optional)</span></label>
+      <select id="genre" formControlName="genre" aria-label="Music genre, optional">
+        <option value="">— Select genre —</option>
+        @for (g of genres; track g) {
+          <option [value]="g">{{ g }}</option>
+        }
+      </select>
     </div>
 
     <!-- Date -->
@@ -64,8 +77,9 @@
         id="date"
         formControlName="date"
         aria-required="true"
-        [attr.aria-invalid]="(submitted || f['date'].touched) && f['date'].errors ? true : null">
-      <div *ngIf="submitted || f['date'].touched" class="error-messages">
+        [attr.aria-invalid]="(submitted || f['date'].touched) && f['date'].errors ? true : null"
+        aria-describedby="date-errors">
+      <div id="date-errors" aria-live="polite" *ngIf="submitted || f['date'].touched" class="error-messages">
         <small *ngIf="f['date'].errors?.['required']" class="error-text">Date is required.</small>
       </div>
     </div>
@@ -80,8 +94,9 @@
           id="startTime"
           formControlName="startTime"
           aria-required="true"
-          [attr.aria-invalid]="(submitted || f['startTime'].touched) && f['startTime'].errors ? true : null">
-        <div *ngIf="submitted || f['startTime'].touched" class="error-messages">
+          [attr.aria-invalid]="(submitted || f['startTime'].touched) && f['startTime'].errors ? true : null"
+          aria-describedby="startTime-errors">
+        <div id="startTime-errors" aria-live="polite" *ngIf="submitted || f['startTime'].touched" class="error-messages">
           <small *ngIf="f['startTime'].errors?.['required']" class="error-text">Start time is required.</small>
         </div>
       </div>
@@ -93,8 +108,9 @@
           id="endTime"
           formControlName="endTime"
           aria-required="true"
-          [attr.aria-invalid]="(submitted || f['endTime'].touched) && f['endTime'].errors ? true : null">
-        <div *ngIf="submitted || f['endTime'].touched" class="error-messages">
+          [attr.aria-invalid]="(submitted || f['endTime'].touched) && f['endTime'].errors ? true : null"
+          aria-describedby="endTime-errors">
+        <div id="endTime-errors" aria-live="polite" *ngIf="submitted || f['endTime'].touched" class="error-messages">
           <small *ngIf="f['endTime'].errors?.['required']" class="error-text">End time is required.</small>
         </div>
       </div>
@@ -103,7 +119,7 @@
 
     <!-- Cross-field time error -->
     @if ((submitted || (f['startTime'].touched && f['endTime'].touched)) && performanceForm.errors?.['endNotAfterStart']) {
-      <div class="error-messages cross-field-error">
+      <div class="error-messages cross-field-error" role="alert" aria-live="polite">
         <small class="error-text">End time must be later than start time.</small>
       </div>
     }

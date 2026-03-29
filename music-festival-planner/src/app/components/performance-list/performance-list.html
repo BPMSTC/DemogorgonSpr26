@@ -9,21 +9,36 @@
         <p class="festival-context">{{ festival.name }}</p>
       }
     </div>
-    <button class="btn-submit" (click)="addPerformance()">+ Add Performance</button>
+    <div class="list-actions">
+      @if (performances.length > 0) {
+        <button
+          class="btn-cancel btn-sm"
+          (click)="clearAll()"
+          aria-label="Clear all performances for this festival">
+          Clear All
+        </button>
+      }
+      <button class="btn-submit" (click)="addPerformance()" aria-label="Add a new performance">
+        + Add Performance
+      </button>
+    </div>
   </div>
 
   @if (performances.length === 0) {
-    <div class="schedule-empty">
+    <div class="schedule-empty" role="status" aria-live="polite">
       <p>No performances scheduled yet. Click <strong>+ Add Performance</strong> to build the lineup.</p>
     </div>
   } @else {
-    <div class="performance-list">
+    <div class="performance-list" role="list" aria-label="Performance lineup">
       @for (perf of performances; track perf.id) {
-        <div class="performance-card">
+        <div class="performance-card" role="listitem">
 
           <div class="performance-card-header">
             <span class="artist-name">{{ perf.artistName }}</span>
-            <span class="stage-badge">{{ perf.stageName }}</span>
+            <span class="stage-badge" [attr.aria-label]="'Stage: ' + perf.stageName">{{ perf.stageName }}</span>
+            @if (perf.genre) {
+              <span class="genre-badge" [attr.aria-label]="'Genre: ' + perf.genre">{{ perf.genre }}</span>
+            }
           </div>
 
           <div class="performance-meta">

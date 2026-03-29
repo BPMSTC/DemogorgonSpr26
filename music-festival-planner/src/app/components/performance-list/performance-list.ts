@@ -53,6 +53,13 @@ export class PerformanceListComponent implements OnInit {
     }
   }
 
+  clearAll(): void {
+    if (confirm('Clear ALL performances for this festival? This cannot be undone.')) {
+      this.scheduleService.clearPerformancesByFestival(this.festivalId);
+      this.loadPerformances();
+    }
+  }
+
   goBack(): void {
     this.router.navigate(['/festivals']);
   }

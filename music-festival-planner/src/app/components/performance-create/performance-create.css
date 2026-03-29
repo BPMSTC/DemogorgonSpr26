@@ -2,23 +2,87 @@
   margin-bottom: 1.25rem;
 }
 
-.error-text {
-  color: var(--neon-cyan);
+/* ---- Labels ---- */
+.optional-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: 0.25rem;
 }
 
+/* ---- Input / Select shared base ---- */
+.form-group input,
+.form-group select {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.15);
+}
+
+/* ---- Visual validation feedback (Angular form state classes) ---- */
+.form-group input.ng-touched.ng-invalid,
+.form-group select.ng-touched.ng-invalid {
+  border-color: var(--neon-magenta);
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.15);
+}
+
+.form-group input.ng-touched.ng-valid:not([type="date"]):not([type="time"]),
+.form-group select.ng-touched.ng-valid:not([value=""]) {
+  border-color: #00e676;
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.12);
+}
+
+/* ---- Error text ---- */
+.error-text {
+  color: var(--neon-magenta);
+  font-size: 0.82rem;
+}
+
+/* ---- Time row ---- */
 .time-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
+.cross-field-error {
+  margin-top: -0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* ---- Button group ---- */
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .button-group {
+    flex-direction: column-reverse;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+}
+
 @media (max-width: 480px) {
   .time-row {
     grid-template-columns: 1fr;
   }
-}
-
-.cross-field-error {
-  margin-top: -0.75rem;
-  margin-bottom: 1rem;
 }

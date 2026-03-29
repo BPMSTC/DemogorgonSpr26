@@ -7,17 +7,25 @@ import { FestivalService } from '../../services/festival.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
 
+export const GENRES = ['Rock', 'Electronic', 'Jazz', 'Hip-Hop', 'Folk', 'Pop', 'Metal', 'Classical', 'R&B', 'World'];
+
+const ARTIST_PLACEHOLDERS = [
+  'e.g. The Neon Shadows',
+  'e.g. Solar Drift',
+  'e.g. Midnight Frequency',
+  'e.g. Echo Collective',
+  'e.g. Velvet Riot',
+  'e.g. Static Bloom',
+  'e.g. The Desert Wolves',
+  'e.g. Indigo Signal',
+];
+
 /** Custom validator: rejects strings that are non-empty but entirely whitespace */
 function noWhitespaceOnly(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
   if (typeof value === 'string') {
-    // Let Validators.required handle empty strings; only flag non-empty whitespace-only values
-    if (value.length === 0) {
-      return null;
-    }
-    if (value.trim().length === 0) {
-      return { whitespaceOnly: true };
-    }
+    if (value.length === 0) return null;
+    if (value.trim().length === 0) return { whitespaceOnly: true };
   }
   return null;
 }
@@ -25,12 +33,9 @@ function noWhitespaceOnly(control: AbstractControl): ValidationErrors | null {
 /** Custom validator: end time must be later than start time */
 function endAfterStart(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startTime')?.value as string;
-  const end = group.get('endTime')?.value as string;
+  const end   = group.get('endTime')?.value as string;
   if (!start || !end) return null;
-  const toMin = (t: string) => {
-    const [h, m] = t.split(':').map(Number);
-    return h * 60 + m;
-  };
+  const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
   return toMin(end) > toMin(start) ? null : { endNotAfterStart: true };
 }
 
@@ -49,6 +54,9 @@ export class PerformanceCreateComponent implements OnInit {
   stages: Stage[] = [];
   festivalId = '';
 
+  readonly genres = GENRES;
+  readonly artistPlaceholder: string;
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -56,7 +64,9 @@ export class PerformanceCreateComponent implements OnInit {
     private scheduleService: ScheduleService,
     private stageService: StageService,
     private festivalService: FestivalService
-  ) {}
+  ) {
+    this.artistPlaceholder = ARTIST_PLACEHOLDERS[Math.floor(Math.random() * ARTIST_PLACEHOLDERS.length)];
+  }
 
   ngOnInit(): void {
     this.festivalId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -67,6 +77,7 @@ export class PerformanceCreateComponent implements OnInit {
       {
         artistName: ['', [Validators.required, noWhitespaceOnly, Validators.maxLength(100)]],
         stageName:  ['', Validators.required],
+        genre:      [''],
         date:       ['', Validators.required],
         startTime:  ['', Validators.required],
         endTime:    ['', Validators.required],
@@ -75,9 +86,7 @@ export class PerformanceCreateComponent implements OnInit {
     );
   }
 
-  get f() {
-    return this.performanceForm.controls;
-  }
+  get f() { return this.performanceForm.controls; }
 
   onSubmit(): void {
     this.submitted = true;
@@ -90,6 +99,7 @@ export class PerformanceCreateComponent implements OnInit {
         festivalId: this.festivalId,
         artistName: this.f['artistName'].value.trim(),
         stageName:  this.f['stageName'].value,
+        genre:      this.f['genre'].value || undefined,
         date:       this.f['date'].value,
         startTime:  this.f['startTime'].value,
         endTime:    this.f['endTime'].value,

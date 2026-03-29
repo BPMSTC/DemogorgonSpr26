@@ -4,61 +4,118 @@
 </div>
 
 <!-- Day selector tabs -->
-<div class="schedule-summary">
+<div class="schedule-summary" role="tablist" aria-label="Festival days">
   @for (day of festivalDays; track day) {
     <button
+      role="tab"
       (click)="selectDay(day)"
       class="summary-stat"
-      [class.day-active]="day === selectedDay">
+      [class.day-active]="day === selectedDay"
+      [attr.aria-selected]="day === selectedDay"
+      [attr.aria-label]="'Select ' + (day | date:'EEEE, MMMM d':'UTC')">
       <strong>{{ day | date:'EEEE':'UTC' }}</strong>
       {{ day | date:'MMM d':'UTC' }}
     </button>
   }
 </div>
 
+<!-- Conflict alert banner -->
+@if (conflicts.length > 0) {
+  <div class="conflict-alert" role="alert" aria-live="assertive">
+    <span class="conflict-icon" aria-hidden="true">⚠️</span>
+    <div class="conflict-text">
+      <strong>Scheduling Conflict{{ conflicts.length > 1 ? 's' : '' }} Detected</strong>
+      @for (c of conflicts; track c.stage + c.time) {
+        <span>{{ c.stage }}: {{ c.artists.join(' & ') }} overlap at {{ c.time }}</span>
+      }
+    </div>
+  </div>
+}
+
 <!-- Stage filter tabs -->
 @if (festivalDays.length > 0) {
-  <div class="stage-filter">
-    <span class="stage-filter-label">Stage:</span>
-    <button
-      class="stage-filter-btn"
-      [class.stage-filter-active]="selectedStage === ALL_STAGES"
-      (click)="selectStage(ALL_STAGES)">
-      All Stages
-    </button>
-    @for (stage of allStagesForDay; track stage) {
+  <div class="filter-row">
+
+    <div class="stage-filter" role="group" aria-label="Filter by stage">
+      <span class="stage-filter-label">Stage:</span>
       <button
         class="stage-filter-btn"
-        [class.stage-filter-active]="selectedStage === stage"
-        (click)="selectStage(stage)">
-        {{ stage }}
+        [class.stage-filter-active]="selectedStage === ALL_STAGES"
+        (click)="selectStage(ALL_STAGES)"
+        [attr.aria-pressed]="selectedStage === ALL_STAGES">
+        All Stages
       </button>
+      @for (stage of allStagesForDay; track stage) {
+        <button
+          class="stage-filter-btn"
+          [class.stage-filter-active]="selectedStage === stage"
+          (click)="selectStage(stage)"
+          [attr.aria-pressed]="selectedStage === stage">
+          {{ stage }}
+        </button>
+      }
+    </div>
+
+    @if (allGenresForDay.length > 0) {
+      <div class="stage-filter" role="group" aria-label="Filter by genre">
+        <span class="stage-filter-label">Genre:</span>
+        <button
+          class="stage-filter-btn"
+          [class.stage-filter-active]="selectedGenre === ALL_GENRES"
+          (click)="selectGenre(ALL_GENRES)"
+          [attr.aria-pressed]="selectedGenre === ALL_GENRES">
+          All
+        </button>
+        @for (genre of allGenresForDay; track genre) {
+          <button
+            class="stage-filter-btn stage-filter-btn--genre"
+            [class.stage-filter-active]="selectedGenre === genre"
+            (click)="selectGenre(genre)"
+            [attr.aria-pressed]="selectedGenre === genre">
+            {{ genre }}
+          </button>
+        }
+      </div>
     }
+
   </div>
 }
 
 @if (filteredPerformances.length > 0) {
-  <div class="timetable" [style.--stage-count]="stages.length">
+  <div
+    class="timetable"
+    [style.--stage-count]="stages.length"
+    role="grid"
+    [attr.aria-label]="'Schedule grid for ' + (selectedDay | date:'EEEE, MMMM d':'UTC')">
 
-    <div class="timetable-corner"></div>
+    <div class="timetable-corner" role="presentation"></div>
 
     @for (stage of stages; track stage) {
-      <div class="timetable-stage-label">
+      <div class="timetable-stage-label" role="columnheader">
         {{ stage }}
       </div>
     }
 
     @for (time of times; track time) {
-      <div class="timetable-time">{{ time }}</div>
+      <div class="timetable-time" role="rowheader">{{ time }}</div>
 
       @for (stage of stages; track stage) {
-        <div class="timetable-slot">
+        <div class="timetable-slot" role="gridcell" [attr.aria-label]="time + ' ' + stage">
 
           @if (performanceGrid[time + '-' + stage]; as perf) {
-            <div class="timetable-event">
+            <div
+              class="timetable-event"
+              [class.has-conflict]="hasConflict(time, stage)"
+              [attr.aria-label]="perf.artistName + ' at ' + perf.startTime + ' on ' + perf.stageName + (perf.genre ? ', ' + perf.genre : '') + (hasConflict(time, stage) ? ' — scheduling conflict' : '')">
+              @if (hasConflict(time, stage)) {
+                <span class="conflict-badge" aria-hidden="true">⚠</span>
+              }
               <div class="event-name">{{ perf.artistName }}</div>
               <div class="event-stage">{{ perf.stageName }}</div>
               <div class="event-time">{{ perf.startTime }} – {{ perf.endTime }}</div>
+              @if (perf.genre) {
+                <div class="event-genre">{{ perf.genre }}</div>
+              }
             </div>
           }
 
@@ -67,9 +124,14 @@
     }
   </div>
 } @else {
-  <div class="schedule-empty">
+  <div class="schedule-empty" role="status" aria-live="polite">
     <span class="empty-icon" aria-hidden="true">🎵</span>
-    @if (selectedStage !== ALL_STAGES) {
+    @if (selectedGenre !== ALL_GENRES) {
+      <p>No {{ selectedGenre }} performances
+        @if (selectedStage !== ALL_STAGES) { on {{ selectedStage }} }
+        @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
+      </p>
+    } @else if (selectedStage !== ALL_STAGES) {
       <p>No performances scheduled for {{ selectedStage }}
         @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
       </p>
