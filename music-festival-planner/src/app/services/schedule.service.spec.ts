@@ -1,6 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import { ScheduleService } from './schedule.service';
+import { ScheduleService, LOCAL_STORAGE } from './schedule.service';
 import { Performance } from '../models/performance.model';
+
+/** Isolated in-memory storage — keeps tests hermetic without touching real localStorage. */
+class MockStorage implements Storage {
+  private store: Record<string, string> = {};
+  get length(): number { return Object.keys(this.store).length; }
+  key(index: number): string | null { return Object.keys(this.store)[index] ?? null; }
+  getItem(key: string): string | null { return this.store[key] ?? null; }
+  setItem(key: string, value: string): void { this.store[key] = value; }
+  removeItem(key: string): void { delete this.store[key]; }
+  clear(): void { this.store = {}; }
+}
 
 /** Typed fixture — no field may be missing or mistyped. */
 const BASE: Omit<Performance, 'id'> = {
@@ -16,8 +27,9 @@ describe('ScheduleService', () => {
   let service: ScheduleService;
 
   beforeEach(() => {
-    localStorage.removeItem('mfp_performances');
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: LOCAL_STORAGE, useValue: new MockStorage() }],
+    });
     service = TestBed.inject(ScheduleService);
   });
 

@@ -1,5 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, InjectionToken } from '@angular/core';
 import { Performance } from '../models/performance.model';
+
+/** InjectionToken for the browser Storage used by ScheduleService.
+ *  Tests can provide an in-memory substitute to avoid touching real localStorage. */
+export const LOCAL_STORAGE = new InjectionToken<Storage>('localStorage', {
+  providedIn: 'root',
+  factory: () => localStorage,
+});
 
 const STORAGE_KEY = 'mfp_performances';
 
@@ -17,7 +24,7 @@ export class ScheduleService {
   private performances: Performance[];
   private nextId: number;
 
-  constructor() {
+  constructor(@Inject(LOCAL_STORAGE) private storage: Storage) {
     this.performances = this.loadFromStorage();
     this.nextId = this.performances.reduce((max, p) => Math.max(max, Number(p.id) || 0), 0) + 1;
   }
@@ -26,7 +33,7 @@ export class ScheduleService {
 
   private loadFromStorage(): Performance[] {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = this.storage.getItem(STORAGE_KEY);
       if (raw !== null) {
         const parsed = JSON.parse(raw) as Performance[];
         if (Array.isArray(parsed)) return parsed;
@@ -39,7 +46,7 @@ export class ScheduleService {
 
   private saveToStorage(): void {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.performances));
+      this.storage.setItem(STORAGE_KEY, JSON.stringify(this.performances));
     } catch {
       // storage full or unavailable — continue in-memory only
     }
