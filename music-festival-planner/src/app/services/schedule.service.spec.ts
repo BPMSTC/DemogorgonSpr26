@@ -16,6 +16,7 @@ describe('ScheduleService', () => {
   let service: ScheduleService;
 
   beforeEach(() => {
+    localStorage.removeItem('mfp_performances');
     TestBed.configureTestingModule({});
     service = TestBed.inject(ScheduleService);
   });

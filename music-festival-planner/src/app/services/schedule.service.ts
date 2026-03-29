@@ -27,9 +27,9 @@ export class ScheduleService {
   private loadFromStorage(): Performance[] {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
+      if (raw !== null) {
         const parsed = JSON.parse(raw) as Performance[];
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch {
       // corrupted data — fall through to seed

@@ -10,6 +10,7 @@ export interface ConflictInfo {
   time: string;
   stage: string;
   artists: string[];
+  ids: string[];
 }
 
 @Component({
@@ -123,6 +124,8 @@ export class MySchedule implements OnInit {
     }
 
     const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const toTimeStr = (m: number) =>
+      `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
     const found: ConflictInfo[] = [];
 
     for (const [stage, perfs] of Object.entries(byStage)) {
@@ -131,10 +134,13 @@ export class MySchedule implements OnInit {
           const a = perfs[i], b = perfs[j];
           const overlap = toMin(a.startTime) < toMin(b.endTime) && toMin(a.endTime) > toMin(b.startTime);
           if (overlap) {
+            const overlapStart = Math.max(toMin(a.startTime), toMin(b.startTime));
+            const overlapEnd   = Math.min(toMin(a.endTime),   toMin(b.endTime));
             found.push({
-              time: `${a.startTime}–${b.endTime}`,
+              time: `${toTimeStr(overlapStart)}–${toTimeStr(overlapEnd)}`,
               stage,
               artists: [a.artistName, b.artistName],
+              ids: [a.id, b.id],
             });
           }
         }
@@ -147,6 +153,6 @@ export class MySchedule implements OnInit {
   hasConflict(time: string, stage: string): boolean {
     const perf = this.performanceGrid[`${time}-${stage}`];
     if (!perf) return false;
-    return this.conflicts.some(c => c.stage === stage && c.artists.includes(perf.artistName));
+    return this.conflicts.some(c => c.stage === stage && c.ids.includes(perf.id));
   }
 }

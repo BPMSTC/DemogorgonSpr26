@@ -88,39 +88,43 @@
     role="grid"
     [attr.aria-label]="'Schedule grid for ' + (selectedDay | date:'EEEE, MMMM d':'UTC')">
 
-    <div class="timetable-corner" role="presentation"></div>
-
-    @for (stage of stages; track stage) {
-      <div class="timetable-stage-label" role="columnheader">
-        {{ stage }}
-      </div>
-    }
-
-    @for (time of times; track time) {
-      <div class="timetable-time" role="rowheader">{{ time }}</div>
+    <div class="timetable-row" role="row">
+      <div class="timetable-corner" role="presentation"></div>
 
       @for (stage of stages; track stage) {
-        <div class="timetable-slot" role="gridcell" [attr.aria-label]="time + ' ' + stage">
-
-          @if (performanceGrid[time + '-' + stage]; as perf) {
-            <div
-              class="timetable-event"
-              [class.has-conflict]="hasConflict(time, stage)"
-              [attr.aria-label]="perf.artistName + ' at ' + perf.startTime + ' on ' + perf.stageName + (perf.genre ? ', ' + perf.genre : '') + (hasConflict(time, stage) ? ' — scheduling conflict' : '')">
-              @if (hasConflict(time, stage)) {
-                <span class="conflict-badge" aria-hidden="true">⚠</span>
-              }
-              <div class="event-name">{{ perf.artistName }}</div>
-              <div class="event-stage">{{ perf.stageName }}</div>
-              <div class="event-time">{{ perf.startTime }} – {{ perf.endTime }}</div>
-              @if (perf.genre) {
-                <div class="event-genre">{{ perf.genre }}</div>
-              }
-            </div>
-          }
-
+        <div class="timetable-stage-label" role="columnheader">
+          {{ stage }}
         </div>
       }
+    </div>
+
+    @for (time of times; track time) {
+      <div class="timetable-row" role="row">
+        <div class="timetable-time" role="rowheader">{{ time }}</div>
+
+        @for (stage of stages; track stage) {
+          <div class="timetable-slot" role="gridcell" [attr.aria-label]="time + ' ' + stage">
+
+            @if (performanceGrid[time + '-' + stage]; as perf) {
+              <div
+                class="timetable-event"
+                [class.has-conflict]="hasConflict(time, stage)"
+                [attr.aria-label]="perf.artistName + ' at ' + perf.startTime + ' on ' + perf.stageName + (perf.genre ? ', ' + perf.genre : '') + (hasConflict(time, stage) ? ' — scheduling conflict' : '')">
+                @if (hasConflict(time, stage)) {
+                  <span class="conflict-badge" aria-hidden="true">⚠</span>
+                }
+                <div class="event-name">{{ perf.artistName }}</div>
+                <div class="event-stage">{{ perf.stageName }}</div>
+                <div class="event-time">{{ perf.startTime }} – {{ perf.endTime }}</div>
+                @if (perf.genre) {
+                  <div class="event-genre">{{ perf.genre }}</div>
+                }
+              </div>
+            }
+
+          </div>
+        }
+      </div>
     }
   </div>
 } @else {
