@@ -1,78 +1,113 @@
+<!-- ============================================================
+     my-schedule.html
+     Festival timetable grid with day tabs, stage + genre filters,
+     conflict detection banner, and per-event conflict highlighting.
+     ============================================================ -->
+
+<!-- ---- Page Header ------------------------------------------------------- -->
 <div class="schedule-header">
-  <button routerLink="/festivals" style="background: none; border: none; color: var(--neon-cyan); cursor: pointer; margin-bottom: 1rem; padding: 0;">← Back to Festivals</button>
+  <!-- Back navigation: returns to the festivals overview -->
+  <button
+    routerLink="/festivals"
+    style="background: none; border: none; color: var(--neon-cyan); cursor: pointer; margin-bottom: 1rem; padding: 0;">
+    ← Back to Festivals
+  </button>
   <h1>Festival Schedule</h1>
 </div>
 
-<!-- Day selector tabs -->
+<!-- ---- Day Selector Tabs ------------------------------------------------- -->
+<!-- Each button represents one performance day; clicking it switches the timetable view -->
 <div class="schedule-summary" role="tablist" aria-label="Festival days">
-  @for (day of festivalDays; track day) {
+  @for (festivalDay of festivalDays; track festivalDay) {
     <button
       role="tab"
-      (click)="selectDay(day)"
+      (click)="selectDay(festivalDay)"
       class="summary-stat"
-      [class.day-active]="day === selectedDay"
-      [attr.aria-selected]="day === selectedDay"
-      [attr.aria-label]="'Select ' + (day | date:'EEEE, MMMM d':'UTC')">
-      <strong>{{ day | date:'EEEE':'UTC' }}</strong>
-      {{ day | date:'MMM d':'UTC' }}
+      [class.day-active]="festivalDay === selectedDay"
+      [attr.aria-selected]="festivalDay === selectedDay"
+      [attr.aria-label]="'Select ' + (festivalDay | date:'EEEE, MMMM d':'UTC')">
+      <!-- Show full weekday name on top, short date below -->
+      <strong>{{ festivalDay | date:'EEEE':'UTC' }}</strong>
+      {{ festivalDay | date:'MMM d':'UTC' }}
     </button>
   }
 </div>
 
-<!-- Conflict alert banner -->
-@if (conflicts.length > 0) {
+<!-- ---- Conflict Alert Banner --------------------------------------------- -->
+<!-- Only rendered when the service detects overlapping time slots on the selected day -->
+@if (detectedConflicts.length > 0) {
+  <!-- assertive aria-live interrupts screen readers immediately for urgent warnings -->
   <div class="conflict-alert" role="alert" aria-live="assertive">
     <span class="conflict-icon" aria-hidden="true">⚠️</span>
     <div class="conflict-text">
-      <strong>Scheduling Conflict{{ conflicts.length > 1 ? 's' : '' }} Detected</strong>
-      @for (c of conflicts; track c.stage + c.time) {
-        <span>{{ c.stage }}: {{ c.artists.join(' & ') }} overlap at {{ c.time }}</span>
+      <!-- Pluralise "Conflict" vs "Conflicts" based on how many were found -->
+      <strong>
+        Scheduling Conflict{{ detectedConflicts.length > 1 ? 's' : '' }} Detected
+      </strong>
+      <!-- List each conflict: "Stage Name: Artist A & Artist B overlap at HH:mm–HH:mm" -->
+      @for (conflict of detectedConflicts; track conflict.stageName + conflict.conflictTimeRange) {
+        <span>
+          {{ conflict.stageName }}:
+          {{ conflict.conflictingArtistNames.join(' & ') }}
+          overlap at {{ conflict.conflictTimeRange }}
+        </span>
       }
     </div>
   </div>
 }
 
-<!-- Stage filter tabs -->
+<!-- ---- Filter Bars ------------------------------------------------------- -->
+<!-- Only shown when there is at least one day with performances to filter -->
 @if (festivalDays.length > 0) {
   <div class="filter-row">
 
+    <!-- Stage filter: shows "All Stages" plus one button per stage on the selected day -->
     <div class="stage-filter" role="group" aria-label="Filter by stage">
       <span class="stage-filter-label">Stage:</span>
+
+      <!-- "All Stages" resets the stage filter -->
       <button
         class="stage-filter-btn"
-        [class.stage-filter-active]="selectedStage === ALL_STAGES"
-        (click)="selectStage(ALL_STAGES)"
-        [attr.aria-pressed]="selectedStage === ALL_STAGES">
+        [class.stage-filter-active]="selectedStageFilter === ALL_STAGES_FILTER"
+        (click)="selectStageFilter(ALL_STAGES_FILTER)"
+        [attr.aria-pressed]="selectedStageFilter === ALL_STAGES_FILTER">
         All Stages
       </button>
-      @for (stage of allStagesForDay; track stage) {
+
+      <!-- One button per unique stage on the selected day -->
+      @for (stageName of allStagesForSelectedDay; track stageName) {
         <button
           class="stage-filter-btn"
-          [class.stage-filter-active]="selectedStage === stage"
-          (click)="selectStage(stage)"
-          [attr.aria-pressed]="selectedStage === stage">
-          {{ stage }}
+          [class.stage-filter-active]="selectedStageFilter === stageName"
+          (click)="selectStageFilter(stageName)"
+          [attr.aria-pressed]="selectedStageFilter === stageName">
+          {{ stageName }}
         </button>
       }
     </div>
 
-    @if (allGenresForDay.length > 0) {
+    <!-- Genre filter: only shown when at least one performance on this day has a genre -->
+    @if (allGenresForSelectedDay.length > 0) {
       <div class="stage-filter" role="group" aria-label="Filter by genre">
         <span class="stage-filter-label">Genre:</span>
+
+        <!-- "All" resets the genre filter -->
         <button
           class="stage-filter-btn"
-          [class.stage-filter-active]="selectedGenre === ALL_GENRES"
-          (click)="selectGenre(ALL_GENRES)"
-          [attr.aria-pressed]="selectedGenre === ALL_GENRES">
+          [class.stage-filter-active]="selectedGenreFilter === ALL_GENRES_FILTER"
+          (click)="selectGenreFilter(ALL_GENRES_FILTER)"
+          [attr.aria-pressed]="selectedGenreFilter === ALL_GENRES_FILTER">
           All
         </button>
-        @for (genre of allGenresForDay; track genre) {
+
+        <!-- One button per unique genre present on the selected day -->
+        @for (genreName of allGenresForSelectedDay; track genreName) {
           <button
             class="stage-filter-btn stage-filter-btn--genre"
-            [class.stage-filter-active]="selectedGenre === genre"
-            (click)="selectGenre(genre)"
-            [attr.aria-pressed]="selectedGenre === genre">
-            {{ genre }}
+            [class.stage-filter-active]="selectedGenreFilter === genreName"
+            (click)="selectGenreFilter(genreName)"
+            [attr.aria-pressed]="selectedGenreFilter === genreName">
+            {{ genreName }}
           </button>
         }
       </div>
@@ -81,40 +116,66 @@
   </div>
 }
 
+<!-- ---- Timetable Grid ---------------------------------------------------- -->
+<!-- CSS Grid: first column = time labels, remaining columns = one per stage -->
 @if (filteredPerformances.length > 0) {
   <div
     class="timetable"
-    [style.--stage-count]="stages.length"
+    [style.--stage-count]="visibleStages.length"
     role="grid"
     [attr.aria-label]="'Schedule grid for ' + (selectedDay | date:'EEEE, MMMM d':'UTC')">
 
+    <!-- Top-left corner cell (sits at the intersection of the time and stage header rows) -->
     <div class="timetable-corner" role="presentation"></div>
 
-    @for (stage of stages; track stage) {
+    <!-- Stage column header row: one label per visible stage -->
+    @for (stageName of visibleStages; track stageName) {
       <div class="timetable-stage-label" role="columnheader">
-        {{ stage }}
+        {{ stageName }}
       </div>
     }
 
-    @for (time of times; track time) {
-      <div class="timetable-time" role="rowheader">{{ time }}</div>
+    <!-- Time slot rows: one row per unique start time, across all visible stages -->
+    @for (startTime of visibleTimes; track startTime) {
 
-      @for (stage of stages; track stage) {
-        <div class="timetable-slot" role="gridcell" [attr.aria-label]="time + ' ' + stage">
+      <!-- Time label in the leftmost column -->
+      <div class="timetable-time" role="rowheader">{{ startTime }}</div>
 
-          @if (performanceGrid[time + '-' + stage]; as perf) {
+      <!-- One cell per stage on this time row -->
+      @for (stageName of visibleStages; track stageName) {
+        <div
+          class="timetable-slot"
+          role="gridcell"
+          [attr.aria-label]="startTime + ' ' + stageName">
+
+          <!-- Performance event block — only rendered if something is scheduled here -->
+          @if (performanceGridLookup[startTime + '-' + stageName]; as performanceInCell) {
             <div
               class="timetable-event"
-              [class.has-conflict]="hasConflict(time, stage)"
-              [attr.aria-label]="perf.artistName + ' at ' + perf.startTime + ' on ' + perf.stageName + (perf.genre ? ', ' + perf.genre : '') + (hasConflict(time, stage) ? ' — scheduling conflict' : '')">
-              @if (hasConflict(time, stage)) {
+              [class.has-conflict]="performanceCellHasConflict(startTime, stageName)"
+              [attr.aria-label]="
+                performanceInCell.artistName +
+                ' at ' + performanceInCell.startTime +
+                ' on ' + performanceInCell.stageName +
+                (performanceInCell.genre ? ', ' + performanceInCell.genre : '') +
+                (performanceCellHasConflict(startTime, stageName) ? ' — scheduling conflict' : '')
+              ">
+
+              <!-- Conflict badge icon: only shown when this event has a time overlap -->
+              @if (performanceCellHasConflict(startTime, stageName)) {
                 <span class="conflict-badge" aria-hidden="true">⚠</span>
               }
-              <div class="event-name">{{ perf.artistName }}</div>
-              <div class="event-stage">{{ perf.stageName }}</div>
-              <div class="event-time">{{ perf.startTime }} – {{ perf.endTime }}</div>
-              @if (perf.genre) {
-                <div class="event-genre">{{ perf.genre }}</div>
+
+              <!-- Event content rows -->
+              <div class="event-name">{{ performanceInCell.artistName }}</div>
+              <div class="event-stage">{{ performanceInCell.stageName }}</div>
+              <div class="event-time">
+                {{ performanceInCell.startTime }} – {{ performanceInCell.endTime }}
+              </div>
+
+              <!-- Genre label: only shown if the performance has a genre set -->
+              @if (performanceInCell.genre) {
+                <div class="event-genre">{{ performanceInCell.genre }}</div>
               }
             </div>
           }
@@ -122,17 +183,25 @@
         </div>
       }
     }
+
   </div>
+
+<!-- ---- Empty State ------------------------------------------------------- -->
 } @else {
+  <!-- polite aria-live announces the empty state to screen readers without interrupting -->
   <div class="schedule-empty" role="status" aria-live="polite">
     <span class="empty-icon" aria-hidden="true">🎵</span>
-    @if (selectedGenre !== ALL_GENRES) {
-      <p>No {{ selectedGenre }} performances
-        @if (selectedStage !== ALL_STAGES) { on {{ selectedStage }} }
+
+    <!-- Tailored message depending on which filters are active -->
+    @if (selectedGenreFilter !== ALL_GENRES_FILTER) {
+      <p>
+        No {{ selectedGenreFilter }} performances
+        @if (selectedStageFilter !== ALL_STAGES_FILTER) { on {{ selectedStageFilter }} }
         @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
       </p>
-    } @else if (selectedStage !== ALL_STAGES) {
-      <p>No performances scheduled for {{ selectedStage }}
+    } @else if (selectedStageFilter !== ALL_STAGES_FILTER) {
+      <p>
+        No performances scheduled for {{ selectedStageFilter }}
         @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
       </p>
     } @else if (selectedDay) {

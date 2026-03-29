@@ -1,66 +1,101 @@
+<!-- ============================================================
+     performance-list.html
+     Shows all performances for a festival sorted by date + time.
+     Provides "Add Performance", per-card "Remove", and "Clear All".
+     ============================================================ -->
+
 <div class="create-container">
 
-  <button type="button" class="back-link" (click)="goBack()">← Back to Festivals</button>
+  <!-- Back link: returns to the festivals overview -->
+  <button type="button" class="back-link" (click)="navigateBackToFestivals()">← Back to Festivals</button>
 
+  <!-- ---- Page Header -------------------------------------------------- -->
   <div class="list-header">
     <div>
       <h2>Performances</h2>
-      @if (festival) {
-        <p class="festival-context">{{ festival.name }}</p>
+      <!-- Show the parent festival name as a subtitle -->
+      @if (currentFestival) {
+        <p class="festival-context">{{ currentFestival.name }}</p>
       }
     </div>
+
+    <!-- Action buttons: "Clear All" only visible when the list is non-empty -->
     <div class="list-actions">
-      @if (performances.length > 0) {
+      @if (sortedPerformances.length > 0) {
         <button
           class="btn-cancel btn-sm"
-          (click)="clearAll()"
+          (click)="confirmAndClearAllPerformances()"
           aria-label="Clear all performances for this festival">
           Clear All
         </button>
       }
-      <button class="btn-submit" (click)="addPerformance()" aria-label="Add a new performance">
+      <button
+        class="btn-submit"
+        (click)="navigateToAddPerformance()"
+        aria-label="Add a new performance">
         + Add Performance
       </button>
     </div>
   </div>
 
-  @if (performances.length === 0) {
+  <!-- ---- Empty State -------------------------------------------------- -->
+  @if (sortedPerformances.length === 0) {
+    <!-- aria-live="polite" announces the empty state to screen readers after a Clear All -->
     <div class="schedule-empty" role="status" aria-live="polite">
       <p>No performances scheduled yet. Click <strong>+ Add Performance</strong> to build the lineup.</p>
     </div>
+
+  <!-- ---- Performance Cards -------------------------------------------- -->
   } @else {
     <div class="performance-list" role="list" aria-label="Performance lineup">
-      @for (perf of performances; track perf.id) {
+
+      @for (performance of sortedPerformances; track performance.id) {
         <div class="performance-card" role="listitem">
 
+          <!-- Card header: artist name, stage badge, optional genre badge -->
           <div class="performance-card-header">
-            <span class="artist-name">{{ perf.artistName }}</span>
-            <span class="stage-badge" [attr.aria-label]="'Stage: ' + perf.stageName">{{ perf.stageName }}</span>
-            @if (perf.genre) {
-              <span class="genre-badge" [attr.aria-label]="'Genre: ' + perf.genre">{{ perf.genre }}</span>
+            <span class="artist-name">{{ performance.artistName }}</span>
+
+            <!-- Stage badge: purple pill showing which stage this is on -->
+            <span
+              class="stage-badge"
+              [attr.aria-label]="'Stage: ' + performance.stageName">
+              {{ performance.stageName }}
+            </span>
+
+            <!-- Genre badge: only shown if the performance has a genre set -->
+            @if (performance.genre) {
+              <span
+                class="genre-badge"
+                [attr.aria-label]="'Genre: ' + performance.genre">
+                {{ performance.genre }}
+              </span>
             }
           </div>
 
+          <!-- Card meta row: date and time range -->
           <div class="performance-meta">
             <span class="meta-item">
-              <strong>Date:</strong> {{ perf.date }}
+              <strong>Date:</strong> {{ performance.date }}
             </span>
             <span class="meta-item">
-              <strong>Time:</strong> {{ perf.startTime }} – {{ perf.endTime }}
+              <strong>Time:</strong> {{ performance.startTime }} – {{ performance.endTime }}
             </span>
           </div>
 
+          <!-- Card action: remove this single performance -->
           <div class="performance-card-actions">
             <button
               class="btn-cancel btn-sm"
-              (click)="deletePerformance(perf.id)"
-              [attr.aria-label]="'Remove ' + perf.artistName + ' from lineup'">
+              (click)="confirmAndDeletePerformance(performance.id)"
+              [attr.aria-label]="'Remove ' + performance.artistName + ' from lineup'">
               Remove
             </button>
           </div>
 
         </div>
       }
+
     </div>
   }
 

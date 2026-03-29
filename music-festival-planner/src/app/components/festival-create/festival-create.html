@@ -1,59 +1,73 @@
+<!-- ============================================================
+     festival-create.html
+     Create a new festival — name, dates, and location.
+     Cross-field validator ensures the end date is not before the start.
+     ============================================================ -->
+
 <div class="create-container">
   <h2>Create a New Festival</h2>
 
-  <!-- Server-level error -->
-  @if (serverError) {
-    <div class="error-banner" role="alert">{{ serverError }}</div>
+  <!-- Service-level error banner (e.g. invalid date range thrown by FestivalService) -->
+  @if (serviceErrorMessage) {
+    <div class="error-banner" role="alert">{{ serviceErrorMessage }}</div>
   }
-  
+
   <form [formGroup]="festivalForm" (ngSubmit)="onSubmit()">
-    
+
+    <!-- Festival Name -->
     <div class="form-group">
       <label for="name">Festival Name <span aria-hidden="true">*</span></label>
-      <input 
-        type="text" 
-        id="name" 
-        formControlName="name" 
-        [attr.aria-invalid]="submitted && f['name'].errors ? true : null"
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+        [attr.aria-invalid]="hasAttemptedSubmit && fields['name'].errors ? true : null"
         aria-required="true">
-      <div *ngIf="submitted || f['name'].touched" class="error-messages">
-        <small *ngIf="f['name'].errors?.['required']" class="error-text">Name is required.</small>
+      <div *ngIf="hasAttemptedSubmit || fields['name'].touched" class="error-messages">
+        <small *ngIf="fields['name'].errors?.['required']" class="error-text">Name is required.</small>
       </div>
     </div>
 
+    <!-- Start Date + End Date side-by-side -->
     <div class="form-group row">
       <div class="half-width">
         <label for="startDate">Start Date <span aria-hidden="true">*</span></label>
         <input type="date" id="startDate" formControlName="startDate" aria-required="true">
-        <div *ngIf="submitted || f['startDate'].touched" class="error-messages">
-          <small *ngIf="f['startDate'].errors?.['required']" class="error-text">Start date is required.</small>
+        <div *ngIf="hasAttemptedSubmit || fields['startDate'].touched" class="error-messages">
+          <small *ngIf="fields['startDate'].errors?.['required']" class="error-text">Start date is required.</small>
         </div>
       </div>
 
       <div class="half-width">
         <label for="endDate">End Date <span aria-hidden="true">*</span></label>
         <input type="date" id="endDate" formControlName="endDate" aria-required="true">
-        <div *ngIf="submitted || f['endDate'].touched" class="error-messages">
-          <small *ngIf="f['endDate'].errors?.['required']" class="error-text">End date is required.</small>
+        <div *ngIf="hasAttemptedSubmit || fields['endDate'].touched" class="error-messages">
+          <small *ngIf="fields['endDate'].errors?.['required']" class="error-text">End date is required.</small>
         </div>
       </div>
     </div>
 
-    <div *ngIf="submitted && festivalForm.errors?.['endBeforeStart']" class="error-messages">
+    <!-- Cross-field date error: end must be on or after start -->
+    <div *ngIf="hasAttemptedSubmit && festivalForm.errors?.['endBeforeStart']" class="error-messages">
       <small class="error-text">End date must be on or after the start date.</small>
     </div>
 
+    <!-- Location -->
     <div class="form-group">
       <label for="location">Location <span aria-hidden="true">*</span></label>
       <input type="text" id="location" formControlName="location" aria-required="true">
-      <div *ngIf="submitted || f['location'].touched" class="error-messages">
-        <small *ngIf="f['location'].errors?.['required']" class="error-text">Location is required.</small>
+      <div *ngIf="hasAttemptedSubmit || fields['location'].touched" class="error-messages">
+        <small *ngIf="fields['location'].errors?.['required']" class="error-text">Location is required.</small>
       </div>
     </div>
 
+    <!-- Form Actions -->
     <div class="button-group">
+      <!-- Cancel: goes back to the festivals list without saving -->
       <button type="button" class="btn-cancel" routerLink="/festivals">Cancel</button>
+      <!-- Submit: disabled until all fields pass validation -->
       <button type="submit" class="btn-submit" [disabled]="festivalForm.invalid">Save Festival</button>
     </div>
+
   </form>
 </div>

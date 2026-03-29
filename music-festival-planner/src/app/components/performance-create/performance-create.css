@@ -1,3 +1,11 @@
+/* ============================================================
+   performance-create.css
+   Styles for the "Add Performance" form — input states, visual
+   validation feedback (valid/invalid glows), time side-by-side
+   row, responsive breakpoints.
+   Shared button and neon variables live in src/styles.css.
+   ============================================================ */
+
 .form-group {
   margin-bottom: 1.25rem;
 }

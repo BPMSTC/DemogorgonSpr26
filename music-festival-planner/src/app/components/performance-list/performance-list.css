@@ -1,3 +1,11 @@
+/* ============================================================
+   performance-list.css
+   Styles for the performance lineup — card layout, stage badge,
+   genre badge, action buttons, and responsive breakpoints.
+   Shared button and neon variables live in src/styles.css.
+   ============================================================ */
+
+/* ---- Page header row: title on left, action buttons on right ---- */
 .list-header {
   display: flex;
   align-items: flex-start;

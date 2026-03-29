@@ -1,17 +1,30 @@
+<!-- ============================================================
+     performance-create.html
+     Add Performance form — validates input, detects stage conflicts,
+     and saves to ScheduleService (persisted via localStorage).
+     ============================================================ -->
+
 <div class="create-container">
 
+  <!-- Back link: returns to the performance list without saving -->
   <button type="button" class="back-link" (click)="onCancel()">← Back to Performances</button>
 
   <h2>Add a Performance</h2>
-  @if (festival) {
-    <p class="festival-context">for <strong>{{ festival.name }}</strong></p>
+
+  <!-- Show which festival this performance is being added to -->
+  @if (currentFestival) {
+    <p class="festival-context">for <strong>{{ currentFestival.name }}</strong></p>
   }
 
-  @if (serverError) {
-    <div class="error-banner" role="alert" aria-live="assertive">{{ serverError }}</div>
+  <!-- Service-level error banner: shown when ScheduleService throws (e.g. double-booking) -->
+  @if (serviceErrorMessage) {
+    <div class="error-banner" role="alert" aria-live="assertive">
+      {{ serviceErrorMessage }}
+    </div>
   }
 
-  @if (stages.length === 0) {
+  <!-- Guard: no stages means performances can't be created yet -->
+  @if (availableStages.length === 0) {
     <div class="error-banner" role="alert">
       This festival has no stages yet. Please
       <a [routerLink]="['/festivals', festivalId, 'stages', 'new']">add a stage</a>
@@ -19,57 +32,76 @@
     </div>
   }
 
-  <form [formGroup]="performanceForm" (ngSubmit)="onSubmit()" novalidate aria-label="Add performance form">
+  <!-- ---- Main Form -------------------------------------------------- -->
+  <form
+    [formGroup]="performanceForm"
+    (ngSubmit)="onSubmit()"
+    novalidate
+    aria-label="Add performance form">
 
-    <!-- Artist Name -->
+    <!-- Artist Name: random placeholder rotates on each page load -->
     <div class="form-group">
       <label for="artistName">Artist Name <span aria-hidden="true">*</span></label>
       <input
         type="text"
         id="artistName"
         formControlName="artistName"
-        [placeholder]="artistPlaceholder"
+        [placeholder]="artistNamePlaceholder"
         aria-required="true"
-        [attr.aria-invalid]="(submitted || f['artistName'].touched) && f['artistName'].errors ? true : null"
+        [attr.aria-invalid]="(hasAttemptedSubmit || fields['artistName'].touched) && fields['artistName'].errors ? true : null"
         aria-describedby="artistName-errors">
-      <div id="artistName-errors" aria-live="polite" *ngIf="submitted || f['artistName'].touched" class="error-messages">
-        <small *ngIf="f['artistName'].errors?.['required']"       class="error-text">Artist name is required.</small>
-        <small *ngIf="f['artistName'].errors?.['whitespaceOnly']" class="error-text">Artist name cannot be blank.</small>
-        <small *ngIf="f['artistName'].errors?.['maxlength']"      class="error-text">Artist name cannot exceed 100 characters.</small>
+
+      <!-- Show errors only after the user has touched this field or tried to submit -->
+      <div
+        id="artistName-errors"
+        aria-live="polite"
+        *ngIf="hasAttemptedSubmit || fields['artistName'].touched"
+        class="error-messages">
+        <small *ngIf="fields['artistName'].errors?.['required']"       class="error-text">Artist name is required.</small>
+        <small *ngIf="fields['artistName'].errors?.['whitespaceOnly']" class="error-text">Artist name cannot be blank.</small>
+        <small *ngIf="fields['artistName'].errors?.['maxlength']"      class="error-text">Artist name cannot exceed 100 characters.</small>
       </div>
     </div>
 
-    <!-- Stage -->
+    <!-- Stage: populated from StageService for this festival -->
     <div class="form-group">
       <label for="stageName">Stage <span aria-hidden="true">*</span></label>
       <select
         id="stageName"
         formControlName="stageName"
         aria-required="true"
-        [attr.aria-invalid]="(submitted || f['stageName'].touched) && f['stageName'].errors ? true : null"
+        [attr.aria-invalid]="(hasAttemptedSubmit || fields['stageName'].touched) && fields['stageName'].errors ? true : null"
         aria-describedby="stageName-errors">
         <option value="" disabled>— Select a stage —</option>
-        @for (stage of stages; track stage.id) {
+        <!-- Render one option per available stage -->
+        @for (stage of availableStages; track stage.id) {
           <option [value]="stage.name">{{ stage.name }}</option>
         }
       </select>
-      <div id="stageName-errors" aria-live="polite" *ngIf="submitted || f['stageName'].touched" class="error-messages">
-        <small *ngIf="f['stageName'].errors?.['required']" class="error-text">Stage is required.</small>
+      <div
+        id="stageName-errors"
+        aria-live="polite"
+        *ngIf="hasAttemptedSubmit || fields['stageName'].touched"
+        class="error-messages">
+        <small *ngIf="fields['stageName'].errors?.['required']" class="error-text">Stage is required.</small>
       </div>
     </div>
 
-    <!-- Genre -->
+    <!-- Genre: optional field for category filtering on the schedule view -->
     <div class="form-group">
-      <label for="genre">Genre <span class="optional-label">(optional)</span></label>
+      <label for="genre">
+        Genre <span class="optional-label">(optional)</span>
+      </label>
       <select id="genre" formControlName="genre" aria-label="Music genre, optional">
         <option value="">— Select genre —</option>
-        @for (g of genres; track g) {
-          <option [value]="g">{{ g }}</option>
+        <!-- One option per genre in the AVAILABLE_GENRES constant -->
+        @for (genreOption of availableGenres; track genreOption) {
+          <option [value]="genreOption">{{ genreOption }}</option>
         }
       </select>
     </div>
 
-    <!-- Date -->
+    <!-- Date: ISO date picker -->
     <div class="form-group">
       <label for="date">Date <span aria-hidden="true">*</span></label>
       <input
@@ -77,14 +109,18 @@
         id="date"
         formControlName="date"
         aria-required="true"
-        [attr.aria-invalid]="(submitted || f['date'].touched) && f['date'].errors ? true : null"
+        [attr.aria-invalid]="(hasAttemptedSubmit || fields['date'].touched) && fields['date'].errors ? true : null"
         aria-describedby="date-errors">
-      <div id="date-errors" aria-live="polite" *ngIf="submitted || f['date'].touched" class="error-messages">
-        <small *ngIf="f['date'].errors?.['required']" class="error-text">Date is required.</small>
+      <div
+        id="date-errors"
+        aria-live="polite"
+        *ngIf="hasAttemptedSubmit || fields['date'].touched"
+        class="error-messages">
+        <small *ngIf="fields['date'].errors?.['required']" class="error-text">Date is required.</small>
       </div>
     </div>
 
-    <!-- Start Time / End Time -->
+    <!-- Start Time + End Time: displayed side-by-side on wider screens -->
     <div class="time-row">
 
       <div class="form-group">
@@ -94,10 +130,14 @@
           id="startTime"
           formControlName="startTime"
           aria-required="true"
-          [attr.aria-invalid]="(submitted || f['startTime'].touched) && f['startTime'].errors ? true : null"
+          [attr.aria-invalid]="(hasAttemptedSubmit || fields['startTime'].touched) && fields['startTime'].errors ? true : null"
           aria-describedby="startTime-errors">
-        <div id="startTime-errors" aria-live="polite" *ngIf="submitted || f['startTime'].touched" class="error-messages">
-          <small *ngIf="f['startTime'].errors?.['required']" class="error-text">Start time is required.</small>
+        <div
+          id="startTime-errors"
+          aria-live="polite"
+          *ngIf="hasAttemptedSubmit || fields['startTime'].touched"
+          class="error-messages">
+          <small *ngIf="fields['startTime'].errors?.['required']" class="error-text">Start time is required.</small>
         </div>
       </div>
 
@@ -108,25 +148,39 @@
           id="endTime"
           formControlName="endTime"
           aria-required="true"
-          [attr.aria-invalid]="(submitted || f['endTime'].touched) && f['endTime'].errors ? true : null"
+          [attr.aria-invalid]="(hasAttemptedSubmit || fields['endTime'].touched) && fields['endTime'].errors ? true : null"
           aria-describedby="endTime-errors">
-        <div id="endTime-errors" aria-live="polite" *ngIf="submitted || f['endTime'].touched" class="error-messages">
-          <small *ngIf="f['endTime'].errors?.['required']" class="error-text">End time is required.</small>
+        <div
+          id="endTime-errors"
+          aria-live="polite"
+          *ngIf="hasAttemptedSubmit || fields['endTime'].touched"
+          class="error-messages">
+          <small *ngIf="fields['endTime'].errors?.['required']" class="error-text">End time is required.</small>
         </div>
       </div>
 
     </div>
 
-    <!-- Cross-field time error -->
-    @if ((submitted || (f['startTime'].touched && f['endTime'].touched)) && performanceForm.errors?.['endNotAfterStart']) {
+    <!-- Cross-field error: only shown after both time fields have been touched -->
+    @if (
+      (hasAttemptedSubmit || (fields['startTime'].touched && fields['endTime'].touched))
+      && performanceForm.errors?.['endNotAfterStart']
+    ) {
       <div class="error-messages cross-field-error" role="alert" aria-live="polite">
         <small class="error-text">End time must be later than start time.</small>
       </div>
     }
 
+    <!-- Form Actions -->
     <div class="button-group">
+      <!-- Cancel: goes back without saving -->
       <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
-      <button type="submit" class="btn-submit" [disabled]="performanceForm.invalid && submitted">
+
+      <!-- Submit: disabled only after a failed submit attempt so the user can still click -->
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="performanceForm.invalid && hasAttemptedSubmit">
         Save Performance
       </button>
     </div>
