@@ -60,23 +60,69 @@ export class ScheduleService {
   // ---- Private Storage Helpers -------------------------------------------
 
   /**
+   * Validates that a value loaded from storage has the minimum shape required
+   * to be safely treated as a Performance for scheduling logic.
+   *
+   * We only require fields that are used by time and layout calculations:
+   * id, festivalId, stageName, date, startTime, endTime — all as strings.
+   *
+   * @param entry Arbitrary value parsed from JSON storage.
+   * @returns True if the entry looks like a valid stored Performance.
+   */
+  private isValidStoredPerformance(entry: unknown): entry is Performance {
+    if (entry === null || typeof entry !== 'object') {
+      return false;
+    }
+
+    const candidate = entry as { [key: string]: unknown };
+    const requiredKeys: Array<keyof Performance> = [
+      'id',
+      'festivalId',
+      'stageName',
+      'date',
+      'startTime',
+      'endTime',
+    ];
+
+    for (const key of requiredKeys) {
+      if (typeof candidate[key] !== 'string') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Reads and deserializes performances from storage.
-   * Falls back to SEED_PERFORMANCES if storage is empty or the JSON is corrupted.
+   * Falls back to SEED_PERFORMANCES if storage is empty, the JSON is corrupted,
+   * or the stored data does not contain at least one valid performance entry.
    */
   private loadFromStorage(): Performance[] {
     try {
       const raw = this.storage.getItem(STORAGE_KEY);
 
-      // Only use stored data if it exists and is a valid array.
+      // Only use stored data if it exists and deserializes to a valid array
+      // with at least one structurally valid performance.
       if (raw !== null) {
-        const parsed = JSON.parse(raw) as Performance[];
-        if (Array.isArray(parsed)) return parsed;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const valid = parsed.filter((entry) =>
+            this.isValidStoredPerformance(entry)
+          );
+
+          if (valid.length > 0) {
+            // Return a cloned array so in-memory mutations do not accidentally
+            // modify any shared references from parsing.
+            return valid.map((p) => ({ ...p } as Performance));
+          }
+        }
       }
     } catch {
       // JSON.parse throws on malformed data — fall through to seed data.
     }
 
-    // First run or corrupted storage: seed with demo performances.
+    // First run, corrupted storage, or no valid entries: seed with demo performances.
     return [...SEED_PERFORMANCES];
   }
 
