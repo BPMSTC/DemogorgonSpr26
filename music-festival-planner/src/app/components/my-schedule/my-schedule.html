@@ -45,7 +45,7 @@
       <!-- Pluralise "Conflict" vs "Conflicts" based on count -->
       <strong>Scheduling Conflict{{ conflicts.length > 1 ? 's' : '' }} Detected</strong>
       <!-- List each conflict: "Stage Name: Artist A & Artist B overlap at HH:mm–HH:mm" -->
-      @for (c of conflicts; track c.stage + c.time) {
+      @for (c of conflicts; track $index) {
         <span>{{ c.stage }}: {{ c.artists.join(' & ') }} overlap at {{ c.time }}</span>
       }
     </div>
