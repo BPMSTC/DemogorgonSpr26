@@ -69,6 +69,11 @@
   display: contents;
 }
 
+/* Row wrapper — transparent to CSS grid, preserves ARIA row semantics */
+.timetable-row {
+  display: contents;
+}
+
 .timetable-stage-label {
   background-color: var(--bg-surface);
   color: var(--neon-cyan);

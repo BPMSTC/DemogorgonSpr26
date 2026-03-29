@@ -47,7 +47,7 @@
 }
 
 .form-group input.ng-touched.ng-valid:not([type="date"]):not([type="time"]),
-.form-group select.ng-touched.ng-valid:not([value=""]) {
+.form-group select.ng-touched.ng-valid {
   border-color: #00e676;
   box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.12);
 }

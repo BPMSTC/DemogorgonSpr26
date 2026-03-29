@@ -1,101 +1,117 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, InjectionToken } from '@angular/core';
 import { Performance } from '../models/performance.model';
+
+// ---- Storage Abstraction ---------------------------------------------------
+
+/**
+ * InjectionToken for the browser Storage used by ScheduleService.
+ * Providing an InjectionToken instead of calling `localStorage` directly
+ * lets unit tests inject a hermetic in-memory substitute (MockStorage)
+ * so tests run without touching the real browser storage.
+ */
+export const LOCAL_STORAGE = new InjectionToken<Storage>('localStorage', {
+  providedIn: 'root',
+  factory: () => localStorage, // production: use the real browser localStorage
+});
 
 // ---- Storage Configuration -------------------------------------------------
 
-/** localStorage key used to persist all performances across page navigations. */
-const PERFORMANCES_STORAGE_KEY = 'mfp_performances';
+/** The key under which all performances are stored in localStorage. */
+const STORAGE_KEY = 'mfp_performances';
 
 /**
  * Pre-loaded demo performances shown the very first time the app opens
  * (i.e. when localStorage has no saved data yet).
- * Gives new users something to explore immediately.
+ * Gives new users something to explore right away without creating anything.
  */
-const DEMO_PERFORMANCES: Performance[] = [
-  { id: '1', festivalId: '1', artistName: 'The Neon Shadows',   stageName: 'Main Stage',   date: '2026-08-01', startTime: '18:00', endTime: '19:30', genre: 'Rock' },
-  { id: '2', festivalId: '1', artistName: 'DJ Horizon',         stageName: 'Dance Tent',   date: '2026-08-01', startTime: '18:00', endTime: '19:00', genre: 'Electronic' },
-  { id: '3', festivalId: '1', artistName: 'Electric Pulse',     stageName: 'Main Stage',   date: '2026-08-01', startTime: '20:00', endTime: '21:30', genre: 'Electronic' },
-  { id: '4', festivalId: '1', artistName: 'Acoustic Wanderers', stageName: 'Forest Stage', date: '2026-08-02', startTime: '14:00', endTime: '15:00', genre: 'Folk' },
+const SEED_PERFORMANCES: Performance[] = [
+  { id: '1', festivalId: '1', artistName: 'The Neon Shadows',    stageName: 'Main Stage',   date: '2026-08-01', startTime: '18:00', endTime: '19:30', genre: 'Rock' },
+  { id: '2', festivalId: '1', artistName: 'DJ Horizon',          stageName: 'Dance Tent',   date: '2026-08-01', startTime: '18:00', endTime: '19:00', genre: 'Electronic' },
+  { id: '3', festivalId: '1', artistName: 'Electric Pulse',      stageName: 'Main Stage',   date: '2026-08-01', startTime: '20:00', endTime: '21:30', genre: 'Electronic' },
+  { id: '4', festivalId: '1', artistName: 'Acoustic Wanderers',  stageName: 'Forest Stage', date: '2026-08-02', startTime: '14:00', endTime: '15:00', genre: 'Folk' },
 ];
 
 // ---- Service ---------------------------------------------------------------
 
 @Injectable({
-  providedIn: 'root', // singleton — shared across the entire app
+  providedIn: 'root', // singleton — one shared instance across the entire app
 })
 export class ScheduleService {
-  /** The working in-memory list of all performances. Kept in sync with localStorage. */
-  private allPerformances: Performance[];
+  /** Working in-memory list of all performances. Kept in sync with storage. */
+  private performances: Performance[];
 
-  /** Counter used to generate unique numeric IDs for new performances. */
-  private nextPerformanceId: number;
+  /** Auto-incrementing counter for assigning unique numeric IDs to new performances. */
+  private nextId: number;
 
-  constructor() {
-    // Hydrate from localStorage on startup so data survives page refreshes.
-    this.allPerformances = this.loadPerformancesFromStorage();
+  constructor(
+    // Inject the storage abstraction so tests can substitute MockStorage.
+    @Inject(LOCAL_STORAGE) private storage: Storage
+  ) {
+    // Hydrate from storage on startup so data survives page refreshes.
+    this.performances = this.loadFromStorage();
 
-    // Set the next ID to one above the highest existing ID to avoid collisions.
-    this.nextPerformanceId = this.allPerformances
-      .reduce((highestId, performance) => Math.max(highestId, Number(performance.id) || 0), 0) + 1;
+    // Set the counter to one above the highest existing ID to avoid collisions
+    // with data that was already stored from a previous session.
+    this.nextId = this.performances.reduce(
+      (highestId, p) => Math.max(highestId, Number(p.id) || 0), 0
+    ) + 1;
   }
 
   // ---- Private Storage Helpers -------------------------------------------
 
   /**
-   * Reads and parses performances from localStorage.
-   * Falls back to the demo dataset if storage is empty or the data is corrupted.
+   * Reads and deserializes performances from storage.
+   * Falls back to SEED_PERFORMANCES if storage is empty or the JSON is corrupted.
    */
-  private loadPerformancesFromStorage(): Performance[] {
+  private loadFromStorage(): Performance[] {
     try {
-      const storedJson = localStorage.getItem(PERFORMANCES_STORAGE_KEY);
+      const raw = this.storage.getItem(STORAGE_KEY);
 
-      // Only use stored data if it exists and contains at least one entry.
-      if (storedJson) {
-        const parsedPerformances = JSON.parse(storedJson) as Performance[];
-        if (Array.isArray(parsedPerformances) && parsedPerformances.length > 0) {
-          return parsedPerformances;
-        }
+      // Only use stored data if it exists and is a valid array.
+      if (raw !== null) {
+        const parsed = JSON.parse(raw) as Performance[];
+        if (Array.isArray(parsed)) return parsed;
       }
     } catch {
-      // JSON.parse throws if the stored string is malformed — use demo data instead.
+      // JSON.parse throws on malformed data — fall through to seed data.
     }
 
-    // First-time visitor or corrupted storage: seed with demo performances.
-    return [...DEMO_PERFORMANCES];
+    // First run or corrupted storage: seed with demo performances.
+    return [...SEED_PERFORMANCES];
   }
 
   /**
-   * Serializes the current performances array to localStorage.
-   * Called after every create/delete operation to keep storage in sync.
+   * Serializes the current performances array back to storage.
+   * Called after every create/delete to keep storage in sync with memory.
    */
-  private persistPerformancesToStorage(): void {
+  private saveToStorage(): void {
     try {
-      localStorage.setItem(PERFORMANCES_STORAGE_KEY, JSON.stringify(this.allPerformances));
+      this.storage.setItem(STORAGE_KEY, JSON.stringify(this.performances));
     } catch {
-      // Storage quota exceeded or unavailable (private browsing) — silently
-      // continue with the in-memory state; the app still functions correctly.
+      // Storage quota exceeded or unavailable (e.g. private browsing mode).
+      // Continue with in-memory state — the app still works for this session.
     }
   }
 
   // ---- Private Time Utility ----------------------------------------------
 
   /**
-   * Converts a 24-hour time string ("H:mm" or "HH:mm") to a total-minutes integer.
-   * Returns null if the format is invalid so callers can handle bad input gracefully.
+   * Converts a "H:mm" or "HH:mm" time string to a total-minutes integer.
+   * Returns null for any input that doesn't match the expected format.
    *
    * Examples:  "9:00" → 540,  "18:30" → 1110,  "bad" → null
+   * Used internally to compare time windows as plain numbers.
    */
-  private convertTimeStringToMinutes(timeString: string): number | null {
-    const timePattern = /^(\d{1,2}):(\d{2})$/;
-    const patternMatch = timePattern.exec(timeString.trim());
-    if (!patternMatch) return null;
+  private toMinutes(time: string): number | null {
+    const match = /^(\d{1,2}):(\d{2})$/.exec(time.trim());
+    if (!match) return null;
 
-    const hours   = Number(patternMatch[1]);
-    const minutes = Number(patternMatch[2]);
+    const hours   = Number(match[1]);
+    const minutes = Number(match[2]);
 
-    // Validate that the parsed values are real integers within clock bounds.
-    if (!Number.isInteger(hours)   || !Number.isInteger(minutes))  return null;
-    if (hours   < 0 || hours   > 23) return null;
+    // Reject non-integers and out-of-range clock values.
+    if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
+    if (hours < 0 || hours > 23)     return null;
     if (minutes < 0 || minutes > 59) return null;
 
     return hours * 60 + minutes;
@@ -105,20 +121,23 @@ export class ScheduleService {
 
   /**
    * Returns a shallow copy of all performances belonging to the given festival.
-   * Copies prevent external code from mutating the internal array directly.
+   * Returning copies prevents external code from accidentally mutating the store.
    */
   getPerformancesByFestival(festivalId: string): Performance[] {
-    return this.allPerformances
-      .filter((performance) => performance.festivalId === festivalId)
-      .map((performance) => ({ ...performance })); // spread creates a safe copy
+    return this.performances
+      .filter((p) => p.festivalId === festivalId)
+      .map((p) => ({ ...p })); // spread creates a safe independent copy
   }
 
   /**
-   * Checks whether a specific stage is already booked during the requested time window.
-   * Uses the "overlap" formula: two intervals overlap when A.start < B.end AND A.end > B.start.
+   * Tests whether a stage is already booked during the requested time window.
+   * Uses the standard interval-overlap formula:
+   *   Two ranges [A.start, A.end) and [B.start, B.end) overlap when
+   *   A.start < B.end  AND  A.end > B.start.
    *
-   * @param excludeId  Optional — ID of an existing performance to skip (used when editing).
-   * @returns true if the stage is occupied (conflict exists), false if the slot is free.
+   * @param excludeId  Skip this performance ID when scanning (used when editing
+   *                   an existing performance so it doesn't conflict with itself).
+   * @returns true = slot is taken (conflict), false = slot is free.
    */
   isStageOccupied(
     festivalId: string,
@@ -128,100 +147,82 @@ export class ScheduleService {
     endTime:    string,
     excludeId?: string
   ): boolean {
-    const newStartMinutes = this.convertTimeStringToMinutes(startTime);
-    const newEndMinutes   = this.convertTimeStringToMinutes(endTime);
+    const newStart = this.toMinutes(startTime);
+    const newEnd   = this.toMinutes(endTime);
 
-    // If either time is unparseable or the window is empty, treat it as no conflict.
-    if (newStartMinutes === null || newEndMinutes === null) return false;
-    if (newStartMinutes >= newEndMinutes) return false;
+    // Unparseable times or zero-duration windows cannot conflict.
+    if (newStart === null || newEnd === null) return false;
+    if (newStart >= newEnd) return false;
 
-    // Walk every stored performance and test for a time overlap on the same stage/day.
-    return this.allPerformances.some((existingPerformance) => {
-      if (existingPerformance.festivalId !== festivalId) return false;
-      if (existingPerformance.stageName  !== stageName)  return false;
-      if (existingPerformance.date       !== date)       return false;
+    // Walk every stored performance and test for an overlap on the same stage/day.
+    return this.performances.some((p) => {
+      if (p.festivalId !== festivalId)          return false;
+      if (p.stageName  !== stageName)           return false;
+      if (p.date       !== date)                return false;
+      if (excludeId && p.id === excludeId)      return false; // skip self when editing
 
-      // Skip the performance being edited so it doesn't conflict with itself.
-      if (excludeId && existingPerformance.id === excludeId) return false;
+      const existingStart = this.toMinutes(p.startTime);
+      const existingEnd   = this.toMinutes(p.endTime);
+      if (existingStart === null || existingEnd === null) return false;
 
-      const existingStartMinutes = this.convertTimeStringToMinutes(existingPerformance.startTime);
-      const existingEndMinutes   = this.convertTimeStringToMinutes(existingPerformance.endTime);
-      if (existingStartMinutes === null || existingEndMinutes === null) return false;
-
-      // Standard interval-overlap test.
-      return newStartMinutes < existingEndMinutes && newEndMinutes > existingStartMinutes;
+      // Interval-overlap test.
+      return newStart < existingEnd && newEnd > existingStart;
     });
   }
 
   // ---- Public Mutation Methods -------------------------------------------
 
   /**
-   * Validates and saves a new performance to the schedule.
-   * Throws a descriptive Error if validation fails — the caller shows it to the user.
+   * Validates and saves a new performance.
+   * Throws a human-readable Error for any validation failure so the calling
+   * component can display it directly in the form's error banner.
    */
-  createPerformance(newPerformanceData: Omit<Performance, 'id'>): Performance {
-    const startMinutes = this.convertTimeStringToMinutes(newPerformanceData.startTime);
-    const endMinutes   = this.convertTimeStringToMinutes(newPerformanceData.endTime);
+  createPerformance(data: Omit<Performance, 'id'>): Performance {
+    const startMinutes = this.toMinutes(data.startTime);
+    const endMinutes   = this.toMinutes(data.endTime);
 
-    // Guard: both times must parse successfully.
+    // Guard: both times must be parseable 24-hour strings.
     if (startMinutes === null || endMinutes === null) {
       throw new Error('Start and end times must be valid 24-hour times (H:mm or HH:mm).');
     }
 
-    // Guard: the performance must have positive duration.
+    // Guard: the performance must have a positive duration.
     if (startMinutes >= endMinutes) {
       throw new Error('End time must be later than start time.');
     }
 
-    // Guard: the stage must not be double-booked during this window.
-    if (
-      this.isStageOccupied(
-        newPerformanceData.festivalId,
-        newPerformanceData.stageName,
-        newPerformanceData.date,
-        newPerformanceData.startTime,
-        newPerformanceData.endTime
-      )
-    ) {
-      throw new Error(`"${newPerformanceData.stageName}" is already booked during that time slot.`);
+    // Guard: the stage must not already be booked during this time window.
+    if (this.isStageOccupied(data.festivalId, data.stageName, data.date, data.startTime, data.endTime)) {
+      throw new Error(`"${data.stageName}" is already booked during that time slot.`);
     }
 
-    // Assign a unique ID and append to the in-memory list.
-    const savedPerformance: Performance = {
-      id: String(this.nextPerformanceId++),
-      ...newPerformanceData,
-    };
-
-    this.allPerformances.push(savedPerformance);
-    this.persistPerformancesToStorage(); // keep localStorage in sync
-    return { ...savedPerformance };     // return a copy, not the stored reference
+    // Assign the next available ID, append to the store, and persist.
+    const performance: Performance = { id: String(this.nextId++), ...data };
+    this.performances.push(performance);
+    this.saveToStorage();
+    return { ...performance }; // return a copy, not the stored reference
   }
 
   /**
    * Removes a single performance by its ID.
-   * @returns true if a matching performance was found and removed, false otherwise.
+   * @returns true if the ID was found and deleted, false if it did not exist.
    */
-  deletePerformance(performanceId: string): boolean {
-    const performanceIndex = this.allPerformances.findIndex(
-      (performance) => performance.id === performanceId
-    );
+  deletePerformance(id: string): boolean {
+    const index = this.performances.findIndex((p) => p.id === id);
+    if (index === -1) return false; // ID not found — nothing to remove
 
-    if (performanceIndex === -1) return false; // ID not found — nothing to delete
-
-    this.allPerformances.splice(performanceIndex, 1); // remove the one entry
-    this.persistPerformancesToStorage();              // sync localStorage
+    this.performances.splice(index, 1); // remove exactly one entry
+    this.saveToStorage();               // sync storage
     return true;
   }
 
   /**
    * Removes ALL performances for a given festival in one operation.
-   * Used by the "Clear All" button on the performance-list page.
+   * Called by the "Clear All" button on the performance-list page.
    */
   clearPerformancesByFestival(festivalId: string): void {
-    // Keep every performance that does NOT belong to this festival.
-    this.allPerformances = this.allPerformances.filter(
-      (performance) => performance.festivalId !== festivalId
-    );
-    this.persistPerformancesToStorage(); // sync localStorage
+    // Keep every performance that belongs to a DIFFERENT festival.
+    this.performances = this.performances.filter((p) => p.festivalId !== festivalId);
+    this.saveToStorage(); // sync storage
   }
 }

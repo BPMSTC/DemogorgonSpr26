@@ -168,6 +168,11 @@ label {
   box-shadow: var(--glow-magenta);
 }
 
+.btn-cancel.btn-sm {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.82rem;
+}
+
 /* ---- Responsive layout ---- */
 @media (max-width: 768px) {
   .container {
