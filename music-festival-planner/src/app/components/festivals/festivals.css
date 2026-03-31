@@ -10,6 +10,10 @@
 .create-card:hover { background-color: #e9ecef; }
 .plus-icon { font-size: 3rem; color: #0056b3; display: block; margin-bottom: 0.5rem; }
 
+:host {
+  display: block;
+}
+
 /* Navigation & Header */
 .page-nav { 
   display: flex; 

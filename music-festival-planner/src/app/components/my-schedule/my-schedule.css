@@ -2,6 +2,10 @@
    My Schedule Component — Timetable Grid + Conflict Alerts
    ============================================================ */
 
+:host {
+  display: block;
+}
+
 .schedule-header {
   margin-bottom: 2rem;
 }
