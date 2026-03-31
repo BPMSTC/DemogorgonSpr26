@@ -82,11 +82,11 @@ describe('PerformanceListComponent', () => {
   });
 
   it('should load the festival on init', () => {
-    expect(component.festival).toEqual(MOCK_FESTIVAL);
+    expect(component.currentFestival).toEqual(MOCK_FESTIVAL);
   });
 
   it('should load performances for the festival on init', () => {
-    expect(component.performances.length).toBe(3);
+    expect(component.sortedPerformances.length).toBe(3);
   });
 
   it('should sort performances by date then by start time', () => {
@@ -94,9 +94,9 @@ describe('PerformanceListComponent', () => {
       const [h, m] = t.split(':').map(Number);
       return h * 60 + m;
     };
-    for (let i = 1; i < component.performances.length; i++) {
-      const prev = component.performances[i - 1];
-      const curr = component.performances[i];
+    for (let i = 1; i < component.sortedPerformances.length; i++) {
+      const prev = component.sortedPerformances[i - 1];
+      const curr = component.sortedPerformances[i];
       if (prev.date === curr.date) {
         expect(toMin(prev.startTime)).toBeLessThanOrEqual(toMin(curr.startTime));
       } else {
@@ -110,11 +110,11 @@ describe('PerformanceListComponent', () => {
     const scheduleService = TestBed.inject(ScheduleService);
     const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance');
 
-    component.deletePerformance('1');
+    component.confirmAndDeletePerformance('1');
 
     expect(deleteSpy).toHaveBeenCalledWith('1');
-    expect(component.performances.length).toBe(2);
-    expect(component.performances.find((p) => p.id === '1')).toBeUndefined();
+    expect(component.sortedPerformances.length).toBe(2);
+    expect(component.sortedPerformances.find((p) => p.id === '1')).toBeUndefined();
   });
 });
 
@@ -133,14 +133,14 @@ describe('PerformanceListComponent — festival not found', () => {
   });
 
   it('should set festival to undefined for an unknown festival id', () => {
-    expect(component.festival).toBeUndefined();
+    expect(component.currentFestival).toBeUndefined();
   });
 
   it('should show an empty performances list for an unknown festival', () => {
-    expect(component.performances.length).toBe(0);
+    expect(component.sortedPerformances.length).toBe(0);
   });
 
-  describe('loadPerformances sorting', () => {
+  describe('refreshPerformanceList sorting', () => {
     it('sorts performances by date then by numeric startTime', () => {
       const mockPerformances: Performance[] = [
         { id: '3', festivalId: '1', artistName: 'C', stageName: 'Stage', date: '2026-08-02', startTime: '9:00', endTime: '10:00' },
@@ -148,11 +148,11 @@ describe('PerformanceListComponent — festival not found', () => {
         { id: '2', festivalId: '1', artistName: 'B', stageName: 'Stage', date: '2026-08-01', startTime: '9:00', endTime: '10:00' },
       ];
       vi.spyOn(scheduleService, 'getPerformancesByFestival').mockReturnValue(mockPerformances);
-      component.loadPerformances();
+      component.refreshPerformanceList();
 
-      expect(component.performances[0].id).toBe('2'); // 2026-08-01, 9:00
-      expect(component.performances[1].id).toBe('1'); // 2026-08-01, 10:00
-      expect(component.performances[2].id).toBe('3'); // 2026-08-02, 9:00
+      expect(component.sortedPerformances[0].id).toBe('2'); // 2026-08-01, 9:00
+      expect(component.sortedPerformances[1].id).toBe('1'); // 2026-08-01, 10:00
+      expect(component.sortedPerformances[2].id).toBe('3'); // 2026-08-02, 9:00
     });
 
     it('sorts "9:00" before "10:00" numerically (not lexicographically)', () => {
@@ -161,14 +161,14 @@ describe('PerformanceListComponent — festival not found', () => {
         { id: '1', festivalId: '1', artistName: 'A', stageName: 'Stage', date: '2026-08-01', startTime: '9:00', endTime: '10:00' },
       ];
       vi.spyOn(scheduleService, 'getPerformancesByFestival').mockReturnValue(mockPerformances);
-      component.loadPerformances();
+      component.refreshPerformanceList();
 
-      expect(component.performances[0].startTime).toBe('9:00');
-      expect(component.performances[1].startTime).toBe('10:00');
+      expect(component.sortedPerformances[0].startTime).toBe('9:00');
+      expect(component.sortedPerformances[1].startTime).toBe('10:00');
     });
   });
 
-  describe('deletePerformance', () => {
+  describe('confirmAndDeletePerformance', () => {
     afterEach(() => {
       vi.unstubAllGlobals();
     });
@@ -176,9 +176,9 @@ describe('PerformanceListComponent — festival not found', () => {
     it('calls deletePerformance and reloads list when confirmed', () => {
       vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
       const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance').mockReturnValue(true);
-      const loadSpy = vi.spyOn(component, 'loadPerformances');
+      const loadSpy = vi.spyOn(component, 'refreshPerformanceList');
 
-      component.deletePerformance('42');
+      component.confirmAndDeletePerformance('42');
 
       expect(deleteSpy).toHaveBeenCalledWith('42');
       expect(loadSpy).toHaveBeenCalled();
@@ -188,7 +188,7 @@ describe('PerformanceListComponent — festival not found', () => {
       vi.stubGlobal('confirm', vi.fn().mockReturnValue(false));
       const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance');
 
-      component.deletePerformance('42');
+      component.confirmAndDeletePerformance('42');
 
       expect(deleteSpy).not.toHaveBeenCalled();
     });

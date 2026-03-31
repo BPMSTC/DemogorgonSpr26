@@ -1,5 +1,13 @@
-<div class="festivals-container" (click)="closeMenus()">
+<!-- ============================================================
+     festivals.html
+     Main festival browser — expandable cards showing stage details
+     and a kebab menu for organizer actions (add stage, add performance).
+     ============================================================ -->
 
+<!-- Clicking outside any open kebab menu closes it -->
+<div class="festivals-container" (click)="closeAllKebabMenus()">
+
+  <!-- ---- Page Header -------------------------------------------------- -->
   <nav class="page-nav">
     <h1>Music Festivals</h1>
     <button class="btn-primary" routerLink="/festivals/create">
@@ -7,32 +15,37 @@
     </button>
   </nav>
 
+  <!-- ---- Festival Card Grid ------------------------------------------- -->
   <div class="card-grid">
     @for (festival of festivalsList; track festival.id) {
+
+      <!-- Each card is keyboard-focusable; Enter/Space expands it -->
       <div
         class="card"
-        [class.card-expanded]="expandedId === festival.id">
+        [class.card-expanded]="expandedFestivalId === festival.id"
+        role="button"
+        tabindex="0"
+        [attr.aria-expanded]="expandedFestivalId === festival.id"
+        [attr.aria-label]="festival.name + ' — ' + (expandedFestivalId === festival.id ? 'collapse' : 'expand') + ' details'"
+        (click)="toggleFestivalCard(festival.id, $event)"
+        (keydown)="toggleFestivalCardOnKeyboard(festival.id, $event)">
 
-        <!-- ── Card Header ── -->
+        <!-- ---- Card Header: name, stage count, actions ---- -->
         <div class="card-header">
-          <button
-            class="card-toggle-btn"
-            type="button"
-            [attr.aria-expanded]="expandedId === festival.id"
-            [attr.aria-controls]="'stage-panel-' + festival.id"
-            [attr.aria-label]="festival.name + ' — ' + (expandedId === festival.id ? 'collapse' : 'expand') + ' details'"
-            (click)="toggleCard(festival.id)">
-            <div class="card-title-group">
-              <h3>{{ festival.name }}</h3>
-              <span class="stage-count-badge">
-                {{ getStages(festival.id).length }}
-                {{ getStages(festival.id).length === 1 ? 'stage' : 'stages' }}
-              </span>
-            </div>
-            <span class="chevron" [class.chevron-open]="expandedId === festival.id">></span>
-          </button>
+          <div class="card-title-group">
+            <h3>{{ festival.name }}</h3>
+            <!-- Pill showing how many stages this festival has -->
+            <span class="stage-count-badge">
+              {{ getStagesForFestival(festival.id).length }}
+              {{ getStagesForFestival(festival.id).length === 1 ? 'stage' : 'stages' }}
+            </span>
+          </div>
 
           <div class="card-header-right">
+            <!-- Chevron rotates when the card is expanded (CSS transition) -->
+            <span class="chevron" [class.chevron-open]="expandedFestivalId === festival.id">></span>
+
+            <!-- Direct link to the festival's visual timetable -->
             <a
               class="view-schedule-btn"
               [routerLink]="['/festivals', festival.id, 'schedule']"
@@ -40,17 +53,19 @@
               View Schedule
             </a>
 
-            @if (isOrganizer) {
+            <!-- Kebab (⋮) menu: only shown to organizers -->
+            @if (isOrganizerUser) {
               <div class="kebab-menu">
                 <button
                   class="kebab-btn"
-                  (click)="toggleMenu(festival.id, $event)"
-                  [attr.aria-expanded]="isMenuOpen(festival.id)"
+                  (click)="toggleKebabMenu(festival.id, $event)"
+                  [attr.aria-expanded]="isKebabMenuOpen(festival.id)"
                   aria-label="Festival options">
                   ⋮
                 </button>
 
-                @if (openMenuId === festival.id) {
+                <!-- Dropdown options: navigates to the relevant management page -->
+                @if (openKebabMenuFestivalId === festival.id) {
                   <div class="kebab-dropdown">
                     <a
                       class="kebab-item"
@@ -83,31 +98,33 @@
           </div>
         </div>
 
-        <!-- ── Card Meta ── -->
+        <!-- ---- Card Meta: location and date range ---- -->
         <p class="card-meta"><strong>Location:</strong> {{ festival.location }}</p>
         <p class="card-meta"><strong>Dates:</strong> {{ festival.startDate }} - {{ festival.endDate }}</p>
 
-        <!-- ── Expanded: Stage List ── -->
-        @if (expandedId === festival.id) {
-          <div class="stage-panel" [id]="'stage-panel-' + festival.id" (click)="$event.stopPropagation()">
+        <!-- ---- Expanded Panel: stage list ---- -->
+        <!-- stopPropagation prevents clicks inside the panel from toggling the card -->
+        @if (expandedFestivalId === festival.id) {
+          <div class="stage-panel" (click)="$event.stopPropagation()">
 
-            @if (getStages(festival.id).length === 0) {
-              <p class="no-stages">
-                No stages yet.
-              </p>
+            @if (getStagesForFestival(festival.id).length === 0) {
+              <p class="no-stages">No stages yet.</p>
+
             } @else {
               <div class="stage-rows">
-                @for (stage of getStages(festival.id); track stage.id) {
+                @for (stage of getStagesForFestival(festival.id); track stage.id) {
                   <div class="stage-row">
                     <div class="stage-row-left">
                       <span class="stage-row-name">{{ stage.name }}</span>
+                      <!-- Emoji icon indicates indoor vs outdoor environment -->
                       <span class="stage-row-env">
                         {{ stage.environment === 'indoor' ? '🏠' : '🌳' }}
                       </span>
                     </div>
                     <div class="stage-row-right">
+                      <!-- Formatted capacity number and status badge -->
                       <span class="stage-row-cap">{{ stage.capacity | number }} cap</span>
-                      <span class="badge badge-sm" [ngClass]="getStatusClass(stage.status)">
+                      <span class="badge badge-sm" [ngClass]="getStatusBadgeClass(stage.status)">
                         {{ stage.status }}
                       </span>
                     </div>
@@ -123,6 +140,7 @@
     }
   </div>
 
+  <!-- ---- Empty State: shown when no festivals have been created ---- -->
   @if (festivalsList.length === 0) {
     <div class="empty-state">
       <p>No festivals planned. Check again soon!</p>

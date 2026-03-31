@@ -1,3 +1,10 @@
+/* ============================================================
+   festivals.css
+   Styles for the festival browser — card grid, expandable stage
+   panels, kebab dropdown menus, and status badges.
+   Shared neon theme variables live in src/styles.css.
+   ============================================================ */
+
 .festivals-header { margin-bottom: 2rem; }
 .create-card { background-color: #f8f9fa; border: 2px dashed #0056b3; cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center; }
 .create-card:hover { background-color: #e9ecef; }

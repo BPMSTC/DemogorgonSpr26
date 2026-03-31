@@ -16,4 +16,6 @@ export interface Performance {
   startTime: string;
   /** End time in 24-hour H:mm or HH:mm format (e.g. "10:30" or "19:30"). Must be after startTime. */
   endTime: string;
+  /** Music genre or category (e.g. "Rock", "Electronic", "Jazz"). */
+  genre?: string;
 }

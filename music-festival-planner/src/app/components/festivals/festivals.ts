@@ -11,19 +11,32 @@ import { Stage } from '../../models/stage.model';
   styleUrl: './festivals.css',
 })
 export class Festivals implements OnInit {
+  /** All festivals retrieved from FestivalService, shown as expandable cards. */
   festivalsList: Festival[] = [];
 
-  // Stub: swap this with a real auth service later
-  isOrganizer = true;
+  /**
+   * Controls visibility of organizer-only actions (manage stages, add performance).
+   * Stub: swap this with a real auth service call when authentication is added.
+   */
+  isOrganizerUser = true;
 
-  // Only one card open at a time — store its id, or null if all closed
-  expandedId: string | null = null;
+  /**
+   * ID of the festival card that is currently expanded to show its stage list.
+   * Null means all cards are collapsed.  Only one card can be open at a time.
+   */
+  expandedFestivalId: string | null = null;
 
-  // Cache stages per festival id
-  stagesMap: Record<string, Stage[]> = {};
+  /**
+   * Pre-fetched stages keyed by festival ID.
+   * Populated on init so the template does not need to call the service on every render.
+   */
+  stagesByFestivalId: Record<string, Stage[]> = {};
 
-  // Track which kebab menu is open
-  openMenuId: string | null = null;
+  /**
+   * ID of the festival whose kebab (⋮) options menu is currently open.
+   * Null means no menu is open.
+   */
+  openKebabMenuFestivalId: string | null = null;
 
   constructor(
     private festivalService: FestivalService,
@@ -31,47 +44,94 @@ export class Festivals implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Load all festivals for the card grid.
     this.festivalsList = this.festivalService.getFestivals();
-    this.festivalsList.forEach((f) => {
-      this.stagesMap[f.id] = this.stageService.getStagesByFestival(f.id);
+
+    // Pre-fetch stages for every festival so the expanded panel renders instantly.
+    this.festivalsList.forEach((festival) => {
+      this.stagesByFestivalId[festival.id] = this.stageService.getStagesByFestival(festival.id);
     });
   }
 
-  toggleCard(festivalId: string): void {
-    this.expandedId = this.expandedId === festivalId ? null : festivalId;
+  // ---- Card Expand / Collapse --------------------------------------------
+
+  /**
+   * Toggles the expanded state of the clicked card.
+   * If the same card is already open, it collapses. Clicks inside the kebab
+   * menu are ignored here (the menu handles its own toggle).
+   */
+  toggleFestivalCard(festivalId: string, clickEvent: MouseEvent): void {
+    const clickedElement = clickEvent.target as HTMLElement;
+
+    // Kebab menu clicks are handled by toggleKebabMenu — don't interfere.
+    if (clickedElement.closest('.kebab-menu')) return;
+
+    // Toggle: clicking the already-expanded card collapses it; clicking any
+    // other card opens it and implicitly closes the previously open one.
+    this.expandedFestivalId =
+      this.expandedFestivalId === festivalId ? null : festivalId;
   }
 
-  toggleCardKey(festivalId: string, event: KeyboardEvent): void {
-    if (event.key === 'Enter' || event.key === ' ') {
-      const target = event.target as HTMLElement;
-      if (target.closest('a, button, input, select, textarea')) return;
-      event.preventDefault();
-      this.expandedId = this.expandedId === festivalId ? null : festivalId;
-    }
+  /**
+   * Keyboard equivalent of toggleFestivalCard.
+   * Activates on Enter or Space so keyboard-only users can expand/collapse cards.
+   * Ignores presses that originate inside interactive child elements
+   * (links, buttons, inputs) to avoid interfering with their native behavior.
+   */
+  toggleFestivalCardOnKeyboard(festivalId: string, keyboardEvent: KeyboardEvent): void {
+    if (keyboardEvent.key !== 'Enter' && keyboardEvent.key !== ' ') return;
+
+    const focusedElement = keyboardEvent.target as HTMLElement;
+
+    // Let native interactions (clicking a link inside the card) work normally.
+    if (focusedElement.closest('a, button, input, select, textarea')) return;
+
+    keyboardEvent.preventDefault(); // prevent Space from scrolling the page
+    this.expandedFestivalId =
+      this.expandedFestivalId === festivalId ? null : festivalId;
   }
 
-  toggleMenu(festivalId: string, event: MouseEvent): void {
-    event.stopPropagation();
-    this.openMenuId = this.openMenuId === festivalId ? null : festivalId;
+  // ---- Kebab Menu --------------------------------------------------------
+
+  /**
+   * Toggles the options (⋮) dropdown for a specific festival card.
+   * stopPropagation prevents the card's own click handler from firing.
+   */
+  toggleKebabMenu(festivalId: string, clickEvent: MouseEvent): void {
+    clickEvent.stopPropagation(); // don't bubble up to the card toggle handler
+    this.openKebabMenuFestivalId =
+      this.openKebabMenuFestivalId === festivalId ? null : festivalId;
   }
 
-  isMenuOpen(festivalId: string): boolean {
-    return this.openMenuId === festivalId;
+  /** Returns true if the kebab menu for the given festival is currently open. */
+  isKebabMenuOpen(festivalId: string): boolean {
+    return this.openKebabMenuFestivalId === festivalId;
   }
 
-  closeMenus(): void {
-    this.openMenuId = null;
+  /** Closes all open kebab menus. Called when the user clicks outside any card. */
+  closeAllKebabMenus(): void {
+    this.openKebabMenuFestivalId = null;
   }
 
-  getStages(festivalId: string): Stage[] {
-    return this.stagesMap[festivalId] ?? [];
+  // ---- Stage Helpers -----------------------------------------------------
+
+  /** Returns the cached stage list for a festival (or an empty array if not found). */
+  getStagesForFestival(festivalId: string): Stage[] {
+    return this.stagesByFestivalId[festivalId] ?? [];
   }
 
-  getStatusClass(status: string): string {
-    return ({
+  // ---- CSS Helpers -------------------------------------------------------
+
+  /**
+   * Maps a stage status string to its corresponding CSS badge class name.
+   * Returns an empty string for any unknown status value.
+   */
+  getStatusBadgeClass(statusValue: string): string {
+    const statusToBadgeClass: Record<string, string> = {
       'active':       'badge-active',
       'inactive':     'badge-inactive',
       'under-repair': 'badge-repair',
-    } as Record<string, string>)[status] ?? '';
+    };
+    return statusToBadgeClass[statusValue] ?? '';
   }
 }
