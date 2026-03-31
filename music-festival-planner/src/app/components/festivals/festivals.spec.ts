@@ -26,7 +26,7 @@ describe('Festivals', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('toggleCardKey', () => {
+  describe('toggleFestivalCardOnKeyboard', () => {
     const festivalId = 'fest-1';
 
     function makeEvent(key: string, target: HTMLElement): KeyboardEvent {
@@ -39,40 +39,40 @@ describe('Festivals', () => {
     it('expands the card when Enter is pressed on the card div', () => {
       const div = document.createElement('div');
       const event = makeEvent('Enter', div);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBe(festivalId);
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBe(festivalId);
       expect(event.preventDefault).toHaveBeenCalled();
     });
 
     it('expands the card when Space is pressed on the card div', () => {
       const div = document.createElement('div');
       const event = makeEvent(' ', div);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBe(festivalId);
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBe(festivalId);
       expect(event.preventDefault).toHaveBeenCalled();
     });
 
     it('collapses the card when already expanded', () => {
-      component.expandedId = festivalId;
+      component.expandedFestivalId = festivalId;
       const div = document.createElement('div');
       const event = makeEvent('Enter', div);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBeNull();
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBeNull();
     });
 
     it('does not toggle when target is an <a> element', () => {
       const a = document.createElement('a');
       const event = makeEvent('Enter', a);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBeNull();
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBeNull();
       expect(event.preventDefault).not.toHaveBeenCalled();
     });
 
     it('does not toggle when target is a <button> element', () => {
       const button = document.createElement('button');
       const event = makeEvent('Enter', button);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBeNull();
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBeNull();
       expect(event.preventDefault).not.toHaveBeenCalled();
     });
 
@@ -81,8 +81,8 @@ describe('Festivals', () => {
       const span = document.createElement('span');
       a.appendChild(span);
       const event = makeEvent('Enter', span);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBeNull();
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBeNull();
       expect(event.preventDefault).not.toHaveBeenCalled();
     });
 
@@ -91,16 +91,16 @@ describe('Festivals', () => {
       const span = document.createElement('span');
       button.appendChild(span);
       const event = makeEvent('Enter', span);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBeNull();
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBeNull();
       expect(event.preventDefault).not.toHaveBeenCalled();
     });
 
     it('does nothing for keys other than Enter or Space', () => {
       const div = document.createElement('div');
       const event = makeEvent('Tab', div);
-      component.toggleCardKey(festivalId, event);
-      expect(component.expandedId).toBeNull();
+      component.toggleFestivalCardOnKeyboard(festivalId, event);
+      expect(component.expandedFestivalId).toBeNull();
       expect(event.preventDefault).not.toHaveBeenCalled();
     });
   });

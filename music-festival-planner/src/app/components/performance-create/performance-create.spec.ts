@@ -81,17 +81,17 @@ describe('PerformanceCreateComponent', () => {
 
   it('should set festivalId and load festival and stages on init', () => {
     expect(component.festivalId).toBe('1');
-    expect(component.festival).toEqual(MOCK_FESTIVAL);
-    expect(component.stages.length).toBe(2);
+    expect(component.currentFestival).toEqual(MOCK_FESTIVAL);
+    expect(component.availableStages.length).toBe(2);
   });
 
   it('should initialise the form with empty fields', () => {
     expect(component.performanceForm).toBeTruthy();
-    expect(component.f['artistName'].value).toBe('');
-    expect(component.f['stageName'].value).toBe('');
-    expect(component.f['date'].value).toBe('');
-    expect(component.f['startTime'].value).toBe('');
-    expect(component.f['endTime'].value).toBe('');
+    expect(component.fields['artistName'].value).toBe('');
+    expect(component.fields['stageName'].value).toBe('');
+    expect(component.fields['date'].value).toBe('');
+    expect(component.fields['startTime'].value).toBe('');
+    expect(component.fields['endTime'].value).toBe('');
   });
 
   it('should be invalid when the form is empty', () => {
@@ -102,6 +102,7 @@ describe('PerformanceCreateComponent', () => {
     component.performanceForm.setValue({
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: '',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -113,22 +114,24 @@ describe('PerformanceCreateComponent', () => {
     component.performanceForm.setValue({
       artistName: '   ',
       stageName: 'Main Stage',
+      genre: '',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
     });
-    expect(component.f['artistName'].errors?.['whitespaceOnly']).toBeTruthy();
+    expect(component.fields['artistName'].errors?.['whitespaceOnly']).toBeTruthy();
   });
 
   it('should reject artist names longer than 100 characters', () => {
-    component.f['artistName'].setValue('A'.repeat(101));
-    expect(component.f['artistName'].errors?.['maxlength']).toBeTruthy();
+    component.fields['artistName'].setValue('A'.repeat(101));
+    expect(component.fields['artistName'].errors?.['maxlength']).toBeTruthy();
   });
 
   it('should fail cross-field validation when endTime is before startTime', () => {
     component.performanceForm.setValue({
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: '',
       date: '2026-09-15',
       startTime: '16:00',
       endTime: '15:00',
@@ -140,6 +143,7 @@ describe('PerformanceCreateComponent', () => {
     component.performanceForm.setValue({
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: '',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '14:00',
@@ -163,6 +167,7 @@ describe('PerformanceCreateComponent', () => {
       festivalId: '1',
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: 'Rock',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -171,6 +176,7 @@ describe('PerformanceCreateComponent', () => {
     component.performanceForm.setValue({
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: 'Rock',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -182,6 +188,7 @@ describe('PerformanceCreateComponent', () => {
       festivalId: '1',
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: 'Rock',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -195,6 +202,7 @@ describe('PerformanceCreateComponent', () => {
       festivalId: '1',
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: 'Rock',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -203,6 +211,7 @@ describe('PerformanceCreateComponent', () => {
     component.performanceForm.setValue({
       artistName: '  Test Artist  ',
       stageName: 'Main Stage',
+      genre: 'Rock',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -224,6 +233,7 @@ describe('PerformanceCreateComponent', () => {
     component.performanceForm.setValue({
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: '',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -231,7 +241,7 @@ describe('PerformanceCreateComponent', () => {
 
     component.onSubmit();
 
-    expect(component.serverError).toContain('already booked');
+    expect(component.serviceErrorMessage).toContain('already booked');
   });
 
   it('should navigate to the performances list on successful submit', () => {
@@ -241,6 +251,7 @@ describe('PerformanceCreateComponent', () => {
       festivalId: '1',
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: '',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -251,6 +262,7 @@ describe('PerformanceCreateComponent', () => {
     component.performanceForm.setValue({
       artistName: 'Test Artist',
       stageName: 'Main Stage',
+      genre: '',
       date: '2026-09-15',
       startTime: '14:00',
       endTime: '15:30',
@@ -279,49 +291,49 @@ describe('PerformanceCreateComponent — no stages', () => {
   });
 
   it('should show an empty stages list for a festival with no stages', () => {
-    expect(component.stages.length).toBe(0);
+    expect(component.availableStages.length).toBe(0);
   });
 
   it('should set festival to undefined for an unknown festival id', () => {
-    expect(component.festival).toBeUndefined();
+    expect(component.currentFestival).toBeUndefined();
   });
 
   describe('noWhitespaceOnly validator', () => {
     it('is invalid when artistName is only whitespace', () => {
-      component.f['artistName'].setValue('   ');
-      expect(component.f['artistName'].errors?.['whitespaceOnly']).toBeTruthy();
+      component.fields['artistName'].setValue('   ');
+      expect(component.fields['artistName'].errors?.['whitespaceOnly']).toBeTruthy();
     });
 
     it('does not show whitespaceOnly error for empty string (required handles it)', () => {
-      component.f['artistName'].setValue('');
-      expect(component.f['artistName'].errors?.['whitespaceOnly']).toBeFalsy();
-      expect(component.f['artistName'].errors?.['required']).toBeTruthy();
+      component.fields['artistName'].setValue('');
+      expect(component.fields['artistName'].errors?.['whitespaceOnly']).toBeFalsy();
+      expect(component.fields['artistName'].errors?.['required']).toBeTruthy();
     });
 
     it('is valid when artistName has non-whitespace content', () => {
-      component.f['artistName'].setValue('The Band');
-      expect(component.f['artistName'].errors).toBeNull();
+      component.fields['artistName'].setValue('The Band');
+      expect(component.fields['artistName'].errors).toBeNull();
     });
   });
 
   describe('endAfterStart cross-field validator', () => {
     function fillValidForm() {
-      component.f['artistName'].setValue('Test Artist');
-      component.f['stageName'].setValue('Main Stage');
-      component.f['date'].setValue('2026-08-01');
-      component.f['startTime'].setValue('18:00');
-      component.f['endTime'].setValue('19:00');
+      component.fields['artistName'].setValue('Test Artist');
+      component.fields['stageName'].setValue('Main Stage');
+      component.fields['date'].setValue('2026-08-01');
+      component.fields['startTime'].setValue('18:00');
+      component.fields['endTime'].setValue('19:00');
     }
 
     it('is invalid when end time is before start time', () => {
       fillValidForm();
-      component.f['endTime'].setValue('17:00');
+      component.fields['endTime'].setValue('17:00');
       expect(component.performanceForm.errors?.['endNotAfterStart']).toBeTruthy();
     });
 
     it('is invalid when end time equals start time', () => {
       fillValidForm();
-      component.f['endTime'].setValue('18:00');
+      component.fields['endTime'].setValue('18:00');
       expect(component.performanceForm.errors?.['endNotAfterStart']).toBeTruthy();
     });
 
@@ -333,11 +345,11 @@ describe('PerformanceCreateComponent — no stages', () => {
 
   describe('onSubmit', () => {
     function fillValidForm() {
-      component.f['artistName'].setValue('Test Artist');
-      component.f['stageName'].setValue('Main Stage');
-      component.f['date'].setValue('2026-08-02');
-      component.f['startTime'].setValue('10:00');
-      component.f['endTime'].setValue('11:00');
+      component.fields['artistName'].setValue('Test Artist');
+      component.fields['stageName'].setValue('Main Stage');
+      component.fields['date'].setValue('2026-08-02');
+      component.fields['startTime'].setValue('10:00');
+      component.fields['endTime'].setValue('11:00');
     }
 
     it('does not call createPerformance when form is invalid', () => {
@@ -352,7 +364,7 @@ describe('PerformanceCreateComponent — no stages', () => {
         throw new Error('Stage is already booked.');
       });
       component.onSubmit();
-      expect(component.serverError).toBe('Stage is already booked.');
+      expect(component.serviceErrorMessage).toBe('Stage is already booked.');
     });
 
     it('sets a generic serverError message when a non-Error is thrown', () => {
@@ -361,12 +373,12 @@ describe('PerformanceCreateComponent — no stages', () => {
         throw 'unknown error';
       });
       component.onSubmit();
-      expect(component.serverError).toBe('An unexpected error occurred.');
+      expect(component.serviceErrorMessage).toBe('An unexpected error occurred.');
     });
 
     it('calls createPerformance with trimmed artistName on valid submit', () => {
       fillValidForm();
-      component.f['artistName'].setValue('  Test Artist  ');
+      component.fields['artistName'].setValue('  Test Artist  ');
       const spy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue({
         id: '99',
         festivalId: '1',
