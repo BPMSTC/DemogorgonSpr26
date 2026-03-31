@@ -49,7 +49,6 @@
   padding: 1.5rem; 
   box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
   background: #fff;
-  cursor: pointer;
   position: relative;
   transition: border-color 0.2s, box-shadow 0.2s;
   /* Each card takes up ~1 column worth of space, min 250px */
@@ -108,6 +107,29 @@
   gap: 0.4rem;
   flex-shrink: 0;
 }
+/* ── Card toggle button (expand/collapse) ── */
+.card-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.card-toggle-btn:focus-visible {
+  outline: 2px solid var(--neon-cyan, #00e5ff);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 
 /* ── View Schedule link ── */
 .view-schedule-btn {

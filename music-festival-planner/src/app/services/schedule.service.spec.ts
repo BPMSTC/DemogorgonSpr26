@@ -76,6 +76,32 @@ describe('ScheduleService', () => {
       ).toThrowError('End time must be later than start time.');
     });
 
+    it('throws when a new performance fully contains an existing one', () => {
+      service.createPerformance({ ...BASE }); // 12:00–13:00
+
+      expect(() =>
+        service.createPerformance({
+          ...BASE,
+          artistName: 'Another Artist',
+          startTime: '11:00',
+          endTime: '14:00',
+        })
+      ).toThrowError(/already booked/i);
+    });
+
+    it('allows adjacent back-to-back slots (new start equals existing end)', () => {
+      service.createPerformance({ ...BASE }); // 12:00–13:00
+
+      expect(() =>
+        service.createPerformance({
+          ...BASE,
+          artistName: 'Back To Back Artist',
+          startTime: '13:00',
+          endTime: '14:00',
+        })
+      ).not.toThrow();
+    });
+
     it('returns an error when times are equal', () => {
       expect(() =>
         service.createPerformance({ ...BASE, startTime: '12:00', endTime: '12:00' })

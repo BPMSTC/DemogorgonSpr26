@@ -12,13 +12,13 @@
   gap: 1rem;
 }
 
+.cross-field-error {
+  margin-top: -0.75rem;
+  margin-bottom: 1rem;
+}
+
 @media (max-width: 480px) {
   .time-row {
     grid-template-columns: 1fr;
   }
-}
-
-.cross-field-error {
-  margin-top: -0.75rem;
-  margin-bottom: 1rem;
 }
