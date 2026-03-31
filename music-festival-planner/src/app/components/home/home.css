@@ -50,6 +50,46 @@
   margin: 0 auto 2rem;
 }
 
+/* ---- Hero logo ------------------------------------------- */
+.hero-logo {
+  display: block;
+  margin: 0 auto 1.5rem;
+  filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.5));
+}
+
+/* ---- Event date badge ------------------------------------ */
+.hero-date-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  border: 1px solid var(--neon-cyan);
+  border-radius: var(--radius-card);
+  padding: 0.75rem 1.5rem;
+  box-shadow: var(--glow-cyan);
+  margin-bottom: 2.5rem;
+}
+
+.date-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+}
+
+.date-value {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--neon-cyan);
+  letter-spacing: 0.06em;
+  text-shadow: var(--glow-cyan);
+}
+
+.date-location {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
 /* ---- Quick-action cards ---------------------------------- */
 .home-actions {
   display: grid;
