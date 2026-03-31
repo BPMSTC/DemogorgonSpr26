@@ -76,19 +76,32 @@ describe('ScheduleService', () => {
       ).toThrowError('End time must be later than start time.');
     });
 
-    it('should throw when a new performance fully contains an existing one', () => {
-      service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
+    it('throws when a new performance fully contains an existing one', () => {
+      service.createPerformance({ ...BASE }); // 12:00–13:00
 
       expect(() =>
-        service.createPerformance({ ...BASE_PERFORMANCE, startTime: '9:00', endTime: '12:00' })
+        service.createPerformance({
+          ...BASE,
+          artistName: 'Another Artist',
+          startTime: '11:00',
+          endTime: '14:00',
+        })
       ).toThrowError(/already booked/i);
     });
 
-    it('should allow a new performance that starts exactly when another ends (back-to-back adjacent slots are permitted)', () => {
-      // Adjacent slots (back-to-back) should NOT overlap: new start == existing end
-      service.createPerformance(BASE_PERFORMANCE); // 10:00–11:00
+    it('allows adjacent back-to-back slots (new start equals existing end)', () => {
+      service.createPerformance({ ...BASE }); // 12:00–13:00
 
-      // 11:00 start is NOT an overlap (new start === existing end → no overlap)
+      expect(() =>
+        service.createPerformance({
+          ...BASE,
+          artistName: 'Back To Back Artist',
+          startTime: '13:00',
+          endTime: '14:00',
+        })
+      ).not.toThrow();
+    });
+
     it('returns an error when times are equal', () => {
       expect(() =>
         service.createPerformance({ ...BASE, startTime: '12:00', endTime: '12:00' })

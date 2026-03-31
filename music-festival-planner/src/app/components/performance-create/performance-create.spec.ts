@@ -62,29 +62,11 @@ function makeTestBed(festivalId = '1') {
 describe('PerformanceCreateComponent', () => {
   let component: PerformanceCreateComponent;
   let fixture: ComponentFixture<PerformanceCreateComponent>;
-
-  beforeEach(async () => {
-    await makeTestBed();
-    fixture = TestBed.createComponent(PerformanceCreateComponent);
-    component = fixture.componentInstance;
   let scheduleService: ScheduleService;
   let router: Router;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [PerformanceCreateComponent],
-      imports: [CommonModule, ReactiveFormsModule, RouterModule.forRoot([])],
-      providers: [
-        ScheduleService,
-        StageService,
-        FestivalService,
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '1' } } },
-        },
-      ],
-    }).compileComponents();
-
+    await makeTestBed();
     fixture = TestBed.createComponent(PerformanceCreateComponent);
     component = fixture.componentInstance;
     scheduleService = TestBed.inject(ScheduleService);
@@ -283,11 +265,15 @@ describe('PerformanceCreateComponent', () => {
 describe('PerformanceCreateComponent — no stages', () => {
   let component: PerformanceCreateComponent;
   let fixture: ComponentFixture<PerformanceCreateComponent>;
+  let scheduleService: ScheduleService;
+  let router: Router;
 
   beforeEach(async () => {
     await makeTestBed('999');
     fixture = TestBed.createComponent(PerformanceCreateComponent);
     component = fixture.componentInstance;
+    scheduleService = TestBed.inject(ScheduleService);
+    router = TestBed.inject(Router);
     fixture.detectChanges();
     await fixture.whenStable();
   });
@@ -298,6 +284,8 @@ describe('PerformanceCreateComponent — no stages', () => {
 
   it('should set festival to undefined for an unknown festival id', () => {
     expect(component.festival).toBeUndefined();
+  });
+
   describe('noWhitespaceOnly validator', () => {
     it('is invalid when artistName is only whitespace', () => {
       component.f['artistName'].setValue('   ');

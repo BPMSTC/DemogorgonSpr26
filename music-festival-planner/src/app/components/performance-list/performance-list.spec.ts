@@ -62,27 +62,10 @@ function makeTestBed(festivalId = '1') {
 describe('PerformanceListComponent', () => {
   let component: PerformanceListComponent;
   let fixture: ComponentFixture<PerformanceListComponent>;
-
-  beforeEach(async () => {
-    await makeTestBed();
-    fixture = TestBed.createComponent(PerformanceListComponent);
-    component = fixture.componentInstance;
   let scheduleService: ScheduleService;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [PerformanceListComponent],
-      imports: [CommonModule, RouterModule.forRoot([])],
-      providers: [
-        ScheduleService,
-        FestivalService,
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => '1' } } },
-        },
-      ],
-    }).compileComponents();
-
+    await makeTestBed();
     fixture = TestBed.createComponent(PerformanceListComponent);
     component = fixture.componentInstance;
     scheduleService = TestBed.inject(ScheduleService);
@@ -138,11 +121,13 @@ describe('PerformanceListComponent', () => {
 describe('PerformanceListComponent — festival not found', () => {
   let component: PerformanceListComponent;
   let fixture: ComponentFixture<PerformanceListComponent>;
+  let scheduleService: ScheduleService;
 
   beforeEach(async () => {
     await makeTestBed('999');
     fixture = TestBed.createComponent(PerformanceListComponent);
     component = fixture.componentInstance;
+    scheduleService = TestBed.inject(ScheduleService);
     fixture.detectChanges();
     await fixture.whenStable();
   });
@@ -153,6 +138,8 @@ describe('PerformanceListComponent — festival not found', () => {
 
   it('should show an empty performances list for an unknown festival', () => {
     expect(component.performances.length).toBe(0);
+  });
+
   describe('loadPerformances sorting', () => {
     it('sorts performances by date then by numeric startTime', () => {
       const mockPerformances: Performance[] = [
