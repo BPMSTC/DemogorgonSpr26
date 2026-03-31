@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ScheduleService } from '../../services/schedule.service';
 import { Performance } from '../../models/performance.model';
@@ -100,7 +100,8 @@ export class MySchedule implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private scheduleService: ScheduleService
+    private scheduleService: ScheduleService,
+    private injector: Injector
   ) {}
 
   ngOnInit(): void {
@@ -108,18 +109,11 @@ export class MySchedule implements OnInit {
     // /my-schedule route which has no :id param in the URL.
     this.festivalId = this.route.snapshot.paramMap.get('id') ?? '1';
 
-    // Load all performances for this festival once on component initialisation.
-    this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
-
-    // Derive the sorted list of unique dates to build the day-tab buttons.
-    this.festivalDays = [
-      ...new Set(this.allPerformances.map(p => p.date))
-    ].sort();
-
-    // Auto-select the first day so the timetable is never blank on initial load.
-    if (this.festivalDays.length > 0) {
-      this.selectDay(this.festivalDays[0]);
-    }
+    // Keep this component synced with shared schedule state.
+    effect(() => {
+      this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
+      this.syncViewStateFromStore();
+    }, { injector: this.injector });
   }
 
   // ---- User Interaction Handlers -----------------------------------------
@@ -130,14 +124,7 @@ export class MySchedule implements OnInit {
     this.selectedStage = ALL_STAGES; // reset stage filter on every day change
     this.selectedGenre = ALL_GENRES; // reset genre filter on every day change
 
-    // Recompute available filter options for the newly selected day.
-    const dayPerformances = this.allPerformances.filter(p => p.date === day);
-    this.allStagesForDay  = [...new Set(dayPerformances.map(p => p.stageName))].sort();
-    this.allGenresForDay  = [
-      ...new Set(
-        dayPerformances.map(p => p.genre).filter((g): g is string => !!g)
-      )
-    ].sort();
+    this.refreshFilterOptionsForSelectedDay();
 
     this.applyFilters();
   }
@@ -152,6 +139,52 @@ export class MySchedule implements OnInit {
   selectGenre(genre: string): void {
     this.selectedGenre = genre;
     this.applyFilters();
+  }
+
+  /**
+   * Reconciles selected-day/filter state after any shared schedule change.
+   * Preserves current selections when still valid.
+   */
+  private syncViewStateFromStore(): void {
+    this.festivalDays = [...new Set(this.allPerformances.map((p) => p.date))].sort();
+
+    if (this.festivalDays.length === 0) {
+      this.selectedDay = '';
+      this.selectedStage = ALL_STAGES;
+      this.selectedGenre = ALL_GENRES;
+      this.allStagesForDay = [];
+      this.allGenresForDay = [];
+      this.applyFilters();
+      return;
+    }
+
+    // Select a valid day whenever data changes remove the current day.
+    if (!this.selectedDay || !this.festivalDays.includes(this.selectedDay)) {
+      this.selectedDay = this.festivalDays[0];
+      this.selectedStage = ALL_STAGES;
+      this.selectedGenre = ALL_GENRES;
+    }
+
+    this.refreshFilterOptionsForSelectedDay();
+
+    // If filters became invalid after data changes, reset them to "All".
+    if (this.selectedStage !== ALL_STAGES && !this.allStagesForDay.includes(this.selectedStage)) {
+      this.selectedStage = ALL_STAGES;
+    }
+    if (this.selectedGenre !== ALL_GENRES && !this.allGenresForDay.includes(this.selectedGenre)) {
+      this.selectedGenre = ALL_GENRES;
+    }
+
+    this.applyFilters();
+  }
+
+  /** Recomputes available stage/genre options for the currently selected day. */
+  private refreshFilterOptionsForSelectedDay(): void {
+    const dayPerformances = this.allPerformances.filter((p) => p.date === this.selectedDay);
+    this.allStagesForDay = [...new Set(dayPerformances.map((p) => p.stageName))].sort();
+    this.allGenresForDay = [
+      ...new Set(dayPerformances.map((p) => p.genre).filter((g): g is string => !!g)),
+    ].sort();
   }
 
   // ---- Private View-Building Logic ---------------------------------------

@@ -1,4 +1,4 @@
-import { Injectable, Inject, InjectionToken } from '@angular/core';
+import { Injectable, Inject, InjectionToken, Signal, signal } from '@angular/core';
 import { Performance } from '../models/performance.model';
 
 // ---- Storage Abstraction ---------------------------------------------------
@@ -37,8 +37,14 @@ const SEED_PERFORMANCES: Performance[] = [
   providedIn: 'root', // singleton — one shared instance across the entire app
 })
 export class ScheduleService {
-  /** Working in-memory list of all performances. Kept in sync with storage. */
-  private performances: Performance[];
+  /**
+   * Canonical in-memory schedule state for the entire app.
+   * All schedule reads and mutations go through this single signal source.
+   */
+  private readonly performancesState = signal<Performance[]>([]);
+
+  /** Read-only signal exposed for components that need reactive schedule state. */
+  readonly performancesSignal: Signal<Performance[]> = this.performancesState.asReadonly();
 
   /** Auto-incrementing counter for assigning unique numeric IDs to new performances. */
   private nextId: number;
@@ -48,11 +54,12 @@ export class ScheduleService {
     @Inject(LOCAL_STORAGE) private storage: Storage
   ) {
     // Hydrate from storage on startup so data survives page refreshes.
-    this.performances = this.loadFromStorage();
+    const initialPerformances = this.loadFromStorage();
+    this.performancesState.set(initialPerformances);
 
     // Set the counter to one above the highest existing ID to avoid collisions
     // with data that was already stored from a previous session.
-    this.nextId = this.performances.reduce(
+    this.nextId = initialPerformances.reduce(
       (highestId, p) => Math.max(highestId, Number(p.id) || 0), 0
     ) + 1;
   }
@@ -132,7 +139,7 @@ export class ScheduleService {
    */
   private saveToStorage(): void {
     try {
-      this.storage.setItem(STORAGE_KEY, JSON.stringify(this.performances));
+      this.storage.setItem(STORAGE_KEY, JSON.stringify(this.performancesState()));
     } catch {
       // Storage quota exceeded or unavailable (e.g. private browsing mode).
       // Continue with in-memory state — the app still works for this session.
@@ -170,7 +177,7 @@ export class ScheduleService {
    * Returning copies prevents external code from accidentally mutating the store.
    */
   getPerformancesByFestival(festivalId: string): Performance[] {
-    return this.performances
+    return this.performancesState()
       .filter((p) => p.festivalId === festivalId)
       .map((p) => ({ ...p })); // spread creates a safe independent copy
   }
@@ -201,7 +208,7 @@ export class ScheduleService {
     if (newStart >= newEnd) return false;
 
     // Walk every stored performance and test for an overlap on the same stage/day.
-    return this.performances.some((p) => {
+    return this.performancesState().some((p) => {
       if (p.festivalId !== festivalId)          return false;
       if (p.stageName  !== stageName)           return false;
       if (p.date       !== date)                return false;
@@ -244,7 +251,7 @@ export class ScheduleService {
 
     // Assign the next available ID, append to the store, and persist.
     const performance: Performance = { id: String(this.nextId++), ...data };
-    this.performances.push(performance);
+    this.performancesState.update((current) => [...current, performance]);
     this.saveToStorage();
     return { ...performance }; // return a copy, not the stored reference
   }
@@ -254,10 +261,11 @@ export class ScheduleService {
    * @returns true if the ID was found and deleted, false if it did not exist.
    */
   deletePerformance(id: string): boolean {
-    const index = this.performances.findIndex((p) => p.id === id);
-    if (index === -1) return false; // ID not found — nothing to remove
+    const current = this.performancesState();
+    const next = current.filter((p) => p.id !== id);
+    if (next.length === current.length) return false; // ID not found — nothing to remove
 
-    this.performances.splice(index, 1); // remove exactly one entry
+    this.performancesState.set(next);
     this.saveToStorage();               // sync storage
     return true;
   }
@@ -268,7 +276,9 @@ export class ScheduleService {
    */
   clearPerformancesByFestival(festivalId: string): void {
     // Keep every performance that belongs to a DIFFERENT festival.
-    this.performances = this.performances.filter((p) => p.festivalId !== festivalId);
+    this.performancesState.update((current) =>
+      current.filter((p) => p.festivalId !== festivalId)
+    );
     this.saveToStorage(); // sync storage
   }
 }
