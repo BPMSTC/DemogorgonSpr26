@@ -2,6 +2,16 @@
    App Shell — Navbar
    ============================================================ */
 
+:host {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1 0 auto;
+}
+
 .navbar {
   background-color: rgba(10, 10, 15, 0.95) !important;
   border-bottom: 1px solid var(--border-subtle);
@@ -39,6 +49,17 @@
 .nav-link.active {
   color: var(--neon-cyan) !important;
   border-bottom-color: var(--neon-cyan);
+}
+
+/* ---- Footer --------------------------------------------- */
+.footer {
+  margin-top: auto;
+  flex-shrink: 0;
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background-color: var(--border-subtle);
 }
 
 /* Mobile toggler */
