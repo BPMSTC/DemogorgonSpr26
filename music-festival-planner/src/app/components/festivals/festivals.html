@@ -1,38 +1,41 @@
 <div class="festivals-container" (click)="closeAllKebabMenus()">
   <nav class="page-nav">
-    <h1>Music Festivals</h1>
+    <h1 id="festivals-heading">Music Festivals</h1>
     <button class="btn-primary" routerLink="/festivals/create">+ Add New Festival</button>
   </nav>
 
-  <div class="card-grid">
+  <div class="card-grid" role="list" aria-labelledby="festivals-heading">
     @for (festival of festivalsList; track festival.id) {
-      <div
-        class="card"
-        [class.card-expanded]="expandedFestivalId === festival.id"
-        role="button"
-        tabindex="0"
-        [attr.aria-expanded]="expandedFestivalId === festival.id"
-        [attr.aria-label]="
-          festival.name +
-          ' — ' +
-          (expandedFestivalId === festival.id ? 'collapse' : 'expand') +
-          ' details'
-        "
-        (click)="toggleFestivalCard(festival.id, $event)"
-        (keydown)="toggleFestivalCardOnKeyboard(festival.id, $event)"
-      >
+      <div class="card" [class.card-expanded]="expandedFestivalId === festival.id" role="listitem">
         <div class="card-header">
-          <div class="card-title-group">
-            <h3>{{ festival.name }}</h3>
-            <span class="stage-count-badge">
-              {{ getStagesForFestival(festival.id).length }}
-              {{ getStagesForFestival(festival.id).length === 1 ? 'stage' : 'stages' }}
+          <button
+            type="button"
+            class="card-toggle-btn"
+            [attr.aria-expanded]="expandedFestivalId === festival.id"
+            [attr.aria-controls]="'festival-panel-' + festival.id"
+            [attr.aria-label]="
+              (expandedFestivalId === festival.id
+                ? 'Collapse details for '
+                : 'Expand details for ') + festival.name
+            "
+            (click)="toggleFestivalCard(festival.id, $event)"
+          >
+            <span class="card-title-group">
+              <h3>{{ festival.name }}</h3>
+              <span class="stage-count-badge">
+                {{ getStagesForFestival(festival.id).length }}
+                {{ getStagesForFestival(festival.id).length === 1 ? 'stage' : 'stages' }}
+              </span>
             </span>
-          </div>
+            <span
+              class="chevron"
+              [class.chevron-open]="expandedFestivalId === festival.id"
+              aria-hidden="true"
+              >▸</span
+            >
+          </button>
 
           <div class="card-header-right">
-            <span class="chevron" [class.chevron-open]="expandedFestivalId === festival.id">></span>
-
             <a
               class="view-schedule-btn"
               [routerLink]="['/festivals', festival.id, 'schedule']"
@@ -102,7 +105,7 @@
         </p>
 
         @if (expandedFestivalId === festival.id) {
-          <div class="stage-panel" (click)="$event.stopPropagation()">
+          <div class="stage-panel" [id]="'festival-panel-' + festival.id">
             @if (getStagesForFestival(festival.id).length === 0) {
               <p class="no-stages">No stages yet.</p>
             } @else {
@@ -133,7 +136,9 @@
 
   @if (festivalsList.length === 0) {
     <div class="empty-state">
-      <p>No festivals planned. Check again soon!</p>
+      <h2>No festivals yet</h2>
+      <p>Add your first festival to start building schedules, stages, and performances.</p>
+      <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
     </div>
   }
 </div>
