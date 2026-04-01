@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
+import { ScheduleService } from '../../services/schedule.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
 
@@ -10,128 +13,132 @@ import { Stage } from '../../models/stage.model';
   templateUrl: './festivals.html',
   styleUrl: './festivals.css',
 })
-export class Festivals implements OnInit {
-  /** All festivals retrieved from FestivalService, shown as expandable cards. */
+export class Festivals implements OnInit, OnDestroy {
   festivalsList: Festival[] = [];
 
-  /**
-   * Controls visibility of organizer-only actions (manage stages, add performance).
-   * Stub: swap this with a real auth service call when authentication is added.
-   */
+  /** Stub: swap with a real auth service when authentication is added. */
   isOrganizerUser = true;
 
-  /**
-   * ID of the festival card that is currently expanded to show its stage list.
-   * Null means all cards are collapsed.  Only one card can be open at a time.
-   */
   expandedFestivalId: string | null = null;
 
-  /**
-   * Pre-fetched stages keyed by festival ID.
-   * Populated on init so the template does not need to call the service on every render.
-   */
+  /** Pre-fetched on init so the template doesn't call the service on every render. */
   stagesByFestivalId: Record<string, Stage[]> = {};
 
-  /**
-   * ID of the festival whose kebab (⋮) options menu is currently open.
-   * Null means no menu is open.
-   */
   openKebabMenuFestivalId: string | null = null;
+
+  private routerEventsSubscription?: Subscription;
 
   constructor(
     private festivalService: FestivalService,
-    private stageService: StageService
+    private stageService: StageService,
+    private scheduleService: ScheduleService,
+    private router: Router,
   ) {}
 
-  ngOnInit(): void {
-    // Load all festivals for the card grid.
+  private loadData(): void {
     this.festivalsList = this.festivalService.getFestivals();
-
-    // Pre-fetch stages for every festival so the expanded panel renders instantly.
     this.festivalsList.forEach((festival) => {
       this.stagesByFestivalId[festival.id] = this.stageService.getStagesByFestival(festival.id);
     });
   }
 
-  // ---- Card Expand / Collapse --------------------------------------------
+  ngOnInit(): void {
+    this.loadData();
+    // Keeps stage counts fresh when navigating back from stage/performance pages without a full reload.
+    this.routerEventsSubscription = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.loadData();
+      });
+  }
 
-  /**
-   * Toggles the expanded state of the clicked card.
-   * If the same card is already open, it collapses. Clicks inside the kebab
-   * menu are ignored here (the menu handles its own toggle).
-   */
+  ngOnDestroy(): void {
+    this.routerEventsSubscription?.unsubscribe();
+  }
+
   toggleFestivalCard(festivalId: string, clickEvent: MouseEvent): void {
     const clickedElement = clickEvent.target as HTMLElement;
-
-    // Kebab menu clicks are handled by toggleKebabMenu — don't interfere.
     if (clickedElement.closest('.kebab-menu')) return;
-
-    // Toggle: clicking the already-expanded card collapses it; clicking any
-    // other card opens it and implicitly closes the previously open one.
-    this.expandedFestivalId =
-      this.expandedFestivalId === festivalId ? null : festivalId;
+    this.expandedFestivalId = this.expandedFestivalId === festivalId ? null : festivalId;
   }
 
-  /**
-   * Keyboard equivalent of toggleFestivalCard.
-   * Activates on Enter or Space so keyboard-only users can expand/collapse cards.
-   * Ignores presses that originate inside interactive child elements
-   * (links, buttons, inputs) to avoid interfering with their native behavior.
-   */
   toggleFestivalCardOnKeyboard(festivalId: string, keyboardEvent: KeyboardEvent): void {
     if (keyboardEvent.key !== 'Enter' && keyboardEvent.key !== ' ') return;
-
     const focusedElement = keyboardEvent.target as HTMLElement;
-
-    // Let native interactions (clicking a link inside the card) work normally.
+    // Don't interfere with interactive children (links, buttons, etc.).
     if (focusedElement.closest('a, button, input, select, textarea')) return;
-
     keyboardEvent.preventDefault(); // prevent Space from scrolling the page
-    this.expandedFestivalId =
-      this.expandedFestivalId === festivalId ? null : festivalId;
+    this.expandedFestivalId = this.expandedFestivalId === festivalId ? null : festivalId;
   }
 
-  // ---- Kebab Menu --------------------------------------------------------
-
-  /**
-   * Toggles the options (⋮) dropdown for a specific festival card.
-   * stopPropagation prevents the card's own click handler from firing.
-   */
   toggleKebabMenu(festivalId: string, clickEvent: MouseEvent): void {
-    clickEvent.stopPropagation(); // don't bubble up to the card toggle handler
-    this.openKebabMenuFestivalId =
-      this.openKebabMenuFestivalId === festivalId ? null : festivalId;
+    clickEvent.stopPropagation();
+    this.openKebabMenuFestivalId = this.openKebabMenuFestivalId === festivalId ? null : festivalId;
   }
 
-  /** Returns true if the kebab menu for the given festival is currently open. */
   isKebabMenuOpen(festivalId: string): boolean {
     return this.openKebabMenuFestivalId === festivalId;
   }
 
-  /** Closes all open kebab menus. Called when the user clicks outside any card. */
   closeAllKebabMenus(): void {
     this.openKebabMenuFestivalId = null;
   }
 
-  // ---- Stage Helpers -----------------------------------------------------
-
-  /** Returns the cached stage list for a festival (or an empty array if not found). */
   getStagesForFestival(festivalId: string): Stage[] {
     return this.stagesByFestivalId[festivalId] ?? [];
   }
 
-  // ---- CSS Helpers -------------------------------------------------------
-
-  /**
-   * Maps a stage status string to its corresponding CSS badge class name.
-   * Returns an empty string for any unknown status value.
-   */
   getStatusBadgeClass(statusValue: string): string {
     const statusToBadgeClass: Record<string, string> = {
-      'active':       'badge-active',
-      'inactive':     'badge-inactive',
+      active: 'badge-active',
+      inactive: 'badge-inactive',
       'under-repair': 'badge-repair',
     };
     return statusToBadgeClass[statusValue] ?? '';
+  }
+
+  // ---- Cascade Delete ----------------------------------------------------
+
+  /**
+   * Orchestrates the deletion of a festival and all its nested resources (stages, performances).
+   * Prompts the user for confirmation before proceeding.
+   */
+  deleteFestivalWithCascade(festivalId: string, clickEvent: MouseEvent): void {
+    // Stop the click from opening the card
+    clickEvent.stopPropagation();
+
+    // Close the kebab menu since the item is about to be deleted
+    this.closeAllKebabMenus();
+
+    // The component does not hold the exact festival name in a handy lookup map,
+    // so we extract it from the currently loaded list for a nicer confirmation message.
+    const festivalToDelete = this.festivalsList.find(f => f.id === festivalId);
+    if (!festivalToDelete) return; // Should not happen
+
+    const confirmMessage = `Are you sure you want to permanently delete "${festivalToDelete.name}"?\n\nThis will also delete ALL stages and performances associated with it. This action cannot be undone.`;
+
+    // Real apps might use a nice modal here; we use the native browser confirm for simplicity.
+    if (!window.confirm(confirmMessage)) {
+      return; // User canceled
+    }
+
+    // --- Execute the cascade delete ---
+    // 1. Delete the children (Performances)
+    this.scheduleService.clearPerformancesByFestival(festivalId);
+
+    // 2. Delete the children (Stages)
+    this.stageService.clearStagesByFestival(festivalId);
+
+    // 3. Delete the parent (Festival)
+    this.festivalService.deleteFestival(festivalId);
+
+    // --- Update the UI ---
+    // Instead of doing a full page reload, just reload the data arrays
+    this.loadData();
+
+    // If the deleted festival was currently expanded, collapse it
+    if (this.expandedFestivalId === festivalId) {
+      this.expandedFestivalId = null;
+    }
   }
 }

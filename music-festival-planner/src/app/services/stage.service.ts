@@ -1,5 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { Stage } from '../models/stage.model';
+import { LOCAL_STORAGE } from './schedule.service';
+
+const STORAGE_KEY = 'mfp_stages';
 
 @Injectable({
   providedIn: 'root', // singleton — one shared instance across the whole app
@@ -51,6 +54,56 @@ export class StageService {
   /** Auto-incrementing counter for unique stage IDs (starts above the demo data). */
   private nextStageId = 5;
 
+  constructor(@Inject(LOCAL_STORAGE) private storage: Storage) {
+    const loadedStages = this.loadFromStorage();
+    if (loadedStages.length > 0) {
+      this.stageStore = loadedStages;
+      this.nextStageId = this.stageStore.reduce((maxId, stage) => Math.max(maxId, Number(stage.id) || 0), 0) + 1;
+    } else {
+      this.saveToStorage();
+    }
+  }
+
+  private isValidStoredStage(entry: unknown): entry is Stage {
+    if (entry === null || typeof entry !== 'object') return false;
+    const candidate = entry as { [key: string]: unknown };
+
+    if (
+      typeof candidate['id'] !== 'string' ||
+      typeof candidate['festivalId'] !== 'string' ||
+      typeof candidate['name'] !== 'string' ||
+      typeof candidate['capacity'] !== 'number' ||
+      typeof candidate['environment'] !== 'string' ||
+      typeof candidate['status'] !== 'string'
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private loadFromStorage(): Stage[] {
+    try {
+      const raw = this.storage.getItem(STORAGE_KEY);
+      if (raw === null) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((entry) => this.isValidStoredStage(entry))
+        .map((stage) => ({ ...stage }));
+    } catch {
+      return [];
+    }
+  }
+
+  private saveToStorage(): void {
+    try {
+      this.storage.setItem(STORAGE_KEY, JSON.stringify(this.stageStore));
+    } catch {
+      // ignore storage write failures
+    }
+  }
+
   // ---- Read Methods ------------------------------------------------------
 
   /**
@@ -101,6 +154,7 @@ export class StageService {
     };
 
     this.stageStore.push(savedStage);
+    this.saveToStorage();
     return { ...savedStage }; // return a copy, not the store reference
   }
 
@@ -122,6 +176,7 @@ export class StageService {
       ...fieldsToUpdate,
     };
 
+    this.saveToStorage();
     return { ...this.stageStore[stageIndex] };
   }
 
@@ -135,7 +190,17 @@ export class StageService {
     if (stageIndex === -1) return false;
 
     this.stageStore.splice(stageIndex, 1); // remove the single entry
+    this.saveToStorage();
     return true;
+  }
+
+  /**
+   * Removes ALL stages for a given festival in one operation.
+   * Called by the cascade delete orchestration when a festival is removed.
+   */
+  clearStagesByFestival(festivalId: string): void {
+    this.stageStore = this.stageStore.filter((stage) => stage.festivalId !== festivalId);
+    this.saveToStorage();
   }
 
   /**
