@@ -23,9 +23,13 @@
         formControlName="name"
         [attr.aria-invalid]="hasAttemptedSubmit && fields['name'].errors ? true : null"
         aria-required="true">
-      <div *ngIf="hasAttemptedSubmit || fields['name'].touched" class="error-messages">
-        <small *ngIf="fields['name'].errors?.['required']" class="error-text">Name is required.</small>
-      </div>
+      @if (hasAttemptedSubmit || fields['name'].touched) {
+        <div class="error-messages">
+          @if (fields['name'].errors?.['required']) {
+            <small class="error-text">Name is required.</small>
+          }
+        </div>
+      }
     </div>
 
     <!-- Start Date + End Date side-by-side -->
@@ -33,32 +37,49 @@
       <div class="half-width">
         <label for="startDate">Start Date <span aria-hidden="true">*</span></label>
         <input type="date" id="startDate" formControlName="startDate" aria-required="true">
-        <div *ngIf="hasAttemptedSubmit || fields['startDate'].touched" class="error-messages">
-          <small *ngIf="fields['startDate'].errors?.['required']" class="error-text">Start date is required.</small>
-        </div>
+        @if (hasAttemptedSubmit || fields['startDate'].touched) {
+          <div class="error-messages">
+            @if (fields['startDate'].errors?.['required']) {
+              <small class="error-text">Start date is required.</small>
+            }
+          </div>
+        }
       </div>
 
       <div class="half-width">
         <label for="endDate">End Date <span aria-hidden="true">*</span></label>
         <input type="date" id="endDate" formControlName="endDate" aria-required="true">
-        <div *ngIf="hasAttemptedSubmit || fields['endDate'].touched" class="error-messages">
-          <small *ngIf="fields['endDate'].errors?.['required']" class="error-text">End date is required.</small>
-        </div>
+        @if (hasAttemptedSubmit || fields['endDate'].touched) {
+          <div class="error-messages">
+            @if (fields['endDate'].errors?.['required']) {
+              <small class="error-text">End date is required.</small>
+            }
+          </div>
+        }
       </div>
     </div>
 
     <!-- Cross-field date error: end must be on or after start -->
-    <div *ngIf="hasAttemptedSubmit && festivalForm.errors?.['endBeforeStart']" class="error-messages">
-      <small class="error-text">End date must be on or after the start date.</small>
-    </div>
+    @if (
+      festivalForm.errors?.['endBeforeStart'] &&
+      (hasAttemptedSubmit || fields['startDate'].touched || fields['endDate'].touched)
+    ) {
+      <div class="error-messages">
+        <small class="error-text">End date must be on or after the start date.</small>
+      </div>
+    }
 
     <!-- Location -->
     <div class="form-group">
       <label for="location">Location <span aria-hidden="true">*</span></label>
       <input type="text" id="location" formControlName="location" aria-required="true">
-      <div *ngIf="hasAttemptedSubmit || fields['location'].touched" class="error-messages">
-        <small *ngIf="fields['location'].errors?.['required']" class="error-text">Location is required.</small>
-      </div>
+      @if (hasAttemptedSubmit || fields['location'].touched) {
+        <div class="error-messages">
+          @if (fields['location'].errors?.['required']) {
+            <small class="error-text">Location is required.</small>
+          }
+        </div>
+      }
     </div>
 
     <!-- Form Actions -->
@@ -66,7 +87,20 @@
       <!-- Cancel: goes back to the festivals list without saving -->
       <button type="button" class="btn-cancel" routerLink="/festivals">Cancel</button>
       <!-- Submit: disabled until all fields pass validation -->
-      <button type="submit" class="btn-submit" [disabled]="festivalForm.invalid">Save Festival</button>
+      <div class="submit-wrapper">
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="festivalForm.invalid"
+          [attr.aria-describedby]="festivalForm.invalid ? 'submit-disabled-tip' : null">
+          Save Festival
+        </button>
+        @if (festivalForm.invalid) {
+          <span id="submit-disabled-tip" class="submit-disabled-tip" role="tooltip">
+            you must fill out the entire form first
+          </span>
+        }
+      </div>
     </div>
 
   </form>
