@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { ScheduleService, LOCAL_STORAGE } from './schedule.service';
+import { ScheduleService } from './schedule.service';
+import { LOCAL_STORAGE } from './storage.token';
 import { Performance } from '../models/performance.model';
 
 /** Isolated in-memory storage — keeps tests hermetic without touching real localStorage. */

@@ -6,6 +6,7 @@
 
   <div class="card-grid" role="list" aria-labelledby="festivals-heading">
     @for (festival of festivalsList; track festival.id) {
+      @let festivalStages = stagesByFestivalId[festival.id];
       <div class="card" [class.card-expanded]="expandedFestivalId === festival.id" role="listitem">
         <div class="card-header">
           <button
@@ -23,8 +24,8 @@
             <span class="card-title-group">
               <h3>{{ festival.name }}</h3>
               <span class="stage-count-badge">
-                {{ getStagesForFestival(festival.id).length }}
-                {{ getStagesForFestival(festival.id).length === 1 ? 'stage' : 'stages' }}
+                {{ festivalStages.length }}
+                {{ festivalStages.length === 1 ? 'stage' : 'stages' }}
               </span>
             </span>
             <span
@@ -106,11 +107,11 @@
 
         @if (expandedFestivalId === festival.id) {
           <div class="stage-panel" [id]="'festival-panel-' + festival.id">
-            @if (getStagesForFestival(festival.id).length === 0) {
+            @if (festivalStages.length === 0) {
               <p class="no-stages">No stages yet.</p>
             } @else {
               <div class="stage-rows">
-                @for (stage of getStagesForFestival(festival.id); track stage.id) {
+                @for (stage of festivalStages; track stage.id) {
                   <div class="stage-row">
                     <div class="stage-row-left">
                       <span class="stage-row-name">{{ stage.name }}</span>

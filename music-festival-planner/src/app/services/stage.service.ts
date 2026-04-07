@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { Stage } from '../models/stage.model';
-import { LOCAL_STORAGE } from './schedule.service';
+import { LOCAL_STORAGE } from './storage.token';
 
 const STORAGE_KEY = 'mfp_stages';
 

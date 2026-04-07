@@ -153,19 +153,20 @@
 
             <!-- Performance event block — only rendered when the cell is occupied -->
             @if (performanceGrid[time + '-' + stage]; as perf) {
+              @let isConflict = hasConflictByPerformanceId(perf.id);
               <div
                 class="timetable-event"
-                [class.has-conflict]="hasConflict(time, stage)"
+                [class.has-conflict]="isConflict"
                 [attr.aria-label]="
                   perf.artistName +
                   ' at ' + perf.startTime +
                   ' on ' + perf.stageName +
                   (perf.genre ? ', ' + perf.genre : '') +
-                  (hasConflict(time, stage) ? ' — scheduling conflict' : '')
+                  (isConflict ? ' — scheduling conflict' : '')
                 ">
 
                 <!-- Conflict warning badge — only shown on conflicting events -->
-                @if (hasConflict(time, stage)) {
+                @if (isConflict) {
                   <span class="conflict-badge" aria-hidden="true">⚠</span>
                 }
 

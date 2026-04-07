@@ -1,18 +1,6 @@
-import { Injectable, Inject, InjectionToken } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { Performance } from '../models/performance.model';
-
-// ---- Storage Abstraction ---------------------------------------------------
-
-/**
- * InjectionToken for the browser Storage used by ScheduleService.
- * Providing an InjectionToken instead of calling `localStorage` directly
- * lets unit tests inject a hermetic in-memory substitute (MockStorage)
- * so tests run without touching the real browser storage.
- */
-export const LOCAL_STORAGE = new InjectionToken<Storage>('localStorage', {
-  providedIn: 'root',
-  factory: () => localStorage, // production: use the real browser localStorage
-});
+import { LOCAL_STORAGE } from './storage.token';
 
 // ---- Storage Configuration -------------------------------------------------
 

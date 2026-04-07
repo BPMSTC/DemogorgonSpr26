@@ -96,6 +96,9 @@ export class MySchedule implements OnInit {
   /** All scheduling conflicts found on the currently selected day. */
   conflicts: ConflictInfo[] = [];
 
+  /** Fast lookup set for performances involved in any conflict on the selected day. */
+  conflictPerformanceIds: Set<string> = new Set();
+
   // -------------------------------------------------------------------------
 
   constructor(
@@ -259,6 +262,9 @@ export class MySchedule implements OnInit {
     }
 
     this.conflicts = found;
+    this.conflictPerformanceIds = new Set(
+      found.flatMap((conflict) => conflict.ids)
+    );
   }
 
   /**
@@ -270,8 +276,13 @@ export class MySchedule implements OnInit {
     const perf = this.performanceGrid[`${time}-${stage}`];
     if (!perf) return false;
 
-    // A conflict exists if this performance's ID appears in any conflict entry
-    // that also matches this stage.
-    return this.conflicts.some(c => c.stage === stage && c.ids.includes(perf.id));
+    return this.hasConflictByPerformanceId(perf.id);
+  }
+
+  /**
+   * Returns true when the given performance ID appears in the selected-day conflict set.
+   */
+  hasConflictByPerformanceId(performanceId: string): boolean {
+    return this.conflictPerformanceIds.has(performanceId);
   }
 }

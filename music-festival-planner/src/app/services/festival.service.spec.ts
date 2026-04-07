@@ -1,6 +1,36 @@
 import { TestBed } from '@angular/core/testing';
 import { FestivalService } from './festival.service';
 import { Festival } from '../models/festival.model';
+import { LOCAL_STORAGE } from './storage.token';
+
+/** In-memory storage used to isolate tests from browser localStorage state. */
+class MockStorage implements Storage {
+  private store: Record<string, string> = {};
+
+  get length(): number {
+    return Object.keys(this.store).length;
+  }
+
+  key(index: number): string | null {
+    return Object.keys(this.store)[index] ?? null;
+  }
+
+  getItem(key: string): string | null {
+    return this.store[key] ?? null;
+  }
+
+  setItem(key: string, value: string): void {
+    this.store[key] = value;
+  }
+
+  removeItem(key: string): void {
+    delete this.store[key];
+  }
+
+  clear(): void {
+    this.store = {};
+  }
+}
 
 const SAMPLE_DATA: Omit<Festival, 'id'> = {
   name: 'Lollapalooza',
@@ -24,7 +54,9 @@ describe('FestivalService', () => {
   let service: FestivalService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: LOCAL_STORAGE, useValue: new MockStorage() }],
+    });
     service = TestBed.inject(FestivalService);
   });
 
@@ -76,7 +108,7 @@ describe('FestivalService', () => {
     it('should throw when endDate is before startDate', () => {
       expect(() =>
         service.createFestival({ ...SAMPLE_DATA, startDate: '2025-08-04', endDate: '2025-08-01' })
-      ).toThrowError('endDate must be on or after startDate.');
+      ).toThrowError('The end date must be on or after the start date.');
     });
 
     it('should allow endDate equal to startDate (single-day festival)', () => {

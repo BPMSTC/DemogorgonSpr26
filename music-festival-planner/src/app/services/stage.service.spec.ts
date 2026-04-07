@@ -1,6 +1,36 @@
 import { TestBed } from '@angular/core/testing';
 import { StageService } from './stage.service';
 import { Stage } from '../models/stage.model';
+import { LOCAL_STORAGE } from './storage.token';
+
+/** In-memory storage used to isolate tests from browser localStorage state. */
+class MockStorage implements Storage {
+  private store: Record<string, string> = {};
+
+  get length(): number {
+    return Object.keys(this.store).length;
+  }
+
+  key(index: number): string | null {
+    return Object.keys(this.store)[index] ?? null;
+  }
+
+  getItem(key: string): string | null {
+    return this.store[key] ?? null;
+  }
+
+  setItem(key: string, value: string): void {
+    this.store[key] = value;
+  }
+
+  removeItem(key: string): void {
+    delete this.store[key];
+  }
+
+  clear(): void {
+    this.store = {};
+  }
+}
 
 const BASE_DATA: Omit<Stage, 'id'> = {
   festivalId: '99',
@@ -14,7 +44,9 @@ describe('StageService', () => {
   let service: StageService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: LOCAL_STORAGE, useValue: new MockStorage() }],
+    });
     service = TestBed.inject(StageService);
   });
 
