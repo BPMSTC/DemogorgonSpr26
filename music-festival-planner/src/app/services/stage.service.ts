@@ -9,50 +9,13 @@ const STORAGE_KEY = 'mfp_stages';
 })
 export class StageService {
   /**
-   * Pre-loaded demo stages for Festival ID "1".
-   * Gives new users a ready-to-explore lineup without having to create stages first.
+   * In-memory stage store — starts empty.
+   * Users must create festivals and stages explicitly.
    */
-  private stageStore: Stage[] = [
-    {
-      id: '1',
-      festivalId: '1',
-      name: 'Main Stage',
-      capacity: 5000,
-      environment: 'outdoor',
-      status: 'active',
-      notes: 'Primary headliner stage with full production.',
-    },
-    {
-      id: '2',
-      festivalId: '1',
-      name: 'Indie Stage',
-      capacity: 1500,
-      environment: 'outdoor',
-      status: 'active',
-      notes: 'Emerging artists and indie acts.',
-    },
-    {
-      id: '3',
-      festivalId: '1',
-      name: 'Dance Tent',
-      capacity: 800,
-      environment: 'indoor',
-      status: 'active',
-      notes: 'Electronic and DJ sets.',
-    },
-    {
-      id: '4',
-      festivalId: '1',
-      name: 'Forest Stage',
-      capacity: 600,
-      environment: 'outdoor',
-      status: 'inactive',
-      notes: 'Acoustic sets in a natural setting.',
-    },
-  ];
+  private stageStore: Stage[] = [];
 
-  /** Auto-incrementing counter for unique stage IDs (starts above the demo data). */
-  private nextStageId = 5;
+  /** Auto-incrementing counter for unique stage IDs. */
+  private nextStageId = 1;
 
   constructor(@Inject(LOCAL_STORAGE) private storage: Storage) {
     const loadedStages = this.loadFromStorage();

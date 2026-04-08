@@ -61,6 +61,26 @@ export class PerformanceListComponent implements OnInit {
       });
   }
 
+  /**
+   * Formats a stored 24-hour time string for display in 12-hour format.
+   *
+   * @param timeString Time string in HH:mm or H:mm format.
+   * @returns Formatted time string such as "06:00 PM".
+   */
+  formatDisplayTime(timeString: string): string {
+    const [hoursText, minutesText] = timeString.split(':');
+    const hours = Number(hoursText);
+    const minutes = Number(minutesText);
+
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+      return timeString;
+    }
+
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    const normalizedHours = hours % 12 || 12;
+    return `${String(normalizedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${suffix}`;
+  }
+
   // ---- Navigation Helpers ------------------------------------------------
 
   /** Routes to the "Add Performance" form for this festival. */
