@@ -20,16 +20,10 @@ export const LOCAL_STORAGE = new InjectionToken<Storage>('localStorage', {
 const STORAGE_KEY = 'mfp_performances';
 
 /**
- * Pre-loaded demo performances shown the very first time the app opens
- * (i.e. when localStorage has no saved data yet).
- * Gives new users something to explore right away without creating anything.
+ * Pre-loaded demo performances — currently empty.
+ * Users must create festivals, stages, and performances explicitly.
  */
-const SEED_PERFORMANCES: Performance[] = [
-  { id: '1', festivalId: '1', artistName: 'The Neon Shadows',    stageName: 'Main Stage',   date: '2026-08-01', startTime: '18:00', endTime: '19:30', genre: 'Rock' },
-  { id: '2', festivalId: '1', artistName: 'DJ Horizon',          stageName: 'Dance Tent',   date: '2026-08-01', startTime: '18:00', endTime: '19:00', genre: 'Electronic' },
-  { id: '3', festivalId: '1', artistName: 'Electric Pulse',      stageName: 'Main Stage',   date: '2026-08-01', startTime: '20:00', endTime: '21:30', genre: 'Electronic' },
-  { id: '4', festivalId: '1', artistName: 'Acoustic Wanderers',  stageName: 'Forest Stage', date: '2026-08-02', startTime: '14:00', endTime: '15:00', genre: 'Folk' },
-];
+const SEED_PERFORMANCES: Performance[] = [];
 
 // ---- Service ---------------------------------------------------------------
 
