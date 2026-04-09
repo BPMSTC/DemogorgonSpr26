@@ -1,11 +1,12 @@
 /* ============================================================
-   My Schedule Component — Timetable Grid + Conflict Alerts
+   My Schedule Component — Festival Timetable + Personal Itinerary
    ============================================================ */
 
 :host {
   display: block;
 }
 
+/* ---- Page Header ------------------------------------------ */
 .schedule-header {
   margin-bottom: 2rem;
 }
@@ -16,6 +17,78 @@
   text-shadow: var(--glow-yellow);
   text-transform: uppercase;
   margin-bottom: 0.25rem;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  margin-bottom: 1rem;
+  padding: 0;
+}
+
+.btn-back:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---- View Tab Switcher ------------------------------------ */
+.view-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0;
+}
+
+.view-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: var(--font-display, inherit);
+  letter-spacing: 0.04em;
+  padding: 0.5rem 1rem 0.65rem;
+  margin-bottom: -1px; /* sit on top of the border-bottom */
+  transition: color 0.15s ease, border-color 0.15s ease;
+  position: relative;
+}
+
+.view-tab:hover {
+  color: var(--text-primary);
+}
+
+.view-tab--active {
+  color: var(--neon-cyan);
+  border-bottom-color: var(--neon-cyan);
+}
+
+.view-tab-icon {
+  font-size: 1rem;
+}
+
+/* Saved-count badge on the My Schedule tab */
+.view-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--neon-cyan);
+  color: var(--bg-dark, #0a0a0f);
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
+  padding: 0 0.3rem;
+  margin-left: 0.15rem;
+  line-height: 1;
 }
 
 /* ---- Conflict Alert Banner -------------------------------- */
@@ -32,9 +105,22 @@
   animation: conflict-pulse 2s ease-in-out infinite;
 }
 
+/* Personal conflict alert — same visual, distinct label */
+.conflict-alert--personal {
+  background-color: rgba(255, 140, 0, 0.08);
+  border-color: #ff8c00;
+  box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
+  animation: personal-conflict-pulse 2s ease-in-out infinite;
+}
+
 @keyframes conflict-pulse {
   0%, 100% { box-shadow: var(--glow-magenta); }
   50%       { box-shadow: 0 0 18px rgba(255, 45, 120, 0.8), 0 0 40px rgba(255, 45, 120, 0.3); }
+}
+
+@keyframes personal-conflict-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(255, 140, 0, 0.25); }
+  50%       { box-shadow: 0 0 20px rgba(255, 140, 0, 0.6), 0 0 40px rgba(255, 140, 0, 0.2); }
 }
 
 .conflict-alert .conflict-icon {
@@ -55,10 +141,13 @@
   margin-bottom: 2px;
 }
 
+.conflict-alert--personal .conflict-text strong {
+  color: #ff8c00;
+}
+
 /* ---- Timetable Grid --------------------------------------- */
 .timetable {
   display: grid;
-  /* First column = time labels, remaining = stage columns */
   grid-template-columns: 60px repeat(var(--stage-count, 3), 1fr);
   gap: 2px;
   background-color: var(--bg-surface);
@@ -68,12 +157,10 @@
   font-size: 0.82rem;
 }
 
-/* Header row — stage names */
 .timetable-header {
   display: contents;
 }
 
-/* Row wrapper — transparent to CSS grid, preserves ARIA row semantics */
 .timetable-row {
   display: contents;
 }
@@ -90,14 +177,12 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-/* Empty top-left corner cell */
 .timetable-corner {
   background-color: var(--bg-dark);
   border-bottom: 1px solid var(--border-subtle);
   border-right: 1px solid var(--border-subtle);
 }
 
-/* Time label cells */
 .timetable-time {
   background-color: var(--bg-dark);
   color: var(--text-muted);
@@ -108,29 +193,34 @@
   white-space: nowrap;
 }
 
-/* Each stage slot (empty) */
 .timetable-slot {
   background-color: var(--bg-card);
   min-height: 40px;
   position: relative;
 }
 
-/* An event block placed inside a slot */
+/* Event block inside a slot */
 .timetable-event {
   background-color: var(--bg-surface);
   border-left: 3px solid var(--neon-cyan);
   border-radius: 4px;
   padding: 6px 8px;
-  cursor: pointer;
+  padding-bottom: 30px; /* room for the Add button */
+  cursor: default;
   transition: filter 0.2s ease, transform 0.15s ease;
   overflow: hidden;
-  /* Spans rows via inline style: grid-row: span N */
+  position: relative;
 }
 
 .timetable-event:hover {
-  filter: brightness(1.2);
-  transform: scale(1.01);
+  filter: brightness(1.15);
   z-index: 1;
+}
+
+/* Saved state: swap left border to yellow */
+.timetable-event.is-saved {
+  border-left-color: var(--neon-yellow, #f5e642);
+  background-color: rgba(245, 230, 66, 0.06);
 }
 
 .timetable-event .event-name {
@@ -156,7 +246,16 @@
   color: var(--text-secondary);
 }
 
-/* Conflict state — event overlaps with another */
+.timetable-event .event-genre {
+  font-size: 0.68rem;
+  color: var(--neon-cyan);
+  opacity: 0.7;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Conflict state */
 .timetable-event.has-conflict {
   border-left-color: var(--neon-magenta);
   background-color: rgba(255, 45, 120, 0.08);
@@ -166,7 +265,6 @@
   color: var(--neon-magenta);
 }
 
-/* Conflict icon badge on event */
 .timetable-event .conflict-badge {
   position: absolute;
   top: 4px;
@@ -175,7 +273,342 @@
   color: var(--neon-magenta);
 }
 
-/* ---- Schedule Empty State --------------------------------- */
+/* ---- Add to My Schedule Button (inside timetable event) --- */
+.btn-save-perf {
+  position: absolute;
+  bottom: 4px;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  background-color: rgba(0, 245, 255, 0.08);
+  border: 1px solid rgba(0, 245, 255, 0.25);
+  border-radius: 3px;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-family: var(--font-display, inherit);
+  letter-spacing: 0.05em;
+  padding: 2px 4px;
+  transition: background-color 0.15s ease, border-color 0.15s ease,
+              color 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.btn-save-perf:hover {
+  background-color: rgba(0, 245, 255, 0.18);
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 6px rgba(0, 245, 255, 0.3);
+}
+
+/* Saved state — yellow accent */
+.btn-save-perf--saved {
+  background-color: rgba(245, 230, 66, 0.1);
+  border-color: rgba(245, 230, 66, 0.4);
+  color: var(--neon-yellow, #f5e642);
+}
+
+.btn-save-perf--saved:hover {
+  background-color: rgba(245, 230, 66, 0.18);
+  border-color: var(--neon-yellow, #f5e642);
+  box-shadow: 0 0 6px rgba(245, 230, 66, 0.3);
+  color: var(--neon-magenta);
+}
+
+/* Override label text on hover to show "Remove" affordance */
+.btn-save-perf--saved:hover .btn-save-perf__label::after {
+  content: ' — click to remove';
+}
+
+.btn-save-perf__icon {
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.btn-save-perf__label {
+  line-height: 1;
+}
+
+/* ---- Personal Schedule Header ----------------------------- */
+.personal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+
+.personal-count {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.personal-count__num {
+  font-size: 1.4rem;
+  font-family: var(--font-display, inherit);
+  color: var(--neon-cyan);
+  margin-right: 0.2rem;
+}
+
+.btn-clear-all {
+  background: none;
+  border: 1px solid rgba(255, 45, 120, 0.35);
+  border-radius: 999px;
+  color: var(--neon-magenta);
+  cursor: pointer;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.85rem;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-clear-all:hover {
+  background-color: rgba(255, 45, 120, 0.1);
+  box-shadow: 0 0 8px rgba(255, 45, 120, 0.25);
+}
+
+/* ---- Personal Day Section --------------------------------- */
+.personal-day {
+  margin-bottom: 2rem;
+}
+
+.personal-day-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.personal-day-weekday {
+  font-family: var(--font-display, inherit);
+  font-size: 1.1rem;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.personal-day-date {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.personal-day-count {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+/* ---- Personal Performance Cards --------------------------- */
+.personal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.personal-card {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--neon-cyan);
+  border-radius: var(--radius-card, 8px);
+  overflow: hidden;
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.personal-card:hover {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.12);
+}
+
+/* Conflict state */
+.personal-card--conflict {
+  border-left-color: #ff8c00;
+  background-color: rgba(255, 140, 0, 0.04);
+}
+
+.personal-card--conflict:hover {
+  border-color: #ff8c00;
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.2);
+}
+
+.personal-card__conflict-tag {
+  position: absolute;
+  top: 6px;
+  right: 36px; /* clear the remove button */
+  font-size: 0.65rem;
+  color: #ff8c00;
+  background-color: rgba(255, 140, 0, 0.12);
+  border: 1px solid rgba(255, 140, 0, 0.3);
+  border-radius: 999px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+/* Time strip */
+.personal-card__time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0.75rem 0.85rem;
+  background-color: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  min-width: 54px;
+  flex-shrink: 0;
+}
+
+.personal-card__start {
+  font-family: var(--font-display, inherit);
+  font-size: 0.85rem;
+  color: var(--neon-cyan);
+  line-height: 1;
+}
+
+.personal-card__duration-line {
+  width: 1px;
+  flex: 1;
+  min-height: 8px;
+  background: linear-gradient(to bottom, var(--neon-cyan), transparent);
+  opacity: 0.3;
+}
+
+.personal-card__end {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+/* Main info block */
+.personal-card__info {
+  flex: 1;
+  padding: 0.75rem 0.85rem;
+  min-width: 0;
+}
+
+.personal-card__festival {
+  font-size: 0.66rem;
+  color: var(--neon-cyan);
+  opacity: 0.8;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.personal-card__artist {
+  font-family: var(--font-display, inherit);
+  font-size: 1rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.personal-card__stage {
+  font-size: 0.78rem;
+  color: var(--neon-magenta);
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.personal-card__genre {
+  display: inline-block;
+  font-size: 0.65rem;
+  color: var(--neon-cyan);
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  background-color: rgba(0, 245, 255, 0.08);
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  border-radius: 999px;
+  padding: 1px 6px;
+}
+
+/* Remove button */
+.btn-remove-perf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 0.85rem;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-remove-perf:hover {
+  color: var(--neon-magenta);
+  background-color: rgba(255, 45, 120, 0.08);
+}
+
+/* ---- Personal Schedule Empty State ----------------------- */
+.personal-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.personal-empty__hint {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  max-width: 340px;
+  line-height: 1.6;
+}
+
+.personal-empty__add-preview {
+  display: inline-block;
+  font-size: 0.75rem;
+  border: 1px solid rgba(0, 245, 255, 0.35);
+  border-radius: 3px;
+  color: var(--neon-cyan);
+  padding: 1px 5px;
+  margin: 0 2px;
+  vertical-align: middle;
+}
+
+.btn-go-festival {
+  background-color: rgba(0, 245, 255, 0.08);
+  border: 1px solid rgba(0, 245, 255, 0.35);
+  border-radius: 999px;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: var(--font-display, inherit);
+  letter-spacing: 0.04em;
+  padding: 0.45rem 1.25rem;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-go-festival:hover {
+  background-color: rgba(0, 245, 255, 0.15);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
+}
+
+/* ---- Schedule Empty State (Festival tab) ------------------ */
 .schedule-empty {
   text-align: center;
   padding: 5rem 1rem;
@@ -193,8 +626,25 @@
   font-size: 1rem;
   margin-bottom: 1.5rem;
 }
+.schedule-empty a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+}
 
-/* ---- Schedule summary row --------------------------------- */
+.schedule-empty a:hover {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
+}
+
+.schedule-empty a:focus-visible {
+  outline: 2px solid var(--neon-cyan);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ---- Schedule Summary (Day Tabs) -------------------------- */
 .schedule-summary {
   display: flex;
   flex-wrap: wrap;
@@ -224,7 +674,7 @@
   box-shadow: 0 0 8px rgba(0, 245, 255, 0.25);
 }
 
-/* ---- Filter row (stage + genre side-by-side) -------------- */
+/* ---- Filter Row ------------------------------------------- */
 .filter-row {
   display: flex;
   flex-direction: column;
@@ -232,7 +682,6 @@
   margin-bottom: 1.5rem;
 }
 
-/* ---- Stage / Genre filter bars ---------------------------- */
 .stage-filter {
   display: flex;
   flex-wrap: wrap;
@@ -270,24 +719,13 @@
   box-shadow: 0 0 8px rgba(255, 45, 120, 0.25);
 }
 
-/* Genre filter buttons use cyan accent */
 .stage-filter-btn--genre.stage-filter-active {
   border-color: var(--neon-cyan);
   color: var(--neon-cyan);
   box-shadow: 0 0 8px rgba(0, 245, 255, 0.25);
 }
 
-/* ---- Event genre label ------------------------------------ */
-.timetable-event .event-genre {
-  font-size: 0.68rem;
-  color: var(--neon-cyan);
-  opacity: 0.7;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-
-/* ---- Responsive breakpoints ------------------------------- */
+/* ---- Responsive ------------------------------------------- */
 @media (max-width: 768px) {
   .schedule-header h1 {
     font-size: 2rem;
@@ -314,6 +752,15 @@
     padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
   }
+
+  .personal-card__artist {
+    font-size: 0.9rem;
+  }
+
+  .view-tab {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.7rem 0.55rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -328,7 +775,7 @@
   }
 
   .timetable-event {
-    padding: 4px 5px;
+    padding: 4px 5px 28px;
   }
 
   .timetable-event .event-stage,
@@ -345,5 +792,14 @@
   .conflict-alert {
     flex-direction: column;
     gap: 0.4rem;
+  }
+
+  .personal-card__time {
+    min-width: 46px;
+    padding: 0.6rem 0.6rem;
+  }
+
+  .personal-card__conflict-tag {
+    display: none; /* hidden at small sizes; conflict shown via border colour */
   }
 }

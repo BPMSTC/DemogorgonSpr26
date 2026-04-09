@@ -1,6 +1,6 @@
 import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { Home } from './components/home/home';
@@ -14,9 +14,22 @@ import { PerformanceListComponent } from './components/performance-list/performa
 import { PerformanceCreateComponent } from './components/performance-create/performance-create';
 
 @NgModule({
-  declarations: [App, Home, Festivals, MySchedule, FestivalCreateComponent, StageCreateComponent, StageListComponent, PerformanceListComponent, PerformanceCreateComponent],
+  declarations: [
+    App,
+    Home,
+    Festivals,
+    MySchedule,
+    FestivalCreateComponent,
+    StageCreateComponent,
+    StageListComponent,
+    PerformanceListComponent,
+    PerformanceCreateComponent,
+  ],
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
-  providers: [provideBrowserGlobalErrorListeners()],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
+  ],
   bootstrap: [App],
 })
 export class AppModule {}
