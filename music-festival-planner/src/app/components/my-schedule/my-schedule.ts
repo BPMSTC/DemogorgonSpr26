@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, Injector, OnInit, OnDestroy, effect } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ScheduleService } from '../../services/schedule.service';
@@ -119,6 +119,7 @@ export class MySchedule implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private scheduleService: ScheduleService,
+    private injector: Injector,
     private festivalService: FestivalService,
     public personalSchedule: PersonalScheduleService,
   ) {}
@@ -133,17 +134,13 @@ export class MySchedule implements OnInit, OnDestroy {
     this.festivalName = this.festivalId
       ? this.festivalService.getFestivalById(this.festivalId)?.name ?? ''
       : '';
-    
+
     if (this.festivalId) {
-      this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
-
-      this.festivalDays = [
-        ...new Set(this.allPerformances.map(p => p.date))
-      ].sort();
-
-      if (this.festivalDays.length > 0) {
-        this.selectDay(this.festivalDays[0]);
-      }
+      // Keep this component synced with shared schedule state via Angular Signals.
+      effect(() => {
+        this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
+        this.syncViewStateFromStore();
+      }, { injector: this.injector });
     }
 
     // Subscribe to the personal schedule so the UI stays in sync with any
@@ -173,11 +170,7 @@ export class MySchedule implements OnInit, OnDestroy {
     this.selectedStage = ALL_STAGES;
     this.selectedGenre = ALL_GENRES;
 
-    const dayPerformances = this.allPerformances.filter(p => p.date === day);
-    this.allStagesForDay  = [...new Set(dayPerformances.map(p => p.stageName))].sort();
-    this.allGenresForDay  = [
-      ...new Set(dayPerformances.map(p => p.genre).filter((g): g is string => !!g))
-    ].sort();
+    this.refreshFilterOptionsForSelectedDay();
 
     this.applyFilters();
   }
@@ -190,6 +183,52 @@ export class MySchedule implements OnInit, OnDestroy {
   selectGenre(genre: string): void {
     this.selectedGenre = genre;
     this.applyFilters();
+  }
+
+  /**
+   * Reconciles selected-day/filter state after any shared schedule change.
+   * Preserves current selections when still valid.
+   */
+  private syncViewStateFromStore(): void {
+    this.festivalDays = [...new Set(this.allPerformances.map((p) => p.date))].sort();
+
+    if (this.festivalDays.length === 0) {
+      this.selectedDay = '';
+      this.selectedStage = ALL_STAGES;
+      this.selectedGenre = ALL_GENRES;
+      this.allStagesForDay = [];
+      this.allGenresForDay = [];
+      this.applyFilters();
+      return;
+    }
+
+    // Select a valid day whenever data changes remove the current day.
+    if (!this.selectedDay || !this.festivalDays.includes(this.selectedDay)) {
+      this.selectedDay = this.festivalDays[0];
+      this.selectedStage = ALL_STAGES;
+      this.selectedGenre = ALL_GENRES;
+    }
+
+    this.refreshFilterOptionsForSelectedDay();
+
+    // If filters became invalid after data changes, reset them to "All".
+    if (this.selectedStage !== ALL_STAGES && !this.allStagesForDay.includes(this.selectedStage)) {
+      this.selectedStage = ALL_STAGES;
+    }
+    if (this.selectedGenre !== ALL_GENRES && !this.allGenresForDay.includes(this.selectedGenre)) {
+      this.selectedGenre = ALL_GENRES;
+    }
+
+    this.applyFilters();
+  }
+
+  /** Recomputes available stage/genre options for the currently selected day. */
+  private refreshFilterOptionsForSelectedDay(): void {
+    const dayPerformances = this.allPerformances.filter((p) => p.date === this.selectedDay);
+    this.allStagesForDay = [...new Set(dayPerformances.map((p) => p.stageName))].sort();
+    this.allGenresForDay = [
+      ...new Set(dayPerformances.map((p) => p.genre).filter((g): g is string => !!g)),
+    ].sort();
   }
 
   // ---- Personal Schedule Actions -----------------------------------------

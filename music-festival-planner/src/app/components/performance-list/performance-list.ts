@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, effect } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScheduleService } from '../../services/schedule.service';
 import { FestivalService } from '../../services/festival.service';
@@ -25,7 +25,8 @@ export class PerformanceListComponent implements OnInit {
     private activeRoute: ActivatedRoute,
     private router: Router,
     private scheduleService: ScheduleService,
-    private festivalService: FestivalService
+    private festivalService: FestivalService,
+    private injector: Injector
   ) {}
 
   ngOnInit(): void {
@@ -33,7 +34,31 @@ export class PerformanceListComponent implements OnInit {
     this.festivalId   = this.activeRoute.snapshot.paramMap.get('id') ?? '';
     this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
 
-    this.refreshPerformanceList();
+    // React to all schedule mutations from the shared service state.
+    effect(() => {
+      this.sortedPerformances = this.sortPerformances(
+        this.scheduleService.getPerformancesByFestival(this.festivalId)
+      );
+    }, { injector: this.injector });
+  }
+
+  /** Pure sort helper used by both reactive state sync and tests. */
+  private sortPerformances(performances: Performance[]): Performance[] {
+    // Helper to convert "HH:mm" → total minutes for numeric time comparison.
+    const convertTimeToMinutes = (timeString: string): number => {
+      const [hours, minutes] = timeString.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    return [...performances].sort((performanceA, performanceB) => {
+      // Primary sort: date string comparison (ISO format sorts lexicographically).
+      if (performanceA.date !== performanceB.date) {
+        return performanceA.date.localeCompare(performanceB.date);
+      }
+      // Secondary sort: earlier start times come first within the same day.
+      return convertTimeToMinutes(performanceA.startTime) -
+             convertTimeToMinutes(performanceB.startTime);
+    });
   }
 
   /**
@@ -42,23 +67,9 @@ export class PerformanceListComponent implements OnInit {
    * Called on init and after every add/delete/clear operation.
    */
   refreshPerformanceList(): void {
-    // Helper to convert "HH:mm" → total minutes for numeric time comparison.
-    const convertTimeToMinutes = (timeString: string): number => {
-      const [hours, minutes] = timeString.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
-
-    this.sortedPerformances = this.scheduleService
-      .getPerformancesByFestival(this.festivalId)
-      .sort((performanceA, performanceB) => {
-        // Primary sort: date string comparison (ISO format sorts lexicographically).
-        if (performanceA.date !== performanceB.date) {
-          return performanceA.date.localeCompare(performanceB.date);
-        }
-        // Secondary sort: earlier start times come first within the same day.
-        return convertTimeToMinutes(performanceA.startTime) -
-               convertTimeToMinutes(performanceB.startTime);
-      });
+    this.sortedPerformances = this.sortPerformances(
+      this.scheduleService.getPerformancesByFestival(this.festivalId)
+    );
   }
 
   /**
