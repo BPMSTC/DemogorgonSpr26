@@ -86,10 +86,6 @@ export class Festivals implements OnInit, OnDestroy {
     this.openKebabMenuFestivalId = null;
   }
 
-  getStagesForFestival(festivalId: string): Stage[] {
-    return this.stagesByFestivalId[festivalId] ?? [];
-  }
-
   getStatusBadgeClass(statusValue: string): string {
     const statusToBadgeClass: Record<string, string> = {
       active: 'badge-active',

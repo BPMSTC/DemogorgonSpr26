@@ -3,14 +3,33 @@ import { FestivalService } from './festival.service';
 import { Festival } from '../models/festival.model';
 import { LOCAL_STORAGE } from './schedule.service';
 
+/** In-memory storage used to isolate tests from browser localStorage state. */
 class MockStorage implements Storage {
   private store: Record<string, string> = {};
-  get length(): number { return Object.keys(this.store).length; }
-  key(index: number): string | null { return Object.keys(this.store)[index] ?? null; }
-  getItem(key: string): string | null { return this.store[key] ?? null; }
-  setItem(key: string, value: string): void { this.store[key] = value; }
-  removeItem(key: string): void { delete this.store[key]; }
-  clear(): void { this.store = {}; }
+
+  get length(): number {
+    return Object.keys(this.store).length;
+  }
+
+  key(index: number): string | null {
+    return Object.keys(this.store)[index] ?? null;
+  }
+
+  getItem(key: string): string | null {
+    return this.store[key] ?? null;
+  }
+
+  setItem(key: string, value: string): void {
+    this.store[key] = value;
+  }
+
+  removeItem(key: string): void {
+    delete this.store[key];
+  }
+
+  clear(): void {
+    this.store = {};
+  }
 }
 
 const SAMPLE_DATA: Omit<Festival, 'id'> = {

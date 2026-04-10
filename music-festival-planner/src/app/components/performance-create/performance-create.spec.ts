@@ -71,6 +71,7 @@ describe('PerformanceCreateComponent', () => {
     component = fixture.componentInstance;
     scheduleService = TestBed.inject(ScheduleService);
     router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture.detectChanges();
     await fixture.whenStable();
   });
@@ -256,8 +257,7 @@ describe('PerformanceCreateComponent', () => {
       startTime: '14:00',
       endTime: '15:30',
     });
-    const router = TestBed.inject(Router);
-    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const navigateSpy = vi.mocked(router.navigate);
 
     component.performanceForm.setValue({
       artistName: 'Test Artist',
@@ -286,6 +286,7 @@ describe('PerformanceCreateComponent — no stages', () => {
     component = fixture.componentInstance;
     scheduleService = TestBed.inject(ScheduleService);
     router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture.detectChanges();
     await fixture.whenStable();
   });
