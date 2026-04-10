@@ -2,7 +2,9 @@
 
 An Angular 21 single-page application for browsing music festivals, managing stages and performances, and viewing a personal timetable.
 
-> **New team member?** Start with [ARCHITECTURE.md](./ARCHITECTURE.md) for a full overview of the folder structure, components, services, and routing.
+This project lives inside the `DemogorgonSpr26` repository. All project documentation now lives in `music-festival-planner/docs/`.
+
+> **New team member?** Start with [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for a full overview of the folder structure, components, services, and routing.
 
 ---
 
@@ -47,6 +49,17 @@ npm run build
 
 ---
 
+## Documentation Index
+
+- Architecture guide: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- GitHub Pages deployment plan: [docs/GITHUB_PAGES_WORKFLOW_PLAN.md](./docs/GITHUB_PAGES_WORKFLOW_PLAN.md)
+- Person A walkthrough: [docs/PERSON-A-WALKTHROUGH.md](./docs/PERSON-A-WALKTHROUGH.md)
+- Person B walkthrough: [docs/PERSON-B-WALKTHROUGH.md](./docs/PERSON-B-WALKTHROUGH.md)
+- DEM-64 full change documentation: [docs/DEM-64_FULL_CHANGE_DOCUMENTATION.md](./docs/DEM-64_FULL_CHANGE_DOCUMENTATION.md)
+- Sprint 2–3 technical debt backlog: [docs/TECH_DEBT_SPRINT2_BACKLOG.md](./docs/TECH_DEBT_SPRINT2_BACKLOG.md)
+
+---
+
 ## Project Structure (summary)
 
 ```
@@ -74,7 +87,7 @@ src/app/
     └── schedule.service.ts     # localStorage-backed CRUD for performances + conflict detection
 ```
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for full details including component inputs/outputs, service API, data flow diagrams, and planned routes.
+See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for full details including component inputs/outputs, service API, data flow diagrams, and planned routes.
 
 ---
 
@@ -92,7 +105,7 @@ ng generate service services/<name>
 
 ## Additional Resources
 
-- GitHub Pages deployment plan (pre-workflow): [GITHUB_PAGES_WORKFLOW_PLAN.md](./GITHUB_PAGES_WORKFLOW_PLAN.md)
+- GitHub Pages deployment plan (pre-workflow): [GITHUB_PAGES_WORKFLOW_PLAN.md](./docs/GITHUB_PAGES_WORKFLOW_PLAN.md)
 - [Angular CLI documentation](https://angular.dev/tools/cli)
 - [Angular 21 docs](https://angular.dev)
 - [Bootstrap 5 docs](https://getbootstrap.com/docs/5.3/)
