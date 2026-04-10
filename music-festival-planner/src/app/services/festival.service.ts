@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@angular/core';
 import { Festival } from '../models/festival.model';
-import { LOCAL_STORAGE } from './storage.token';
+import { LOCAL_STORAGE } from './schedule.service';
 
 const STORAGE_KEY = 'mfp_festivals';
 

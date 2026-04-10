@@ -4,6 +4,7 @@ import { Subscription, filter } from 'rxjs';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
 import { ScheduleService } from '../../services/schedule.service';
+import { PersonalScheduleService } from '../../services/personal-schedule.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
 
@@ -32,6 +33,7 @@ export class Festivals implements OnInit, OnDestroy {
     private festivalService: FestivalService,
     private stageService: StageService,
     private scheduleService: ScheduleService,
+    private personalScheduleService: PersonalScheduleService,
     private router: Router,
   ) {}
 
@@ -119,13 +121,16 @@ export class Festivals implements OnInit, OnDestroy {
     }
 
     // --- Execute the cascade delete ---
-    // 1. Delete the children (Performances)
+    // 1. Delete the children (Performances) from personal schedule
+    this.personalScheduleService.removePerformancesByFestival(festivalId);
+
+    // 2. Delete the children (Performances) from schedule
     this.scheduleService.clearPerformancesByFestival(festivalId);
 
-    // 2. Delete the children (Stages)
+    // 3. Delete the children (Stages)
     this.stageService.clearStagesByFestival(festivalId);
 
-    // 3. Delete the parent (Festival)
+    // 4. Delete the parent (Festival)
     this.festivalService.deleteFestival(festivalId);
 
     // --- Update the UI ---

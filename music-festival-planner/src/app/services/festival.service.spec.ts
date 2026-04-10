@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { FestivalService } from './festival.service';
 import { Festival } from '../models/festival.model';
-import { LOCAL_STORAGE } from './storage.token';
+import { LOCAL_STORAGE } from './schedule.service';
 
 /** In-memory storage used to isolate tests from browser localStorage state. */
 class MockStorage implements Storage {
