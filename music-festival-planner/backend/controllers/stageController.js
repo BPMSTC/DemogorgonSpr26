@@ -42,6 +42,43 @@ exports.createStage = async (req, res) => {
   }
 };
 
+// PUT /api/stages/:id — full replacement (festivalId is immutable)
+exports.replaceStage = async (req, res) => {
+  const { name, capacity, environment, status, notes } = req.body;
+
+  if (!Number.isInteger(capacity) || capacity <= 0) {
+    return res.status(400).json({ message: 'capacity must be a positive integer.' });
+  }
+
+  try {
+    const existing = await Stage.findById(req.params.id);
+    if (!existing) return res.status(404).json({ message: 'Stage not found.' });
+
+    const { festivalId } = existing;
+
+    // Stage names must be unique within the festival, excluding this stage itself.
+    const duplicate = await Stage.findOne({
+      festivalId,
+      name: { $regex: new RegExp(`^${name}$`, 'i') },
+      _id: { $ne: req.params.id },
+    });
+    if (duplicate) {
+      return res
+        .status(409)
+        .json({ message: `A stage named "${name}" already exists for this festival.` });
+    }
+
+    const stage = await Stage.findOneAndReplace(
+      { _id: req.params.id },
+      { festivalId, name, capacity, environment, status, notes: notes ?? '' },
+      { new: true, runValidators: true }
+    );
+    res.json(stage);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
 // DELETE /api/stages/festival/:festivalId
 // Deletes ALL stages for a festival (cascade delete helper).
 exports.deleteStagesByFestival = async (req, res) => {
