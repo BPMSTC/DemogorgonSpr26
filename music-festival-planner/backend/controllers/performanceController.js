@@ -1,5 +1,3 @@
-const express = require('express');
-const router = express.Router();
 const Performance = require('../models/Performance');
 
 // ---- Time helpers ----------------------------------------------------------
@@ -13,8 +11,9 @@ function toMinutes(time) {
   return h * 60 + m;
 }
 
-// Returns true if the new slot overlaps any existing performance on the same
-// stage/date (excluding an optional performance ID for edit scenarios).
+// Returns true if the requested time window overlaps any existing performance
+// on the same stage/date.  Pass excludeId when editing an existing performance
+// so it doesn't conflict with itself.
 async function isStageOccupied(festivalId, stageName, date, startTime, endTime, excludeId) {
   const newStart = toMinutes(startTime);
   const newEnd   = toMinutes(endTime);
@@ -28,15 +27,14 @@ async function isStageOccupied(festivalId, stageName, date, startTime, endTime, 
     const s = toMinutes(p.startTime);
     const e = toMinutes(p.endTime);
     if (s === null || e === null) return false;
-    return newStart < e && newEnd > s;
+    return newStart < e && newEnd > s; // standard interval-overlap test
   });
 }
 
 // ----------------------------------------------------------------------------
 
 // GET /api/performances?festivalId=<id>
-// Returns all performances for a given festival, sorted by date then start time.
-router.get('/', async (req, res) => {
+exports.getPerformancesByFestival = async (req, res) => {
   const { festivalId } = req.query;
   if (!festivalId) {
     return res.status(400).json({ message: 'festivalId query parameter is required.' });
@@ -50,11 +48,10 @@ router.get('/', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
+};
 
 // POST /api/performances
-// Creates a new performance with time-conflict validation.
-router.post('/', async (req, res) => {
+exports.createPerformance = async (req, res) => {
   const { festivalId, artistName, stageName, date, startTime, endTime, genre } = req.body;
 
   const startMinutes = toMinutes(startTime);
@@ -72,9 +69,9 @@ router.post('/', async (req, res) => {
   try {
     const conflict = await isStageOccupied(festivalId, stageName, date, startTime, endTime);
     if (conflict) {
-      return res.status(409).json({
-        message: `"${stageName}" is already booked during that time slot.`,
-      });
+      return res
+        .status(409)
+        .json({ message: `"${stageName}" is already booked during that time slot.` });
     }
 
     const performance = new Performance({
@@ -91,23 +88,21 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
-});
+};
 
 // DELETE /api/performances/festival/:festivalId
-// Deletes ALL performances for a festival (used in cascade delete).
-// IMPORTANT: must be declared BEFORE /:id to prevent "festival" matching as id.
-router.delete('/festival/:festivalId', async (req, res) => {
+// Deletes ALL performances for a festival (cascade delete helper).
+exports.deletePerformancesByFestival = async (req, res) => {
   try {
     await Performance.deleteMany({ festivalId: req.params.festivalId });
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
+};
 
 // DELETE /api/performances/:id
-// Deletes a single performance by its MongoDB ID.
-router.delete('/:id', async (req, res) => {
+exports.deletePerformance = async (req, res) => {
   try {
     const performance = await Performance.findByIdAndDelete(req.params.id);
     if (!performance) return res.status(404).json({ message: 'Performance not found.' });
@@ -115,6 +110,4 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
-
-module.exports = router;
+};

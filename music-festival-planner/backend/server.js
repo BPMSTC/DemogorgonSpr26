@@ -10,25 +10,22 @@
  *      npm start                     # production
  *
  * The server listens on the PORT env variable (default 3000).
- * The Angular dev server runs on port 4200 and proxies /api/* calls here.
  */
 
 require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 
-const connectDB      = require('./src/db');
-const festivalsRouter    = require('./src/routes/festivals');
-const stagesRouter       = require('./src/routes/stages');
-const performancesRouter = require('./src/routes/performances');
+const connectDB          = require('./db');
+const festivalsRouter    = require('./routes/festivals');
+const stagesRouter       = require('./routes/stages');
+const performancesRouter = require('./routes/performances');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ---- Middleware -------------------------------------------------------------
 
-// Allow requests from the Angular dev server (port 4200) and any origin in
-// development.  Tighten the origin allowlist for production deployments.
 app.use(cors());
 app.use(express.json());
 

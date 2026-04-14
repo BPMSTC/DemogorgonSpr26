@@ -1,23 +1,20 @@
-const express = require('express');
-const router = express.Router();
-const Festival = require('../models/Festival');
-const Stage = require('../models/Stage');
+const Festival   = require('../models/Festival');
+const Stage       = require('../models/Stage');
 const Performance = require('../models/Performance');
 
 // GET /api/festivals
-// Returns all festivals.
-router.get('/', async (_req, res) => {
+exports.getAllFestivals = async (req, res) => {
   try {
     const festivals = await Festival.find().sort({ startDate: 1 });
     res.json(festivals);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
+};
 
 // GET /api/festivals/:id
-// Returns a single festival together with its stages and performances.
-router.get('/:id', async (req, res) => {
+// Returns the festival with its stages and performances embedded.
+exports.getFestivalById = async (req, res) => {
   try {
     const festival = await Festival.findById(req.params.id);
     if (!festival) return res.status(404).json({ message: 'Festival not found.' });
@@ -32,15 +29,16 @@ router.get('/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
+};
 
 // POST /api/festivals
-// Creates a new festival.
-router.post('/', async (req, res) => {
+exports.createFestival = async (req, res) => {
   const { name, startDate, endDate, location, genre, capacity } = req.body;
 
   if (endDate < startDate) {
-    return res.status(400).json({ message: 'The end date must be on or after the start date.' });
+    return res
+      .status(400)
+      .json({ message: 'The end date must be on or after the start date.' });
   }
 
   try {
@@ -50,11 +48,10 @@ router.post('/', async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
-});
+};
 
 // PATCH /api/festivals/:id
-// Updates specific fields on an existing festival.
-router.patch('/:id', async (req, res) => {
+exports.updateFestival = async (req, res) => {
   try {
     const festival = await Festival.findByIdAndUpdate(
       req.params.id,
@@ -66,11 +63,11 @@ router.patch('/:id', async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
-});
+};
 
 // DELETE /api/festivals/:id
-// Deletes the festival and cascade-deletes all its stages and performances.
-router.delete('/:id', async (req, res) => {
+// Cascade-deletes all stages and performances for the festival.
+exports.deleteFestival = async (req, res) => {
   try {
     const festival = await Festival.findByIdAndDelete(req.params.id);
     if (!festival) return res.status(404).json({ message: 'Festival not found.' });
@@ -85,6 +82,4 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
-
-module.exports = router;
+};
