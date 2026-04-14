@@ -1,8 +1,8 @@
 # Music Festival Planner — Architecture Guide
 
 > **Audience:** New team members and contributors
-> **Last updated:** 2026-03-31
-> **Angular version:** 21.2.x | **Test runner:** Vitest | **CSS framework:** Bootstrap 5
+> **Last updated:** 2026-04-14
+> **Angular version:** 21.2.x | **Test runner:** Vitest | **CSS framework:** Bootstrap 5 | **Backend:** Node.js/Express + MongoDB
 
 ---
 
@@ -12,18 +12,23 @@
 2. [Folder Structure](#2-folder-structure)
 3. [Component Hierarchy](#3-component-hierarchy)
 4. [Component Reference](#4-component-reference)
-5. [Services](#5-services)
-6. [Models](#6-models)
-7. [Routing](#7-routing)
-8. [Module Architecture](#8-module-architecture)
-9. [Data Flow](#9-data-flow)
-10. [Development Conventions](#10-development-conventions)
+5. [Angular Services](#5-angular-services)
+6. [Backend API](#6-backend-api)
+7. [Models](#7-models)
+8. [Routing](#8-routing)
+9. [Module Architecture](#9-module-architecture)
+10. [Data Flow](#10-data-flow)
+11. [Development Conventions](#11-development-conventions)
 
 ---
 
 ## 1. Project Overview
 
-Music Festival Planner is an Angular 21 single-page application that lets users browse festivals, manage stages, schedule performances, and view a personal timetable. The app uses a **NgModule-based** (non-standalone) architecture, Bootstrap 5 for layout and components, and Vitest for unit testing.
+Music Festival Planner is a full-stack web application consisting of an **Angular 21 SPA** (frontend) and a **Node.js/Express REST API** (backend) backed by **MongoDB**.
+
+- The Angular app handles all UI, routing, and reactive state. It calls the backend API over HTTP for all festival, stage, and performance data.
+- The Express backend exposes a REST API, validates business rules (date ordering, double-booking), and persists data to MongoDB via Mongoose.
+- The frontend uses a **NgModule-based** (non-standalone) Angular architecture, Bootstrap 5 for layout, and Vitest for unit testing.
 
 ---
 
@@ -31,40 +36,62 @@ Music Festival Planner is an Angular 21 single-page application that lets users 
 
 ```
 music-festival-planner/
+├── backend/                        # Node.js/Express REST API
+│   ├── server.js                   # Entry point — middleware, routes, DB connect
+│   ├── db.js                       # Mongoose connection helper
+│   ├── package.json
+│   ├── .env.example                # Template: MONGODB_URI, PORT (copy → .env)
+│   ├── .gitignore                  # Excludes node_modules/ and .env
+│   ├── models/                     # Mongoose schemas
+│   │   ├── Festival.js
+│   │   ├── Stage.js
+│   │   └── Performance.js
+│   ├── controllers/                # Business logic — one file per resource
+│   │   ├── festivalController.js
+│   │   ├── stageController.js
+│   │   └── performanceController.js
+│   └── routes/                     # Thin Express routers — path → controller
+│       ├── festivals.js
+│       ├── stages.js
+│       └── performances.js
 ├── public/
 │   └── favicon.ico
 ├── src/
-│   ├── index.html              # Shell HTML — mounts <app-root>
-│   ├── main.ts                 # Bootstrap entry — calls platformBrowser().bootstrapModule(AppModule)
-│   ├── styles.css              # Global styles (Bootstrap imported via angular.json)
+│   ├── environments/
+│   │   ├── environment.ts          # Dev config (apiUrl: http://localhost:3000)
+│   │   └── environment.prod.ts     # Prod config (apiUrl: your deployed API)
+│   ├── index.html                  # Shell HTML — mounts <app-root>
+│   ├── main.ts                     # Bootstrap entry point
+│   ├── styles.css                  # Global styles (Bootstrap via angular.json)
 │   └── app/
-│       ├── app-module.ts       # Root NgModule — declares & imports everything
-│       ├── app-routing-module.ts  # Route definitions
-│       ├── app.ts              # Root component (App)
-│       ├── app.html            # Navbar + <router-outlet>
-│       ├── app.css             # Root component styles
-│       ├── app.spec.ts         # Root component tests
+│       ├── app-module.ts           # Root NgModule — declares & imports everything
+│       ├── app-routing-module.ts   # Route definitions
+│       ├── app.ts                  # Root component (App)
+│       ├── app.html                # Navbar + <router-outlet>
+│       ├── app.css
+│       ├── app.spec.ts
 │       ├── components/
-│       │   ├── home/                   # Landing page component
-│       │   ├── festivals/              # Festival listing component (expandable cards)
-│       │   ├── festival-create/        # Create festival form component
-│       │   ├── my-schedule/            # Timetable view component
-│       │   ├── stage-list/             # Stage management list component
-│       │   ├── stage-create/           # Add stage form component
-│       │   ├── performance-list/       # Performance listing component
-│       │   └── performance-create/     # Add performance form component
+│       │   ├── home/               # Landing page
+│       │   ├── festivals/          # Festival listing (expandable cards)
+│       │   ├── festival-create/    # Create festival form
+│       │   ├── my-schedule/        # Timetable view
+│       │   ├── stage-list/         # Stage management list
+│       │   ├── stage-create/       # Add stage form
+│       │   ├── performance-list/   # Performance listing
+│       │   └── performance-create/ # Add performance form
 │       ├── models/
 │       │   ├── festival.model.ts       # Festival interface
 │       │   ├── stage.model.ts          # Stage interface + StageStatus/StageEnvironment types
 │       │   ├── performance.model.ts    # Performance interface
 │       │   └── index.ts                # Barrel re-export
 │       └── services/
-│           ├── festival.service.ts       # CRUD service for festivals
-│           ├── festival.service.spec.ts  # Festival service unit tests
-│           ├── stage.service.ts          # CRUD service for stages
-│           ├── stage.service.spec.ts     # Stage service unit tests
-│           ├── schedule.service.ts       # localStorage-backed CRUD for performances
-│           └── schedule.service.spec.ts  # Schedule service unit tests
+│           ├── festival.service.ts         # HTTP CRUD for festivals
+│           ├── festival.service.spec.ts
+│           ├── stage.service.ts            # HTTP CRUD for stages
+│           ├── stage.service.spec.ts
+│           ├── schedule.service.ts         # HTTP CRUD for performances + conflict detection
+│           ├── schedule.service.spec.ts
+│           └── personal-schedule.service.ts # localStorage — attendee bookmarks only
 ├── angular.json                # Angular CLI config (build, serve, test)
 ├── package.json
 ├── tsconfig.json
@@ -466,7 +493,27 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ---
 
-## 5. Services
+## 5. Angular Services
+
+All three data services use `HttpClient` to communicate with the backend API. They maintain an **in-memory cache** so that synchronous read helpers (`getFestivals()`, `getStagesByFestival()`, etc.) can return data after the initial load without additional network requests. Mutation methods return `Observable<T>` and update the cache on success via `tap()`.
+
+`PersonalScheduleService` is the exception — it remains `localStorage`-backed since personal bookmarks are user-device data, not shared festival data.
+
+### Service pattern summary
+
+```
+Component ngOnInit()
+  └── calls service.load() / service.loadByFestival()   ← HTTP GET
+          └── tap() populates in-memory cache
+  └── reads cache synchronously for template bindings
+
+Component onSubmit() / confirmAndDelete()
+  └── calls service.create() / .delete()                ← HTTP POST/DELETE
+          └── tap() updates in-memory cache
+          └── subscribe({ next, error }) in component
+```
+
+---
 
 ### 5.1 `FestivalService`
 
@@ -474,29 +521,20 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 |---|---|
 | **File** | `src/app/services/festival.service.ts` |
 | **Scope** | `providedIn: 'root'` (app-wide singleton) |
-| **Storage** | In-memory only (resets on page refresh) |
+| **Transport** | `HttpClient` → `GET/POST/PATCH/DELETE /api/festivals` |
+| **Cache** | `private cache: Festival[]` — populated by `load()` |
 | **Test file** | `src/app/services/festival.service.spec.ts` |
-
-**Purpose:** Provides in-memory CRUD operations for `Festival` objects. Acts as the single source of truth for festival data within the running app.
-
-**Internal state:**
-
-| Field | Type | Description |
-|---|---|---|
-| `festivalStore` | `Festival[]` | Private in-memory list of all festivals (starts empty) |
-| `nextFestivalId` | `number` | Auto-incrementing ID counter, starts at `1` |
 
 **Public API:**
 
-| Method | Signature | Returns | Description |
-|---|---|---|---|
-| `getFestivals` | `(): Festival[]` | `Festival[]` | Returns an array of shallow copies |
-| `getFestivalById` | `(id: string): Festival \| undefined` | `Festival \| undefined` | Returns a copy of the matching festival, or `undefined` |
-| `createFestival` | `(data: Omit<Festival, 'id'>): Festival` | `Festival` | Validates date range, assigns next ID, returns a copy. Throws if `endDate < startDate`. |
-| `updateFestival` | `(id: string, updates: Partial<Omit<Festival, 'id'>>): Festival \| null` | `Festival \| null` | Merges updates into the matching festival; returns `null` if not found |
-| `deleteFestival` | `(id: string): boolean` | `boolean` | Removes a festival by ID; returns `true` on success, `false` if not found |
-
-> **Note:** All methods return copies so external code cannot mutate the internal store.
+| Method | Returns | Description |
+|---|---|---|
+| `load()` | `Observable<Festival[]>` | Fetches all festivals from the API; populates cache. Call in `ngOnInit`. |
+| `getFestivals()` | `Festival[]` | Synchronous read from cache. |
+| `getFestivalById(id)` | `Festival \| undefined` | Synchronous lookup from cache. |
+| `createFestival(data)` | `Observable<Festival>` | POST to API; appends result to cache on success. |
+| `updateFestival(id, fields)` | `Observable<Festival>` | PATCH to API; updates cache entry on success. |
+| `deleteFestival(id)` | `Observable<void>` | DELETE to API; removes from cache on success. |
 
 ---
 
@@ -506,28 +544,20 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 |---|---|
 | **File** | `src/app/services/stage.service.ts` |
 | **Scope** | `providedIn: 'root'` (app-wide singleton) |
-| **Storage** | In-memory only (resets on page refresh) |
+| **Transport** | `HttpClient` → `GET/POST/DELETE /api/stages` |
+| **Cache** | `private cache: Stage[]` — stores stages across all loaded festivals |
 | **Test file** | `src/app/services/stage.service.spec.ts` |
-
-**Purpose:** Provides in-memory CRUD operations for `Stage` objects, scoped per festival. Pre-loaded with four demo stages for festival ID `"1"`.
-
-**Internal state:**
-
-| Field | Type | Description |
-|---|---|---|
-| `stageStore` | `Stage[]` | Private in-memory list (pre-seeded with 4 demo stages for festival `"1"`) |
-| `nextStageId` | `number` | Auto-incrementing ID counter, starts at `5` (above demo data) |
 
 **Public API:**
 
-| Method | Signature | Returns | Description |
-|---|---|---|---|
-| `getStagesByFestival` | `(festivalId: string): Stage[]` | `Stage[]` | Returns shallow copies of all stages for the given festival |
-| `getStageById` | `(id: string): Stage \| undefined` | `Stage \| undefined` | Returns a copy of the matching stage, or `undefined` |
-| `createStage` | `(data: Omit<Stage, 'id'>): Stage` | `Stage` | Validates capacity and uniqueness, assigns next ID, returns a copy. Throws on invalid capacity or duplicate name within the festival. |
-| `updateStage` | `(id: string, updates: Partial<Omit<Stage, 'id'>>): Stage \| null` | `Stage \| null` | Merges updates; returns `null` if not found |
-| `deleteStage` | `(id: string): boolean` | `boolean` | Removes stage by ID; returns `true` on success |
-| `isStageAvailable` | `(festivalId, stageName, date, startTime, endTime, excludeId?): boolean` | `boolean` | Stub — real conflict checking is handled by `ScheduleService` |
+| Method | Returns | Description |
+|---|---|---|
+| `loadByFestival(festivalId)` | `Observable<Stage[]>` | Fetches stages for a festival; replaces that festival's cache entries. |
+| `getStagesByFestival(festivalId)` | `Stage[]` | Synchronous read from cache. |
+| `getStageById(id)` | `Stage \| undefined` | Synchronous lookup from cache. |
+| `createStage(data)` | `Observable<Stage>` | POST to API; appends result to cache on success. |
+| `deleteStage(id)` | `Observable<void>` | DELETE to API; removes from cache on success. |
+| `clearStagesByFestival(festivalId)` | `Observable<void>` | DELETE all stages for a festival; clears from cache. Used in cascade delete. |
 
 ---
 
@@ -537,38 +567,146 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 |---|---|
 | **File** | `src/app/services/schedule.service.ts` |
 | **Scope** | `providedIn: 'root'` (app-wide singleton) |
-| **Storage** | `localStorage` (key: `mfp_performances`) — data persists across page refreshes |
+| **Transport** | `HttpClient` → `GET/POST/DELETE /api/performances` |
+| **State** | Angular `Signal<Performance[]>` — reactive; components use `effect()` to auto-update |
 | **Test file** | `src/app/services/schedule.service.spec.ts` |
 
-**Purpose:** Manages `Performance` records with localStorage persistence. Provides conflict detection to prevent double-booking a stage during overlapping time windows.
-
-**Storage design:**
-
-- Uses an `InjectionToken<Storage>` (`LOCAL_STORAGE`) instead of calling `localStorage` directly. This lets unit tests inject a hermetic `MockStorage` substitute.
-- On first run (or if storage is empty/corrupted), seeds 4 demo performances for festival `"1"`.
-
-**Internal state:**
-
-| Field | Type | Description |
-|---|---|---|
-| `performances` | `Performance[]` | Working in-memory list, hydrated from storage on init |
-| `nextId` | `number` | Set to one above the highest stored ID to avoid collisions across sessions |
+**Reactive state:** The service holds a private `performancesState` Signal. Components that use `effect()` referencing `getPerformancesByFestival()` automatically re-render whenever the signal changes (after a load, create, or delete).
 
 **Public API:**
 
-| Method | Signature | Returns | Description |
-|---|---|---|---|
-| `getPerformancesByFestival` | `(festivalId: string): Performance[]` | `Performance[]` | Returns shallow copies of all performances for the festival |
-| `isStageOccupied` | `(festivalId, stageName, date, startTime, endTime, excludeId?): boolean` | `boolean` | Returns `true` if any existing performance overlaps the given time window on the same stage and day. Uses standard interval-overlap formula. |
-| `createPerformance` | `(data: Omit<Performance, 'id'>): Performance` | `Performance` | Validates times, checks for conflicts, assigns ID, persists to storage. Throws on invalid times, zero-duration window, or conflict. |
-| `deletePerformance` | `(id: string): boolean` | `boolean` | Removes a performance by ID; persists to storage. Returns `false` if not found. |
-| `clearPerformancesByFestival` | `(festivalId: string): void` | `void` | Removes ALL performances for a festival in one operation; persists to storage. |
+| Method | Returns | Description |
+|---|---|---|
+| `loadByFestival(festivalId)` | `Observable<Performance[]>` | Fetches performances; merges into signal. Call in `ngOnInit`. |
+| `getPerformancesByFestival(festivalId)` | `Performance[]` | Synchronous read from signal (signal-tracked). |
+| `isStageOccupied(...)` | `boolean` | Synchronous interval-overlap check against in-memory signal data. Also validated server-side on POST. |
+| `createPerformance(data)` | `Observable<Performance>` | Local validation first (fast UX feedback), then POST; appends to signal on success. |
+| `deletePerformance(id)` | `Observable<void>` | DELETE to API; removes from signal on success. |
+| `clearPerformancesByFestival(festivalId)` | `Observable<void>` | DELETE all performances for a festival; clears from signal. |
+
+**Also exports:** `LOCAL_STORAGE` InjectionToken (re-exported for `PersonalScheduleService` backward compatibility).
 
 ---
 
-## 6. Models
+### 5.4 `PersonalScheduleService`
 
-### 6.1 `Festival`
+| Property | Value |
+|---|---|
+| **File** | `src/app/services/personal-schedule.service.ts` |
+| **Scope** | `providedIn: 'root'` (app-wide singleton) |
+| **Storage** | `localStorage` (key: `mfp_personal_schedule`) |
+
+**Purpose:** Manages the attendee's personal bookmark list — performances the user has saved to their own timetable. This is purely device-local data so it intentionally stays in `localStorage` rather than the API.
+
+**Public API:**
+
+| Method | Returns | Description |
+|---|---|---|
+| `saved$` | `Observable<Performance[]>` | BehaviorSubject stream; components subscribe for live updates |
+| `isSaved(id)` | `boolean` | Synchronous check |
+| `add(performance)` | `void` | Adds to personal list |
+| `remove(id)` | `void` | Removes from personal list |
+| `toggle(performance)` | `void` | Adds if not present; removes if present |
+| `clearAll()` | `void` | Clears the entire personal list |
+| `removePerformancesByFestival(festivalId)` | `void` | Removes all bookmarks for a deleted festival |
+| `getPersonalConflicts()` | `PersonalConflict[]` | Detects time overlaps across all saved performances (cross-stage) |
+
+---
+
+## 6. Backend API
+
+The backend is a Node.js/Express server that connects to MongoDB via Mongoose and exposes a REST API on port `3000` (configurable via `PORT` env var).
+
+### 6.1 Directory layout
+
+```
+backend/
+├── server.js                  # App entry point
+├── db.js                      # mongoose.connect() helper
+├── models/                    # Mongoose schemas (all with _id → id transform)
+│   ├── Festival.js
+│   ├── Stage.js
+│   └── Performance.js
+├── controllers/               # All business logic and DB queries
+│   ├── festivalController.js
+│   ├── stageController.js
+│   └── performanceController.js
+└── routes/                    # Thin routers: path → controller function
+    ├── festivals.js
+    ├── stages.js
+    └── performances.js
+```
+
+### 6.2 Environment configuration
+
+| Variable | Description |
+|---|---|
+| `MONGODB_URI` | Full MongoDB connection string (local or Atlas) |
+| `PORT` | Port the server listens on (default: `3000`) |
+
+Copy `.env.example` → `.env` and fill in values. The `.env` file is git-ignored.
+
+### 6.3 API endpoints
+
+All routes are prefixed with `/api`. IDs in responses are strings (MongoDB ObjectId serialised via the `toJSON` transform).
+
+#### Festivals — `/api/festivals`
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/festivals` | Returns all festivals sorted by `startDate` |
+| `GET` | `/api/festivals/:id` | Returns festival + embedded `stages[]` + `performances[]` |
+| `POST` | `/api/festivals` | Creates a festival; validates `endDate >= startDate` |
+| `PATCH` | `/api/festivals/:id` | Partial update of festival fields |
+| `DELETE` | `/api/festivals/:id` | Deletes festival + cascade-deletes its stages and performances |
+
+#### Stages — `/api/stages`
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/stages?festivalId=<id>` | Returns all stages for a festival |
+| `POST` | `/api/stages` | Creates a stage; validates positive-integer capacity and unique name per festival (case-insensitive) |
+| `DELETE` | `/api/stages/festival/:festivalId` | Deletes all stages for a festival (cascade helper) |
+| `DELETE` | `/api/stages/:id` | Deletes a single stage |
+
+#### Performances — `/api/performances`
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/performances?festivalId=<id>` | Returns performances for a festival sorted by date then startTime |
+| `POST` | `/api/performances` | Creates a performance; validates time format, ordering, and double-booking |
+| `DELETE` | `/api/performances/festival/:festivalId` | Deletes all performances for a festival (cascade helper) |
+| `DELETE` | `/api/performances/:id` | Deletes a single performance |
+
+> **Route order note:** In both stages and performances routers, the `/festival/:festivalId` route is declared **before** `/:id` to prevent Express from matching the literal string `"festival"` as an ID parameter.
+
+#### Utility
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/health` | Returns `{ status: "ok" }` — use to verify the server is up |
+
+### 6.4 Mongoose model conventions
+
+All three schemas share the same `toJSON` transform:
+
+```js
+toJSON: {
+  transform(_doc, ret) {
+    ret.id = ret._id.toString();  // rename _id → id
+    delete ret._id;
+    delete ret.__v;
+  }
+}
+```
+
+This ensures the JSON shape matches the Angular TypeScript interfaces exactly (`id: string` not `_id: ObjectId`).
+
+---
+
+## 7. Models
+
+### 7.1 `Festival`
 
 **File:** `src/app/models/festival.model.ts`
 
@@ -586,7 +724,7 @@ export interface Festival {
 
 ---
 
-### 6.2 `Stage`
+### 7.2 `Stage`
 
 **File:** `src/app/models/stage.model.ts`
 
@@ -607,7 +745,7 @@ export interface Stage {
 
 ---
 
-### 6.3 `Performance`
+### 7.3 `Performance`
 
 **File:** `src/app/models/performance.model.ts`
 
@@ -626,9 +764,9 @@ export interface Performance {
 
 ---
 
-## 7. Routing
+## 8. Routing
 
-### 7.1 Current Routes
+### 8.1 Current Routes
 
 **File:** `src/app/app-routing-module.ts`
 
@@ -646,7 +784,7 @@ export interface Performance {
 
 The router is initialized with `RouterModule.forRoot(routes)` and uses the default **HTML5 `pushState`** strategy (`<base href="/">` in `index.html`).
 
-### 7.2 Navigation Hierarchy
+### 8.2 Navigation Hierarchy
 
 ```
 /                                   ← Home (default)
@@ -660,7 +798,7 @@ The router is initialized with `RouterModule.forRoot(routes)` and uses the defau
 └── /my-schedule                    ← Standalone timetable (festival "1")
 ```
 
-### 7.3 Planned Routes
+### 8.3 Planned Routes
 
 | Path | Component | Description |
 |---|---|---|
@@ -670,15 +808,20 @@ The router is initialized with `RouterModule.forRoot(routes)` and uses the defau
 
 ---
 
-## 8. Module Architecture
+## 9. Module Architecture
 
 ```
 index.html
   └── <app-root>
         └── AppModule  (bootstrapped in main.ts via platformBrowser)
               ├── BrowserModule
-              ├── AppRoutingModule       ──▶  RouterModule.forRoot(routes)
+              ├── AppRoutingModule         ──▶  RouterModule.forRoot(routes)
               ├── ReactiveFormsModule
+              └── providers: [
+                    provideHttpClient(withFetch()),   ← enables HttpClient app-wide
+                    provideBrowserGlobalErrorListeners(),
+                    { provide: LocationStrategy, useClass: HashLocationStrategy }
+                  ]
               └── declarations: [
                     App, Home, Festivals, FestivalCreateComponent,
                     MySchedule, StageListComponent, StageCreateComponent,
@@ -690,67 +833,72 @@ All nine components are **NgModule-declared** (non-standalone). New components g
 
 ---
 
-## 9. Data Flow
+## 10. Data Flow
 
-### 9.1 Reading Festivals
+### 10.1 Reading Festivals
 
 ```
 User navigates to /festivals
         │
         ▼
 Festivals component (ngOnInit)
-        │  calls FestivalService.getFestivals()
-        │  calls StageService.getStagesByFestival(id) for each festival
+        │  calls FestivalService.load()              → GET /api/festivals
         ▼
-Services return copies of their in-memory arrays
-        │
+HTTP response arrives → cache populated
+        │  subscribe callback sets festivalsList
+        │  calls StageService.loadByFestival(id)     → GET /api/stages?festivalId=...
+        │  (one request per festival, run in parallel via forkJoin)
         ▼
 Festivals renders expandable cards via *ngFor
 ```
 
-### 9.2 Creating a Festival
+### 10.2 Creating a Festival
 
 ```
 User fills in FestivalCreate form → submits
         │
         ▼
 FestivalCreateComponent calls FestivalService.createFestival(formData)
-        │  (throws if endDate < startDate)
+        │                                            → POST /api/festivals
+        │  backend validates endDate >= startDate
         ▼
-FestivalService assigns ID, pushes to store, returns copy
-        │
-        ▼
-Router navigates to /festivals
+201 response → service cache updated via tap()
+        │  subscribe next: Router navigates to /festivals
+        │  subscribe error: serviceErrorMessage shown in form banner
 ```
 
-### 9.3 Creating a Performance (with conflict detection)
+### 10.3 Creating a Performance (with conflict detection)
 
 ```
 User fills in PerformanceCreate form → submits
         │
         ▼
 PerformanceCreateComponent calls ScheduleService.createPerformance(data)
-        │  validates time format and ordering
-        │  calls isStageOccupied() — checks for overlapping bookings
-        │  (throws human-readable error on any violation)
+        │  [frontend] validates time format + ordering (immediate UX feedback)
+        │  [frontend] isStageOccupied() checks in-memory signal for conflicts
+        │  if either check fails → Observable errors immediately (no HTTP call)
+        │                                            → POST /api/performances
+        │  [backend] re-validates times + runs DB conflict check
         ▼
-ScheduleService assigns ID, pushes to in-memory list, saves to localStorage
-        │
-        ▼
-Router navigates to /festivals/:id/performances
+201 response → performance appended to signal via tap()
+        │  effect() in PerformanceList fires → list re-renders
+        │  subscribe next: Router navigates to /festivals/:id/performances
+        │  subscribe error: serviceErrorMessage shown in form banner
 ```
 
-### 9.4 Timetable View (MySchedule)
+### 10.4 Timetable View (MySchedule)
 
 ```
 User navigates to /festivals/:id/schedule
         │
         ▼
 MySchedule (ngOnInit)
-        │  reads :id from URL (defaults to "1" on /my-schedule)
-        │  calls ScheduleService.getPerformancesByFestival(id)
+        │  calls FestivalService.load()              → GET /api/festivals
+        │  calls ScheduleService.loadByFestival(id)  → GET /api/performances?festivalId=...
         ▼
-Derives unique dates → renders day-tab buttons
+HTTP responses arrive → signal updated
+        │  effect() fires → allPerformances refreshed
+        │  syncViewStateFromStore() derives unique dates
         │  auto-selects first day
         ▼
 applyFilters():
@@ -761,50 +909,61 @@ applyFilters():
 Template renders timetable grid; conflict cells highlighted
 ```
 
-### 9.5 Component Interaction Diagram
+### 10.5 Cascade Delete (Festival)
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                       AppModule                        │
-│                                                        │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │                   App (Shell)                    │  │
-│  │  ┌─────────────────────────────────────────────┐ │  │
-│  │  │              Bootstrap Navbar               │ │  │
-│  │  │  [Home] [Festivals] [My Schedule]           │ │  │
-│  │  └─────────────────────────────────────────────┘ │  │
-│  │  ┌─────────────────────────────────────────────┐ │  │
-│  │  │              <router-outlet>                │ │  │
-│  │  │  ┌───────────────────────────────────────┐  │ │  │
-│  │  │  │  Home / Festivals / FestivalCreate /  │  │ │  │
-│  │  │  │  MySchedule / StageList / StageCreate │  │ │  │
-│  │  │  │  PerformanceList / PerformanceCreate  │  │ │  │
-│  │  │  │  (one rendered at a time)             │  │ │  │
-│  │  │  └───────────────────────────────────────┘  │ │  │
-│  │  └─────────────────────────────────────────────┘ │  │
-│  └──────────────────────────────────────────────────┘  │
-│                                                        │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │  FestivalService  (root, in-memory)             │   │
-│  │  festivalStore: Festival[]                      │   │
-│  └─────────────────────────────────────────────────┘   │
-│                                                        │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │  StageService  (root, in-memory + demo data)    │   │
-│  │  stageStore: Stage[]                            │   │
-│  └─────────────────────────────────────────────────┘   │
-│                                                        │
-│  ┌─────────────────────────────────────────────────┐   │
-│  │  ScheduleService  (root, localStorage-backed)   │   │
-│  │  performances: Performance[]                    │   │
-│  │  conflict detection via isStageOccupied()       │   │
-│  └─────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────┘
+User clicks Delete on a festival card → confirms dialog
+        │
+        ▼
+PersonalScheduleService.removePerformancesByFestival(id)   (local only)
+        │
+        ▼
+forkJoin([
+  ScheduleService.clearPerformancesByFestival(id),   → DELETE /api/performances/festival/:id
+  StageService.clearStagesByFestival(id)             → DELETE /api/stages/festival/:id
+]).pipe(
+  switchMap(() => FestivalService.deleteFestival(id) → DELETE /api/festivals/:id
+))                (backend also cascade-deletes as a safety net)
+        │
+        ▼
+subscribe next → loadData() refreshes UI
+```
+
+### 10.6 Full-Stack Architecture Diagram
+
+```
+  Browser (Angular SPA — port 4200)
+  ┌─────────────────────────────────────────────────────┐
+  │  AppModule                                          │
+  │  ┌─────────────┐  ┌────────────┐  ┌─────────────┐  │
+  │  │FestivalSvc  │  │ StageSvc   │  │ScheduleSvc  │  │
+  │  │cache:       │  │cache:      │  │signal:      │  │
+  │  │Festival[]   │  │Stage[]     │  │Performance[]│  │
+  │  └──────┬──────┘  └─────┬──────┘  └──────┬──────┘  │
+  │         │               │                │          │
+  │         └───────────────┴────────────────┘          │
+  │                         │  HttpClient               │
+  └─────────────────────────┼───────────────────────────┘
+                            │  HTTP (JSON)
+  ┌─────────────────────────┼───────────────────────────┐
+  │  Express API (port 3000)│                           │
+  │  ┌──────────┐  ┌────────┴──┐  ┌────────────────┐   │
+  │  │ routes/  │→ │controllers│→ │ Mongoose models │   │
+  │  │festivals │  │festivals  │  │ Festival        │   │
+  │  │stages    │  │stages     │  │ Stage           │   │
+  │  │perfs     │  │perfs      │  │ Performance     │   │
+  │  └──────────┘  └───────────┘  └───────┬────────┘   │
+  └──────────────────────────────────────┬┴────────────┘
+                                         │  Mongoose
+  ┌──────────────────────────────────────┴─────────────┐
+  │  MongoDB                                           │
+  │  collections: festivals · stages · performances   │
+  └────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 10. Development Conventions
+## 11. Development Conventions
 
 ### Branch Naming
 Following the project's git conventions (see `codeAndBrew/CODING-STANDARDS.md`):
@@ -830,10 +989,20 @@ ng generate service services/<service-name>
 Services with `providedIn: 'root'` are automatically available app-wide without adding to `AppModule.providers`.
 
 ### Running the App Locally
+
+Both the backend and the Angular dev server must be running simultaneously.
+
 ```bash
+# Terminal 1 — backend API
+cd music-festival-planner/backend
+cp .env.example .env    # set MONGODB_URI (local or Atlas)
+npm install
+npm run dev             # nodemon → http://localhost:3000
+
+# Terminal 2 — Angular frontend
 cd music-festival-planner
 npm install
-npm start          # ng serve → http://localhost:4200
+npm start               # ng serve → http://localhost:4200
 ```
 
 ### Running Tests
