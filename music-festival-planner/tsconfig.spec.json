@@ -3,6 +3,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "forceConsistentCasingInFileNames": true,
     "rootDir": "./src",
     "outDir": "./out-tsc/spec",
     "types": [

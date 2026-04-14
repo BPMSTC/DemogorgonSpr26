@@ -14,14 +14,14 @@
 
 require('dotenv').config();
 const express = require('express');
-const cors    = require('cors');
+const cors = require('cors');
 
-const connectDB          = require('./db');
-const festivalsRouter    = require('./routes/festivals');
-const stagesRouter       = require('./routes/stages');
+const connectDB = require('./db');
+const festivalsRouter = require('./routes/festivals');
+const stagesRouter = require('./routes/stages');
 const performancesRouter = require('./routes/performances');
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ---- Middleware -------------------------------------------------------------
@@ -31,8 +31,38 @@ app.use(express.json());
 
 // ---- Routes ----------------------------------------------------------------
 
-app.use('/api/festivals',    festivalsRouter);
-app.use('/api/stages',       stagesRouter);
+app.get('/', (_req, res) => {
+  res.status(200).type('html').send(`
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Music Festival Planner API</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 2rem; line-height: 1.5; }
+            h1 { margin-bottom: .5rem; }
+            code { background: #f3f4f6; padding: .15rem .35rem; border-radius: 4px; }
+            ul { padding-left: 1.25rem; }
+          </style>
+        </head>
+        <body>
+          <h1>🎵 Music Festival Planner API</h1>
+          <p>The API is running successfully.</p>
+          <p>Try these endpoints:</p>
+          <ul>
+            <li><a href="/health"><code>/health</code></a></li>
+            <li><code>/api/festivals</code></li>
+            <li><code>/api/stages</code></li>
+            <li><code>/api/performances</code></li>
+          </ul>
+        </body>
+      </html>
+    `);
+});
+
+app.use('/api/festivals', festivalsRouter);
+app.use('/api/stages', stagesRouter);
 app.use('/api/performances', performancesRouter);
 
 // ---- Health check ----------------------------------------------------------
