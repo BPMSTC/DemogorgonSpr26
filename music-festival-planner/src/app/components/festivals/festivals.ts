@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { filter, switchMap } from 'rxjs/operators';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
 import { ScheduleService } from '../../services/schedule.service';
@@ -38,9 +39,23 @@ export class Festivals implements OnInit, OnDestroy {
   ) {}
 
   private loadData(): void {
-    this.festivalsList = this.festivalService.getFestivals();
-    this.festivalsList.forEach((festival) => {
-      this.stagesByFestivalId[festival.id] = this.stageService.getStagesByFestival(festival.id);
+    this.festivalService.load().pipe(
+      switchMap((festivals) => {
+        this.festivalsList = festivals;
+        this.stagesByFestivalId = {};
+        if (festivals.length === 0) return of([] as { id: string; stages: Stage[] }[]);
+        return forkJoin(
+          festivals.map((f) =>
+            this.stageService.loadByFestival(f.id).pipe(
+              switchMap((stages) => of({ id: f.id, stages }))
+            )
+          )
+        );
+      })
+    ).subscribe((results) => {
+      results.forEach((r) => {
+        this.stagesByFestivalId[r.id] = r.stages;
+      });
     });
   }
 
@@ -98,48 +113,43 @@ export class Festivals implements OnInit, OnDestroy {
   // ---- Cascade Delete ----------------------------------------------------
 
   /**
-   * Orchestrates the deletion of a festival and all its nested resources (stages, performances).
-   * Prompts the user for confirmation before proceeding.
+   * Orchestrates the deletion of a festival and all its nested resources
+   * (stages, performances).  Calls the API in parallel for children, then
+   * removes the festival, and finally refreshes the UI.
    */
   deleteFestivalWithCascade(festivalId: string, clickEvent: MouseEvent): void {
-    // Stop the click from opening the card
     clickEvent.stopPropagation();
-
-    // Close the kebab menu since the item is about to be deleted
     this.closeAllKebabMenus();
 
-    // The component does not hold the exact festival name in a handy lookup map,
-    // so we extract it from the currently loaded list for a nicer confirmation message.
-    const festivalToDelete = this.festivalsList.find(f => f.id === festivalId);
-    if (!festivalToDelete) return; // Should not happen
+    const festivalToDelete = this.festivalsList.find((f) => f.id === festivalId);
+    if (!festivalToDelete) return;
 
-    const confirmMessage = `Are you sure you want to permanently delete "${festivalToDelete.name}"?\n\nThis will also delete ALL stages and performances associated with it. This action cannot be undone.`;
+    const confirmMessage =
+      `Are you sure you want to permanently delete "${festivalToDelete.name}"?\n\n` +
+      `This will also delete ALL stages and performances associated with it. This action cannot be undone.`;
 
-    // Real apps might use a nice modal here; we use the native browser confirm for simplicity.
-    if (!window.confirm(confirmMessage)) {
-      return; // User canceled
-    }
+    if (!window.confirm(confirmMessage)) return;
 
-    // --- Execute the cascade delete ---
-    // 1. Delete the children (Performances) from personal schedule
+    // Remove from personal schedule immediately (local-only, no API needed).
     this.personalScheduleService.removePerformancesByFestival(festivalId);
 
-    // 2. Delete the children (Performances) from schedule
-    this.scheduleService.clearPerformancesByFestival(festivalId);
-
-    // 3. Delete the children (Stages)
-    this.stageService.clearStagesByFestival(festivalId);
-
-    // 4. Delete the parent (Festival)
-    this.festivalService.deleteFestival(festivalId);
-
-    // --- Update the UI ---
-    // Instead of doing a full page reload, just reload the data arrays
-    this.loadData();
-
-    // If the deleted festival was currently expanded, collapse it
-    if (this.expandedFestivalId === festivalId) {
-      this.expandedFestivalId = null;
-    }
+    // Delete stages and performances in parallel, then delete the festival.
+    forkJoin([
+      this.scheduleService.clearPerformancesByFestival(festivalId),
+      this.stageService.clearStagesByFestival(festivalId),
+    ]).pipe(
+      switchMap(() => this.festivalService.deleteFestival(festivalId))
+    ).subscribe({
+      next: () => {
+        this.loadData();
+        if (this.expandedFestivalId === festivalId) {
+          this.expandedFestivalId = null;
+        }
+      },
+      error: () => {
+        // Re-load to ensure UI matches server state even if partial failure occurred.
+        this.loadData();
+      },
+    });
   }
 }

@@ -1,278 +1,184 @@
-import { Injectable, Inject, InjectionToken, Signal, signal } from '@angular/core';
+import { Injectable, InjectionToken, Signal, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { Performance } from '../models/performance.model';
-
-// ---- Storage Abstraction ---------------------------------------------------
+import { environment } from '../../environments/environment';
 
 /**
- * InjectionToken for the browser Storage used by ScheduleService.
- * Providing an InjectionToken instead of calling `localStorage` directly
- * lets unit tests inject a hermetic in-memory substitute (MockStorage)
- * so tests run without touching the real browser storage.
+ * Re-exported so PersonalScheduleService (which still uses localStorage) can
+ * continue to import LOCAL_STORAGE from this module without breaking.
  */
 export const LOCAL_STORAGE = new InjectionToken<Storage>('localStorage', {
   providedIn: 'root',
-  factory: () => localStorage, // production: use the real browser localStorage
+  factory: () => localStorage,
 });
-
-// ---- Storage Configuration -------------------------------------------------
-
-/** The key under which all performances are stored in localStorage. */
-const STORAGE_KEY = 'mfp_performances';
-
-/**
- * Pre-loaded demo performances — currently empty.
- * Users must create festivals, stages, and performances explicitly.
- */
-const SEED_PERFORMANCES: Performance[] = [];
 
 // ---- Service ---------------------------------------------------------------
 
 @Injectable({
-  providedIn: 'root', // singleton — one shared instance across the entire app
+  providedIn: 'root',
 })
 export class ScheduleService {
+  private readonly apiUrl = `${environment.apiUrl}/api/performances`;
+
   /**
-   * Canonical in-memory schedule state for the entire app.
-   * All schedule reads and mutations go through this single signal source.
+   * In-memory signal holding all performances loaded across festivals.
+   * Components that use effect() will react automatically when this updates.
    */
   private readonly performancesState = signal<Performance[]>([]);
 
-  /** Read-only signal exposed for components that need reactive schedule state. */
-  readonly performancesSignal: Signal<Performance[]> = this.performancesState.asReadonly();
+  /** Read-only signal for components that need reactive schedule state. */
+  readonly performancesSignal: Signal<Performance[]> =
+    this.performancesState.asReadonly();
 
-  /** Auto-incrementing counter for assigning unique numeric IDs to new performances. */
-  private nextId: number;
+  constructor(private http: HttpClient) {}
 
-  constructor(
-    // Inject the storage abstraction so tests can substitute MockStorage.
-    @Inject(LOCAL_STORAGE) private storage: Storage
-  ) {
-    // Hydrate from storage on startup so data survives page refreshes.
-    const initialPerformances = this.loadFromStorage();
-    this.performancesState.set(initialPerformances);
-
-    // Set the counter to one above the highest existing ID to avoid collisions
-    // with data that was already stored from a previous session.
-    this.nextId = initialPerformances.reduce(
-      (highestId, p) => Math.max(highestId, Number(p.id) || 0), 0
-    ) + 1;
-  }
-
-  // ---- Private Storage Helpers -------------------------------------------
+  // ---- Data loading ---------------------------------------------------------
 
   /**
-   * Validates that a value loaded from storage has the minimum shape required
-   * to be safely treated as a Performance for scheduling logic.
-   *
-   * We only require fields that are used by time and layout calculations:
-   * id, festivalId, stageName, date, startTime, endTime — all as strings.
-   *
-   * @param entry Arbitrary value parsed from JSON storage.
-   * @returns True if the entry looks like a valid stored Performance.
+   * Fetches all performances for a festival and merges them into the signal.
+   * Components call this in ngOnInit; the signal update triggers any effect()
+   * that reads performancesSignal or getPerformancesByFestival().
    */
-  private isValidStoredPerformance(entry: unknown): entry is Performance {
-    if (entry === null || typeof entry !== 'object') {
-      return false;
-    }
-
-    const candidate = entry as { [key: string]: unknown };
-    const requiredKeys: Array<keyof Performance> = [
-      'id',
-      'festivalId',
-      'stageName',
-      'date',
-      'startTime',
-      'endTime',
-    ];
-
-    for (const key of requiredKeys) {
-      if (typeof candidate[key] !== 'string') {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Reads and deserializes performances from storage.
-   * Falls back to SEED_PERFORMANCES if storage is empty, the JSON is corrupted,
-   * or the stored data does not contain at least one valid performance entry.
-   */
-  private loadFromStorage(): Performance[] {
-    try {
-      const raw = this.storage.getItem(STORAGE_KEY);
-
-      // Only use stored data if it exists and deserializes to a valid array
-      // with at least one structurally valid performance.
-      if (raw !== null) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          const valid = parsed.filter((entry) =>
-            this.isValidStoredPerformance(entry)
+  loadByFestival(festivalId: string): Observable<Performance[]> {
+    return this.http
+      .get<Performance[]>(`${this.apiUrl}?festivalId=${encodeURIComponent(festivalId)}`)
+      .pipe(
+        tap((perfs) => {
+          const current = this.performancesState().filter(
+            (p) => p.festivalId !== festivalId
           );
-
-          if (valid.length > 0) {
-            // Return a cloned array so in-memory mutations do not accidentally
-            // modify any shared references from parsing.
-            return valid.map((p) => ({ ...p } as Performance));
-          }
-        }
-      }
-    } catch {
-      // JSON.parse throws on malformed data — fall through to seed data.
-    }
-
-    // First run, corrupted storage, or no valid entries: seed with demo performances.
-    return [...SEED_PERFORMANCES];
+          this.performancesState.set([...current, ...perfs]);
+        }),
+        catchError(this.handleError)
+      );
   }
 
-  /**
-   * Serializes the current performances array back to storage.
-   * Called after every create/delete to keep storage in sync with memory.
-   */
-  private saveToStorage(): void {
-    try {
-      this.storage.setItem(STORAGE_KEY, JSON.stringify(this.performancesState()));
-    } catch {
-      // Storage quota exceeded or unavailable (e.g. private browsing mode).
-      // Continue with in-memory state — the app still works for this session.
-    }
-  }
+  // ---- Synchronous reads (from signal) -------------------------------------
 
-  // ---- Private Time Utility ----------------------------------------------
-
-  /**
-   * Converts a "H:mm" or "HH:mm" time string to a total-minutes integer.
-   * Returns null for any input that doesn't match the expected format.
-   *
-   * Examples:  "9:00" → 540,  "18:30" → 1110,  "bad" → null
-   * Used internally to compare time windows as plain numbers.
-   */
-  private toMinutes(time: string): number | null {
-    const match = /^(\d{1,2}):(\d{2})$/.exec(time.trim());
-    if (!match) return null;
-
-    const hours   = Number(match[1]);
-    const minutes = Number(match[2]);
-
-    // Reject non-integers and out-of-range clock values.
-    if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
-    if (hours < 0 || hours > 23)     return null;
-    if (minutes < 0 || minutes > 59) return null;
-
-    return hours * 60 + minutes;
-  }
-
-  // ---- Public Query Methods ----------------------------------------------
-
-  /**
-   * Returns a shallow copy of all performances belonging to the given festival.
-   * Returning copies prevents external code from accidentally mutating the store.
-   */
+  /** Returns performances for the given festival from the in-memory signal. */
   getPerformancesByFestival(festivalId: string): Performance[] {
     return this.performancesState()
       .filter((p) => p.festivalId === festivalId)
-      .map((p) => ({ ...p })); // spread creates a safe independent copy
+      .map((p) => ({ ...p }));
   }
 
   /**
    * Tests whether a stage is already booked during the requested time window.
-   * Uses the standard interval-overlap formula:
-   *   Two ranges [A.start, A.end) and [B.start, B.end) overlap when
-   *   A.start < B.end  AND  A.end > B.start.
-   *
-   * @param excludeId  Skip this performance ID when scanning (used when editing
-   *                   an existing performance so it doesn't conflict with itself).
-   * @returns true = slot is taken (conflict), false = slot is free.
+   * Uses the standard interval-overlap formula against in-memory signal state.
+   * The backend also validates this on POST, providing a double safety net.
    */
   isStageOccupied(
     festivalId: string,
-    stageName:  string,
-    date:       string,
-    startTime:  string,
-    endTime:    string,
+    stageName: string,
+    date: string,
+    startTime: string,
+    endTime: string,
     excludeId?: string
   ): boolean {
     const newStart = this.toMinutes(startTime);
-    const newEnd   = this.toMinutes(endTime);
+    const newEnd = this.toMinutes(endTime);
+    if (newStart === null || newEnd === null || newStart >= newEnd) return false;
 
-    // Unparseable times or zero-duration windows cannot conflict.
-    if (newStart === null || newEnd === null) return false;
-    if (newStart >= newEnd) return false;
-
-    // Walk every stored performance and test for an overlap on the same stage/day.
     return this.performancesState().some((p) => {
-      if (p.festivalId !== festivalId)          return false;
-      if (p.stageName  !== stageName)           return false;
-      if (p.date       !== date)                return false;
-      if (excludeId && p.id === excludeId)      return false; // skip self when editing
+      if (p.festivalId !== festivalId) return false;
+      if (p.stageName !== stageName) return false;
+      if (p.date !== date) return false;
+      if (excludeId && p.id === excludeId) return false;
 
-      const existingStart = this.toMinutes(p.startTime);
-      const existingEnd   = this.toMinutes(p.endTime);
-      if (existingStart === null || existingEnd === null) return false;
-
-      // Interval-overlap test.
-      return newStart < existingEnd && newEnd > existingStart;
+      const s = this.toMinutes(p.startTime);
+      const e = this.toMinutes(p.endTime);
+      if (s === null || e === null) return false;
+      return newStart < e && newEnd > s;
     });
   }
 
-  // ---- Public Mutation Methods -------------------------------------------
+  // ---- Mutations ------------------------------------------------------------
 
   /**
-   * Validates and saves a new performance.
-   * Throws a human-readable Error for any validation failure so the calling
-   * component can display it directly in the form's error banner.
+   * Validates timing and double-booking locally for immediate UX feedback,
+   * then persists to the API.  Updates the signal so reactive components
+   * (effect()) re-render without needing an extra network round-trip.
    */
-  createPerformance(data: Omit<Performance, 'id'>): Performance {
+  createPerformance(data: Omit<Performance, 'id'>): Observable<Performance> {
     const startMinutes = this.toMinutes(data.startTime);
-    const endMinutes   = this.toMinutes(data.endTime);
+    const endMinutes = this.toMinutes(data.endTime);
 
-    // Guard: both times must be parseable 24-hour strings.
     if (startMinutes === null || endMinutes === null) {
-      throw new Error('Start and end times must be valid 24-hour times (H:mm or HH:mm).');
+      return throwError(
+        () =>
+          new Error(
+            'Start and end times must be valid 24-hour times (H:mm or HH:mm).'
+          )
+      );
     }
-
-    // Guard: the performance must have a positive duration.
     if (startMinutes >= endMinutes) {
-      throw new Error('End time must be later than start time.');
+      return throwError(() => new Error('End time must be later than start time.'));
+    }
+    if (
+      this.isStageOccupied(
+        data.festivalId,
+        data.stageName,
+        data.date,
+        data.startTime,
+        data.endTime
+      )
+    ) {
+      return throwError(
+        () =>
+          new Error(`"${data.stageName}" is already booked during that time slot.`)
+      );
     }
 
-    // Guard: the stage must not already be booked during this time window.
-    if (this.isStageOccupied(data.festivalId, data.stageName, data.date, data.startTime, data.endTime)) {
-      throw new Error(`"${data.stageName}" is already booked during that time slot.`);
-    }
-
-    // Assign the next available ID, append to the store, and persist.
-    const performance: Performance = { id: String(this.nextId++), ...data };
-    this.performancesState.update((current) => [...current, performance]);
-    this.saveToStorage();
-    return { ...performance }; // return a copy, not the stored reference
-  }
-
-  /**
-   * Removes a single performance by its ID.
-   * @returns true if the ID was found and deleted, false if it did not exist.
-   */
-  deletePerformance(id: string): boolean {
-    const current = this.performancesState();
-    const next = current.filter((p) => p.id !== id);
-    if (next.length === current.length) return false; // ID not found — nothing to remove
-
-    this.performancesState.set(next);
-    this.saveToStorage();               // sync storage
-    return true;
-  }
-
-  /**
-   * Removes ALL performances for a given festival in one operation.
-   * Called by the "Clear All" button on the performance-list page.
-   */
-  clearPerformancesByFestival(festivalId: string): void {
-    // Keep every performance that belongs to a DIFFERENT festival.
-    this.performancesState.update((current) =>
-      current.filter((p) => p.festivalId !== festivalId)
+    return this.http.post<Performance>(this.apiUrl, data).pipe(
+      tap((perf) => this.performancesState.update((p) => [...p, perf])),
+      catchError(this.handleError)
     );
-    this.saveToStorage(); // sync storage
+  }
+
+  /** Deletes a single performance by ID and removes it from the signal. */
+  deletePerformance(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() =>
+        this.performancesState.update((p) => p.filter((perf) => perf.id !== id))
+      ),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Deletes all performances for a festival (cascade delete / clear all).
+   * Removes them from the signal so reactive components update immediately.
+   */
+  clearPerformancesByFestival(festivalId: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.apiUrl}/festival/${encodeURIComponent(festivalId)}`)
+      .pipe(
+        tap(() =>
+          this.performancesState.update((p) =>
+            p.filter((perf) => perf.festivalId !== festivalId)
+          )
+        ),
+        catchError(this.handleError)
+      );
+  }
+
+  // ---- Private helpers ------------------------------------------------------
+
+  private toMinutes(time: string): number | null {
+    const match = /^(\d{1,2}):(\d{2})$/.exec((time ?? '').trim());
+    if (!match) return null;
+    const h = Number(match[1]);
+    const m = Number(match[2]);
+    if (!Number.isInteger(h) || !Number.isInteger(m)) return null;
+    if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+    return h * 60 + m;
+  }
+
+  private handleError(err: { error?: { message?: string }; message?: string }): Observable<never> {
+    const message =
+      err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
+    return throwError(() => new Error(message));
   }
 }

@@ -1,100 +1,89 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { Festival } from '../models/festival.model';
-import { LOCAL_STORAGE } from './schedule.service';
-
-const STORAGE_KEY = 'mfp_festivals';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FestivalService {
-  private festivalStore: Festival[] = [];
-  private nextFestivalId = 1;
+  private readonly apiUrl = `${environment.apiUrl}/api/festivals`;
 
-  constructor(@Inject(LOCAL_STORAGE) private storage: Storage) {
-    this.festivalStore = this.loadFromStorage();
-    this.nextFestivalId =
-      this.festivalStore.reduce((highestIdSoFar, currentFestival) =>
-        Math.max(highestIdSoFar, Number(currentFestival.id) || 0), 0) + 1;
+  /** In-memory cache populated by the most recent load() call. */
+  private cache: Festival[] = [];
+
+  constructor(private http: HttpClient) {}
+
+  // ---- Data loading ---------------------------------------------------------
+
+  /**
+   * Fetches all festivals from the API and refreshes the local cache.
+   * Components should call this in ngOnInit and subscribe to receive the data.
+   */
+  load(): Observable<Festival[]> {
+    return this.http.get<Festival[]>(this.apiUrl).pipe(
+      tap((festivals) => {
+        this.cache = festivals;
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  private isValidStoredFestival(entry: unknown): entry is Festival {
-    if (entry === null || typeof entry !== 'object') return false;
-    const candidate = entry as { [key: string]: unknown };
-    if (
-      typeof candidate['id'] !== 'string' ||
-      typeof candidate['name'] !== 'string' ||
-      typeof candidate['startDate'] !== 'string' ||
-      typeof candidate['endDate'] !== 'string' ||
-      typeof candidate['location'] !== 'string'
-    ) {
-      return false;
-    }
-    if (candidate['genre'] !== undefined && typeof candidate['genre'] !== 'string') return false;
-    if (candidate['capacity'] !== undefined && typeof candidate['capacity'] !== 'number') return false;
-    return true;
-  }
+  // ---- Synchronous reads (from cache) --------------------------------------
 
-  private loadFromStorage(): Festival[] {
-    try {
-      const rawTextData = this.storage.getItem(STORAGE_KEY);
-      if (rawTextData === null) return [];
-      const parsedData = JSON.parse(rawTextData);
-      if (!Array.isArray(parsedData)) return [];
-      return parsedData
-        .filter((entry) => this.isValidStoredFestival(entry))
-        .map((festival) => ({ ...festival }));
-    } catch {
-      return [];
-    }
-  }
-
-  private saveToStorage(): void {
-    try {
-      this.storage.setItem(STORAGE_KEY, JSON.stringify(this.festivalStore));
-    } catch {
-      // Silently ignore storage errors (e.g. quota exceeded).
-    }
-  }
-
+  /** Returns a shallow copy of the cached festival list. */
   getFestivals(): Festival[] {
-    return this.festivalStore.map((festival) => ({ ...festival }));
+    return [...this.cache];
   }
 
-  getFestivalById(targetId: string): Festival | undefined {
-    const matchedFestival = this.festivalStore.find((festival) => festival.id === targetId);
-    return matchedFestival ? { ...matchedFestival } : undefined;
+  /** Finds a cached festival by ID, or undefined if not found. */
+  getFestivalById(id: string): Festival | undefined {
+    return this.cache.find((f) => f.id === id);
   }
 
-  createFestival(newFestivalData: Omit<Festival, 'id'>): Festival {
-    if (newFestivalData.endDate < newFestivalData.startDate) {
-      throw new Error('The end date must be on or after the start date.');
-    }
-    const savedFestival: Festival = {
-      id: String(this.nextFestivalId++),
-      ...newFestivalData,
-    };
-    this.festivalStore.push(savedFestival);
-    this.saveToStorage();
-    return { ...savedFestival };
+  // ---- Mutations ------------------------------------------------------------
+
+  /** Creates a festival and adds it to the local cache on success. */
+  createFestival(data: Omit<Festival, 'id'>): Observable<Festival> {
+    return this.http.post<Festival>(this.apiUrl, data).pipe(
+      tap((festival) => {
+        this.cache.push(festival);
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  updateFestival(targetId: string, fieldsToChange: Partial<Omit<Festival, 'id'>>): Festival | null {
-    const festivalIndex = this.festivalStore.findIndex((festival) => festival.id === targetId);
-    if (festivalIndex === -1) return null;
-    this.festivalStore[festivalIndex] = {
-      ...this.festivalStore[festivalIndex],
-      ...fieldsToChange,
-    };
-    this.saveToStorage();
-    return { ...this.festivalStore[festivalIndex] };
+  /** Partially updates a festival and refreshes its cache entry on success. */
+  updateFestival(
+    id: string,
+    fields: Partial<Omit<Festival, 'id'>>
+  ): Observable<Festival> {
+    return this.http.patch<Festival>(`${this.apiUrl}/${id}`, fields).pipe(
+      tap((updated) => {
+        const idx = this.cache.findIndex((f) => f.id === id);
+        if (idx !== -1) this.cache[idx] = updated;
+      }),
+      catchError(this.handleError)
+    );
   }
 
-  deleteFestival(targetId: string): boolean {
-    const festivalIndex = this.festivalStore.findIndex((festival) => festival.id === targetId);
-    if (festivalIndex === -1) return false;
-    this.festivalStore.splice(festivalIndex, 1);
-    this.saveToStorage();
-    return true;
+  /** Deletes a festival and removes it from the local cache on success. */
+  deleteFestival(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => {
+        this.cache = this.cache.filter((f) => f.id !== id);
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+  // ---- Error handling -------------------------------------------------------
+
+  private handleError(err: { error?: { message?: string }; message?: string }): Observable<never> {
+    const message =
+      err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
+    return throwError(() => new Error(message));
   }
 }

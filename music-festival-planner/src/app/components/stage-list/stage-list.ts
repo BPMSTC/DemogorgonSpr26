@@ -12,13 +12,8 @@ import { Stage, StageStatus } from '../../models/stage.model';
   styleUrl: './stage-list.css',
 })
 export class StageListComponent implements OnInit {
-  /** The parent festival (used to show the festival name in the page header). */
   currentFestival: Festival | undefined;
-
-  /** All stages belonging to this festival, shown as a list of cards. */
   stageList: Stage[] = [];
-
-  /** Festival ID extracted from the URL (:id route param). */
   festivalId = '';
 
   constructor(
@@ -29,67 +24,57 @@ export class StageListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Read the festival ID from the URL and load both the festival and its stages.
-    this.festivalId      = this.activeRoute.snapshot.paramMap.get('id') ?? '';
-    this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    this.festivalId = this.activeRoute.snapshot.paramMap.get('id') ?? '';
+
+    // Load festival name for the page header.
+    this.festivalService.load().subscribe(() => {
+      this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    });
 
     this.refreshStageList();
   }
 
-  /**
-   * Re-fetches the stage list from the service.
-   * Called on init and after any add or delete operation so the view stays in sync.
-   */
   refreshStageList(): void {
-    this.stageList = this.stageService.getStagesByFestival(this.festivalId);
+    this.stageService.loadByFestival(this.festivalId).subscribe((stages) => {
+      this.stageList = stages;
+    });
   }
 
   // ---- Display Helpers ---------------------------------------------------
 
-  /**
-   * Returns a human-readable label for a stage status value.
-   * Used instead of displaying raw enum strings in the UI.
-   */
   getStatusDisplayLabel(stageStatus: StageStatus): string {
     const statusToLabel: Record<StageStatus, string> = {
-      'active':        'Active',
-      'inactive':      'Inactive',
-      'under-repair':  'Under Repair',
+      'active':       'Active',
+      'inactive':     'Inactive',
+      'under-repair': 'Under Repair',
     };
     return statusToLabel[stageStatus];
   }
 
-  /**
-   * Maps a stage status to its CSS badge class name for colored status indicators.
-   */
   getStatusBadgeClass(stageStatus: StageStatus): string {
     const statusToBadgeClass: Record<StageStatus, string> = {
-      'active':        'badge-active',
-      'inactive':      'badge-inactive',
-      'under-repair':  'badge-repair',
+      'active':       'badge-active',
+      'inactive':     'badge-inactive',
+      'under-repair': 'badge-repair',
     };
     return statusToBadgeClass[stageStatus];
   }
 
   // ---- Navigation / Action Handlers --------------------------------------
 
-  /** Routes to the "Add Stage" form for this festival. */
   navigateToAddStage(): void {
     this.router.navigate(['/festivals', this.festivalId, 'stages', 'new']);
   }
 
-  /**
-   * Prompts the user to confirm, then removes a stage by its ID.
-   * Refreshes the list so the deleted card disappears immediately.
-   */
   confirmAndDeleteStage(stageId: string): void {
     if (confirm('Remove this stage from the festival?')) {
-      this.stageService.deleteStage(stageId);
-      this.refreshStageList(); // re-fetch to remove the deleted card
+      this.stageService.deleteStage(stageId).subscribe({
+        next: () => this.refreshStageList(),
+        error: () => this.refreshStageList(),
+      });
     }
   }
 
-  /** Routes back to the festivals overview page. */
   navigateBackToFestivals(): void {
     this.router.navigate(['/festivals']);
   }
