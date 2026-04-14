@@ -1,156 +1,119 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { firstValueFrom } from 'rxjs';
+
 import { StageService } from './stage.service';
 import { Stage } from '../models/stage.model';
-import { LOCAL_STORAGE } from './schedule.service';
+import { environment } from '../../environments/environment';
 
-/** In-memory storage used to isolate tests from browser localStorage state. */
-class MockStorage implements Storage {
-  private store: Record<string, string> = {};
+const BASE_URL = `${environment.apiUrl}/api/stages`;
 
-  get length(): number {
-    return Object.keys(this.store).length;
-  }
-
-  key(index: number): string | null {
-    return Object.keys(this.store)[index] ?? null;
-  }
-
-  getItem(key: string): string | null {
-    return this.store[key] ?? null;
-  }
-
-  setItem(key: string, value: string): void {
-    this.store[key] = value;
-  }
-
-  removeItem(key: string): void {
-    delete this.store[key];
-  }
-
-  clear(): void {
-    this.store = {};
-  }
-}
-
-const BASE_DATA: Omit<Stage, 'id'> = {
+const STAGE_A: Stage = {
+  id: 'a',
   festivalId: '99',
-  name: 'Test Stage',
-  capacity: 1000,
+  name: 'Main Stage',
+  capacity: 5000,
   environment: 'outdoor',
+  status: 'active',
+};
+
+const STAGE_B: Stage = {
+  id: 'b',
+  festivalId: '99',
+  name: 'Tent',
+  capacity: 1000,
+  environment: 'indoor',
   status: 'active',
 };
 
 describe('StageService', () => {
   let service: StageService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [{ provide: LOCAL_STORAGE, useValue: new MockStorage() }],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     });
+
     service = TestBed.inject(StageService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  // ---------------------------------------------------------------------------
-  // CREATE
-  // ---------------------------------------------------------------------------
-  describe('createStage', () => {
-    it('should create a stage and return it with an assigned id', () => {
-      const created = service.createStage(BASE_DATA);
+  it('loadByFestival() should fetch and cache only requested festival stages', async () => {
+    const p99 = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([STAGE_A, STAGE_B]);
+    await p99;
 
-      expect(created.id).toBeDefined();
-      expect(created.name).toBe(BASE_DATA.name);
-      expect(created.capacity).toBe(BASE_DATA.capacity);
-    });
+    expect(service.getStagesByFestival('99')).toEqual([STAGE_A, STAGE_B]);
 
-    it('should throw when capacity is zero', () => {
-      expect(() =>
-        service.createStage({ ...BASE_DATA, capacity: 0 })
-      ).toThrowError('capacity must be a positive integer.');
-    });
+    const other: Stage = { ...STAGE_A, id: 'c', festivalId: '88' };
+    const p88 = firstValueFrom(service.loadByFestival('88'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=88`).flush([other]);
+    await p88;
 
-    it('should throw when capacity is negative', () => {
-      expect(() =>
-        service.createStage({ ...BASE_DATA, capacity: -5 })
-      ).toThrowError('capacity must be a positive integer.');
-    });
-
-    it('should throw when capacity is a non-integer (float)', () => {
-      expect(() =>
-        service.createStage({ ...BASE_DATA, capacity: 1.5 })
-      ).toThrowError('capacity must be a positive integer.');
-    });
-
-    it('should allow capacity of 1 (minimum valid value)', () => {
-      const created = service.createStage({ ...BASE_DATA, capacity: 1 });
-      expect(created.id).toBeDefined();
-    });
-
-    it('should not persist a stage when capacity validation fails', () => {
-      const before = service.getStagesByFestival(BASE_DATA.festivalId).length;
-      try {
-        service.createStage({ ...BASE_DATA, capacity: 0 });
-      } catch {
-        // expected
-      }
-      expect(service.getStagesByFestival(BASE_DATA.festivalId).length).toBe(before);
-    });
-
-    it('should throw when a duplicate stage name exists for the same festival', () => {
-      service.createStage(BASE_DATA);
-      expect(() =>
-        service.createStage(BASE_DATA)
-      ).toThrowError(`A stage named "${BASE_DATA.name}" already exists for this festival.`);
-    });
-
-    it('should return a copy so mutations do not affect stored data', () => {
-      const created = service.createStage(BASE_DATA);
-      created.name = 'Mutated Name';
-      const stored = service.getStageById(created.id)!;
-
-      expect(stored.name).toBe(BASE_DATA.name);
-    });
+    expect(service.getStagesByFestival('99')).toEqual([STAGE_A, STAGE_B]);
+    expect(service.getStagesByFestival('88')).toEqual([other]);
   });
 
-  // ---------------------------------------------------------------------------
-  // READ
-  // ---------------------------------------------------------------------------
-  describe('getStagesByFestival', () => {
-    it('should return only stages for the given festival', () => {
-      service.createStage(BASE_DATA);
-      const stages = service.getStagesByFestival(BASE_DATA.festivalId);
+  it('createStage() should post and append to cache', async () => {
+    const input: Omit<Stage, 'id'> = {
+      festivalId: STAGE_A.festivalId,
+      name: STAGE_A.name,
+      capacity: STAGE_A.capacity,
+      environment: STAGE_A.environment,
+      status: STAGE_A.status,
+    };
 
-      expect(stages.every((s) => s.festivalId === BASE_DATA.festivalId)).toBe(true);
-    });
+    const promise = firstValueFrom(service.createStage(input));
+    const req = httpMock.expectOne(BASE_URL);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(input);
+    req.flush(STAGE_A);
 
-    it('should return an empty array when no stages exist for a festival', () => {
-      expect(service.getStagesByFestival('nonexistent')).toEqual([]);
-    });
-
-    it('should return copies so external mutations do not affect stored data', () => {
-      service.createStage(BASE_DATA);
-      const stages = service.getStagesByFestival(BASE_DATA.festivalId);
-      stages[0].name = 'Mutated';
-      const stored = service.getStagesByFestival(BASE_DATA.festivalId);
-
-      expect(stored[0].name).toBe(BASE_DATA.name);
-    });
+    await expect(promise).resolves.toEqual(STAGE_A);
+    expect(service.getStageById('a')).toEqual(STAGE_A);
   });
 
-  describe('getStageById', () => {
-    it('should return the correct stage by id', () => {
-      const created = service.createStage(BASE_DATA);
-      const found = service.getStageById(created.id);
+  it('deleteStage() should delete and remove from cache', async () => {
+    const loadPromise = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([STAGE_A]);
+    await loadPromise;
 
-      expect(found).toBeDefined();
-      expect(found!.name).toBe(BASE_DATA.name);
-    });
+    const deletePromise = firstValueFrom(service.deleteStage('a'));
+    const req = httpMock.expectOne(`${BASE_URL}/a`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
 
-    it('should return undefined for a non-existent id', () => {
-      expect(service.getStageById('nonexistent')).toBeUndefined();
-    });
+    await expect(deletePromise).resolves.toBeNull();
+    expect(service.getStageById('a')).toBeUndefined();
+  });
+
+  it('clearStagesByFestival() should remove only that festival from cache', async () => {
+    const p99 = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([STAGE_A]);
+    await p99;
+
+    const other = { ...STAGE_B, id: 'x', festivalId: '88' };
+    const p88 = firstValueFrom(service.loadByFestival('88'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=88`).flush([other]);
+    await p88;
+
+    const clearPromise = firstValueFrom(service.clearStagesByFestival('99'));
+    const req = httpMock.expectOne(`${BASE_URL}/festival/99`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+
+    await expect(clearPromise).resolves.toBeNull();
+    expect(service.getStagesByFestival('99')).toEqual([]);
+    expect(service.getStagesByFestival('88')).toEqual([other]);
   });
 });

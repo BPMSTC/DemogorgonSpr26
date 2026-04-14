@@ -1,310 +1,111 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { firstValueFrom } from 'rxjs';
+
 import { FestivalService } from './festival.service';
 import { Festival } from '../models/festival.model';
-import { LOCAL_STORAGE } from './schedule.service';
+import { environment } from '../../environments/environment';
 
-/** In-memory storage used to isolate tests from browser localStorage state. */
-class MockStorage implements Storage {
-  private store: Record<string, string> = {};
-
-  get length(): number {
-    return Object.keys(this.store).length;
-  }
-
-  key(index: number): string | null {
-    return Object.keys(this.store)[index] ?? null;
-  }
-
-  getItem(key: string): string | null {
-    return this.store[key] ?? null;
-  }
-
-  setItem(key: string, value: string): void {
-    this.store[key] = value;
-  }
-
-  removeItem(key: string): void {
-    delete this.store[key];
-  }
-
-  clear(): void {
-    this.store = {};
-  }
-}
+const BASE_URL = `${environment.apiUrl}/api/festivals`;
 
 const SAMPLE_DATA: Omit<Festival, 'id'> = {
   name: 'Lollapalooza',
-  startDate: '2025-08-01',
-  endDate: '2025-08-04',
+  startDate: '2026-08-01',
+  endDate: '2026-08-04',
   location: 'Chicago, IL',
   genre: 'Rock',
   capacity: 100000,
 };
 
-const SAMPLE_DATA_2: Omit<Festival, 'id'> = {
-  name: 'Coachella',
-  startDate: '2025-04-11',
-  endDate: '2025-04-14',
-  location: 'Indio, CA',
-  genre: 'Indie',
-  capacity: 125000,
-};
-
 describe('FestivalService', () => {
   let service: FestivalService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [{ provide: LOCAL_STORAGE, useValue: new MockStorage() }],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     });
+
     service = TestBed.inject(FestivalService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  // ---------------------------------------------------------------------------
-  // CREATE
-  // ---------------------------------------------------------------------------
-  describe('createFestival', () => {
-    it('should create a festival and return it with an assigned id', () => {
-      const created = service.createFestival(SAMPLE_DATA);
+  it('load() should fetch and cache festivals', async () => {
+    const expected: Festival[] = [{ id: '1', ...SAMPLE_DATA }];
 
-      expect(created.id).toBeDefined();
-      expect(created.name).toBe(SAMPLE_DATA.name);
-      expect(created.startDate).toBe(SAMPLE_DATA.startDate);
-      expect(created.endDate).toBe(SAMPLE_DATA.endDate);
-      expect(created.location).toBe(SAMPLE_DATA.location);
-      expect(created.genre).toBe(SAMPLE_DATA.genre);
-      expect(created.capacity).toBe(SAMPLE_DATA.capacity);
-    });
+    const promise = firstValueFrom(service.load());
+    const req = httpMock.expectOne(BASE_URL);
+    expect(req.request.method).toBe('GET');
+    req.flush(expected);
 
-    it('should persist the created festival to storage', () => {
-      service.createFestival(SAMPLE_DATA);
-      const all = service.getFestivals();
-
-      expect(all.length).toBe(1);
-      expect(all[0].name).toBe(SAMPLE_DATA.name);
-    });
-
-    it('should assign unique ids to multiple festivals', () => {
-      const first = service.createFestival(SAMPLE_DATA);
-      const second = service.createFestival(SAMPLE_DATA_2);
-
-      expect(first.id).not.toBe(second.id);
-    });
-
-    it('should create multiple festivals independently', () => {
-      service.createFestival(SAMPLE_DATA);
-      service.createFestival(SAMPLE_DATA_2);
-      const all = service.getFestivals();
-
-      expect(all.length).toBe(2);
-      expect(all[0].name).toBe(SAMPLE_DATA.name);
-      expect(all[1].name).toBe(SAMPLE_DATA_2.name);
-    });
-
-    it('should throw when endDate is before startDate', () => {
-      expect(() =>
-        service.createFestival({ ...SAMPLE_DATA, startDate: '2025-08-04', endDate: '2025-08-01' })
-      ).toThrowError('The end date must be on or after the start date.');
-    });
-
-    it('should allow endDate equal to startDate (single-day festival)', () => {
-      const created = service.createFestival({ ...SAMPLE_DATA, startDate: '2025-08-01', endDate: '2025-08-01' });
-      expect(created.id).toBeDefined();
-    });
-
-    it('should not persist a festival when date validation fails', () => {
-      try {
-        service.createFestival({ ...SAMPLE_DATA, startDate: '2025-08-04', endDate: '2025-08-01' });
-      } catch {
-        // expected
-      }
-      expect(service.getFestivals().length).toBe(0);
-    });
-
-
-
-    it('should return a copy so mutations do not affect stored data', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      created.name = 'Mutated Name';
-      const stored = service.getFestivalById(created.id)!;
-
-      expect(stored.name).toBe(SAMPLE_DATA.name);
-    });
+    await expect(promise).resolves.toEqual(expected);
+    expect(service.getFestivals()).toEqual(expected);
+    expect(service.getFestivalById('1')).toEqual(expected[0]);
   });
 
-  // ---------------------------------------------------------------------------
-  // READ
-  // ---------------------------------------------------------------------------
-  describe('getFestivals', () => {
-    it('should return an empty array when no festivals exist', () => {
-      expect(service.getFestivals()).toEqual([]);
-    });
+  it('createFestival() should post and append to cache', async () => {
+    const created: Festival = { id: '99', ...SAMPLE_DATA };
 
-    it('should return all created festivals', () => {
-      service.createFestival(SAMPLE_DATA);
-      service.createFestival(SAMPLE_DATA_2);
-      const all = service.getFestivals();
+    const promise = firstValueFrom(service.createFestival(SAMPLE_DATA));
+    const req = httpMock.expectOne(BASE_URL);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(SAMPLE_DATA);
+    req.flush(created);
 
-      expect(all.length).toBe(2);
-    });
-
-    it('should return a copy so external mutations do not affect stored data', () => {
-      service.createFestival(SAMPLE_DATA);
-      const all = service.getFestivals();
-      all[0].name = 'Mutated';
-      const stored = service.getFestivals();
-
-      expect(stored[0].name).toBe(SAMPLE_DATA.name);
-    });
+    await expect(promise).resolves.toEqual(created);
+    expect(service.getFestivalById('99')).toEqual(created);
   });
 
-  describe('getFestivalById', () => {
-    it('should return the correct festival by id', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      const found = service.getFestivalById(created.id);
+  it('updateFestival() should patch and update cached item', async () => {
+    const existing: Festival = { id: '1', ...SAMPLE_DATA };
 
-      expect(found).toBeDefined();
-      expect(found!.name).toBe(SAMPLE_DATA.name);
-    });
+    const loadPromise = firstValueFrom(service.load());
+    httpMock.expectOne(BASE_URL).flush([existing]);
+    await loadPromise;
 
-    it('should return undefined for a non-existent id', () => {
-      expect(service.getFestivalById('nonexistent')).toBeUndefined();
-    });
+    const updated: Festival = { ...existing, name: 'Updated Name' };
+    const updatePromise = firstValueFrom(service.updateFestival('1', { name: 'Updated Name' }));
 
-    it('should return undefined when storage is empty', () => {
-      expect(service.getFestivalById('1')).toBeUndefined();
-    });
+    const req = httpMock.expectOne(`${BASE_URL}/1`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ name: 'Updated Name' });
+    req.flush(updated);
 
-    it('should return the correct festival when multiple exist', () => {
-      const first = service.createFestival(SAMPLE_DATA);
-      const second = service.createFestival(SAMPLE_DATA_2);
-
-      expect(service.getFestivalById(first.id)!.name).toBe(SAMPLE_DATA.name);
-      expect(service.getFestivalById(second.id)!.name).toBe(SAMPLE_DATA_2.name);
-    });
-
-    it('should return a copy so mutations do not affect stored data', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      const found = service.getFestivalById(created.id)!;
-      found.name = 'Mutated Name';
-      const stored = service.getFestivalById(created.id)!;
-
-      expect(stored.name).toBe(SAMPLE_DATA.name);
-    });
+    await expect(updatePromise).resolves.toEqual(updated);
+    expect(service.getFestivalById('1')?.name).toBe('Updated Name');
   });
 
-  // ---------------------------------------------------------------------------
-  // UPDATE
-  // ---------------------------------------------------------------------------
-  describe('updateFestival', () => {
-    it('should update a festival and return the updated record', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      const updated = service.updateFestival(created.id, { name: 'Updated Name' });
+  it('deleteFestival() should delete and remove from cache', async () => {
+    const existing: Festival = { id: '1', ...SAMPLE_DATA };
 
-      expect(updated).not.toBeNull();
-      expect(updated!.name).toBe('Updated Name');
-      expect(updated!.id).toBe(created.id);
-    });
+    const loadPromise = firstValueFrom(service.load());
+    httpMock.expectOne(BASE_URL).flush([existing]);
+    await loadPromise;
 
-    it('should persist the update in storage', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      service.updateFestival(created.id, { name: 'Persisted Name' });
-      const stored = service.getFestivalById(created.id);
+    const deletePromise = firstValueFrom(service.deleteFestival('1'));
+    const req = httpMock.expectOne(`${BASE_URL}/1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
 
-      expect(stored!.name).toBe('Persisted Name');
-    });
-
-    it('should support partial updates without overwriting other fields', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      service.updateFestival(created.id, { location: 'New York, NY' });
-      const stored = service.getFestivalById(created.id)!;
-
-      expect(stored.location).toBe('New York, NY');
-      expect(stored.name).toBe(SAMPLE_DATA.name);
-      expect(stored.genre).toBe(SAMPLE_DATA.genre);
-      expect(stored.capacity).toBe(SAMPLE_DATA.capacity);
-    });
-
-    it('should update multiple fields at once', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      service.updateFestival(created.id, { name: 'New Name', capacity: 50000 });
-      const stored = service.getFestivalById(created.id)!;
-
-      expect(stored.name).toBe('New Name');
-      expect(stored.capacity).toBe(50000);
-    });
-
-    it('should return null for a non-existent id', () => {
-      const result = service.updateFestival('nonexistent', { name: 'Ghost' });
-
-      expect(result).toBeNull();
-    });
-
-    it('should not affect other festivals when one is updated', () => {
-      const first = service.createFestival(SAMPLE_DATA);
-      service.createFestival(SAMPLE_DATA_2);
-      service.updateFestival(first.id, { name: 'Changed' });
-      const second = service.getFestivals().find((f) => f.name === SAMPLE_DATA_2.name);
-
-      expect(second).toBeDefined();
-      expect(second!.name).toBe(SAMPLE_DATA_2.name);
-    });
+    await expect(deletePromise).resolves.toBeNull();
+    expect(service.getFestivalById('1')).toBeUndefined();
+    expect(service.getFestivals()).toEqual([]);
   });
 
-  // ---------------------------------------------------------------------------
-  // DELETE
-  // ---------------------------------------------------------------------------
-  describe('deleteFestival', () => {
-    it('should delete a festival and return true', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      const result = service.deleteFestival(created.id);
+  it('should surface API error messages', async () => {
+    const promise = firstValueFrom(service.load());
+    const req = httpMock.expectOne(BASE_URL);
+    req.flush({ message: 'Backend exploded' }, { status: 500, statusText: 'Server Error' });
 
-      expect(result).toBe(true);
-    });
-
-    it('should remove the festival from storage after deletion', () => {
-      const created = service.createFestival(SAMPLE_DATA);
-      service.deleteFestival(created.id);
-
-      expect(service.getFestivals().length).toBe(0);
-      expect(service.getFestivalById(created.id)).toBeUndefined();
-    });
-
-    it('should return false for a non-existent id', () => {
-      const result = service.deleteFestival('nonexistent');
-
-      expect(result).toBe(false);
-    });
-
-    it('should only delete the targeted festival and preserve others', () => {
-      const first = service.createFestival(SAMPLE_DATA);
-      const second = service.createFestival(SAMPLE_DATA_2);
-      service.deleteFestival(first.id);
-      const remaining = service.getFestivals();
-
-      expect(remaining.length).toBe(1);
-      expect(remaining[0].id).toBe(second.id);
-      expect(remaining[0].name).toBe(SAMPLE_DATA_2.name);
-    });
-
-    it('should maintain correct festival count after multiple deletions', () => {
-      const first = service.createFestival(SAMPLE_DATA);
-      const second = service.createFestival(SAMPLE_DATA_2);
-      service.deleteFestival(first.id);
-      service.deleteFestival(second.id);
-
-      expect(service.getFestivals().length).toBe(0);
-    });
-
-    it('should not affect storage when deleting a non-existent id', () => {
-      service.createFestival(SAMPLE_DATA);
-      service.deleteFestival('nonexistent');
-
-      expect(service.getFestivals().length).toBe(1);
-    });
+    await expect(promise).rejects.toThrow('Backend exploded');
   });
 });

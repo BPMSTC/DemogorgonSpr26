@@ -11,6 +11,7 @@ import { FestivalService } from '../../services/festival.service';
 import { Performance } from '../../models/performance.model';
 import { Stage } from '../../models/stage.model';
 import { Festival } from '../../models/festival.model';
+import { Observable, of, throwError } from 'rxjs';
 
 const MOCK_FESTIVAL: Festival = {
   id: '1',
@@ -21,23 +22,49 @@ const MOCK_FESTIVAL: Festival = {
 };
 
 const MOCK_STAGES: Stage[] = [
-  { id: '1', festivalId: '1', name: 'Main Stage',  capacity: 5000, environment: 'outdoor', status: 'active' },
-  { id: '2', festivalId: '1', name: 'Dance Tent',  capacity: 800,  environment: 'indoor',  status: 'active' },
+  {
+    id: '1',
+    festivalId: '1',
+    name: 'Main Stage',
+    capacity: 5000,
+    environment: 'outdoor',
+    status: 'active',
+  },
+  {
+    id: '2',
+    festivalId: '1',
+    name: 'Dance Tent',
+    capacity: 800,
+    environment: 'indoor',
+    status: 'active',
+  },
 ];
 
 class MockScheduleService {
-  createPerformance(data: Omit<Performance, 'id'>): Performance {
-    return { id: '99', ...data };
+  createPerformance(data: Omit<Performance, 'id'>): Observable<Performance> {
+    return of({ id: '99', ...data });
+  }
+
+  loadByFestival(_festivalId: string): Observable<Performance[]> {
+    return of([]);
   }
 }
 
 class MockStageService {
+  loadByFestival(festivalId: string): Observable<Stage[]> {
+    return of(this.getStagesByFestival(festivalId));
+  }
+
   getStagesByFestival(festivalId: string): Stage[] {
     return festivalId === '1' ? MOCK_STAGES.map((s) => ({ ...s })) : [];
   }
 }
 
 class MockFestivalService {
+  load(): Observable<Festival[]> {
+    return of([MOCK_FESTIVAL]);
+  }
+
   getFestivalById(id: string): Festival | undefined {
     return id === '1' ? { ...MOCK_FESTIVAL } : undefined;
   }
@@ -163,16 +190,18 @@ describe('PerformanceCreateComponent', () => {
 
   it('should call scheduleService.createPerformance with correct data on valid submit', () => {
     const scheduleService = TestBed.inject(ScheduleService);
-    const createSpy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue({
-      id: '99',
-      festivalId: '1',
-      artistName: 'Test Artist',
-      stageName: 'Main Stage',
-      genre: 'Rock',
-      date: '2026-09-15',
-      startTime: '14:00',
-      endTime: '15:30',
-    });
+    const createSpy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      of({
+        id: '99',
+        festivalId: '1',
+        artistName: 'Test Artist',
+        stageName: 'Main Stage',
+        genre: 'Rock',
+        date: '2026-09-15',
+        startTime: '14:00',
+        endTime: '15:30',
+      }),
+    );
 
     component.performanceForm.setValue({
       artistName: 'Test Artist',
@@ -198,16 +227,18 @@ describe('PerformanceCreateComponent', () => {
 
   it('should trim whitespace from artistName before submitting', () => {
     const scheduleService = TestBed.inject(ScheduleService);
-    const createSpy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue({
-      id: '99',
-      festivalId: '1',
-      artistName: 'Test Artist',
-      stageName: 'Main Stage',
-      genre: 'Rock',
-      date: '2026-09-15',
-      startTime: '14:00',
-      endTime: '15:30',
-    });
+    const createSpy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      of({
+        id: '99',
+        festivalId: '1',
+        artistName: 'Test Artist',
+        stageName: 'Main Stage',
+        genre: 'Rock',
+        date: '2026-09-15',
+        startTime: '14:00',
+        endTime: '15:30',
+      }),
+    );
 
     component.performanceForm.setValue({
       artistName: '  Test Artist  ',
@@ -220,16 +251,14 @@ describe('PerformanceCreateComponent', () => {
 
     component.onSubmit();
 
-    expect(createSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ artistName: 'Test Artist' })
-    );
+    expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({ artistName: 'Test Artist' }));
   });
 
   it('should set serverError when createPerformance throws a conflict error', () => {
     const scheduleService = TestBed.inject(ScheduleService);
-    vi.spyOn(scheduleService, 'createPerformance').mockImplementation(() => {
-      throw new Error('"Main Stage" is already booked during that time slot.');
-    });
+    vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      throwError(() => new Error('"Main Stage" is already booked during that time slot.')),
+    );
 
     component.performanceForm.setValue({
       artistName: 'Test Artist',
@@ -247,16 +276,18 @@ describe('PerformanceCreateComponent', () => {
 
   it('should navigate to the performances list on successful submit', () => {
     const scheduleService = TestBed.inject(ScheduleService);
-    vi.spyOn(scheduleService, 'createPerformance').mockReturnValue({
-      id: '99',
-      festivalId: '1',
-      artistName: 'Test Artist',
-      stageName: 'Main Stage',
-      genre: '',
-      date: '2026-09-15',
-      startTime: '14:00',
-      endTime: '15:30',
-    });
+    vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      of({
+        id: '99',
+        festivalId: '1',
+        artistName: 'Test Artist',
+        stageName: 'Main Stage',
+        genre: '',
+        date: '2026-09-15',
+        startTime: '14:00',
+        endTime: '15:30',
+      }),
+    );
     const navigateSpy = vi.mocked(router.navigate);
 
     component.performanceForm.setValue({
@@ -361,18 +392,18 @@ describe('PerformanceCreateComponent — no stages', () => {
 
     it('sets serverError when ScheduleService.createPerformance throws', () => {
       fillValidForm();
-      vi.spyOn(scheduleService, 'createPerformance').mockImplementation(() => {
-        throw new Error('Stage is already booked.');
-      });
+      vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+        throwError(() => new Error('Stage is already booked.')),
+      );
       component.onSubmit();
       expect(component.serviceErrorMessage).toBe('Stage is already booked.');
     });
 
     it('sets a generic serverError message when a non-Error is thrown', () => {
       fillValidForm();
-      vi.spyOn(scheduleService, 'createPerformance').mockImplementation(() => {
-        throw 'unknown error';
-      });
+      vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+        throwError(() => 'unknown error'),
+      );
       component.onSubmit();
       expect(component.serviceErrorMessage).toBe('An unexpected error occurred.');
     });
@@ -380,20 +411,20 @@ describe('PerformanceCreateComponent — no stages', () => {
     it('calls createPerformance with trimmed artistName on valid submit', () => {
       fillValidForm();
       component.fields['artistName'].setValue('  Test Artist  ');
-      const spy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue({
-        id: '99',
-        festivalId: '1',
-        artistName: 'Test Artist',
-        stageName: 'Main Stage',
-        date: '2026-08-02',
-        startTime: '10:00',
-        endTime: '11:00',
-      });
+      const spy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+        of({
+          id: '99',
+          festivalId: '1',
+          artistName: 'Test Artist',
+          stageName: 'Main Stage',
+          date: '2026-08-02',
+          startTime: '10:00',
+          endTime: '11:00',
+        }),
+      );
       vi.spyOn(router, 'navigate').mockResolvedValue(true);
       component.onSubmit();
-      expect(spy).toHaveBeenCalledWith(
-        expect.objectContaining({ artistName: 'Test Artist' })
-      );
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ artistName: 'Test Artist' }));
     });
   });
 });

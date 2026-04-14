@@ -14,13 +14,11 @@ function validateEndDateOnOrAfterStartDate(formGroup: AbstractControl): Validati
   const startDateValue = formGroup.get('startDate')?.value;
   const endDateValue   = formGroup.get('endDate')?.value;
 
-  // Only validate when both dates are filled in; individual Validators.required
-  // will flag the empty cases.
   if (startDateValue && endDateValue && endDateValue < startDateValue) {
-    return { endBeforeStart: true }; // triggers the cross-field error message
+    return { endBeforeStart: true };
   }
 
-  return null; // dates are valid (or one is still empty)
+  return null;
 }
 
 // ---- Component -------------------------------------------------------------
@@ -32,13 +30,8 @@ function validateEndDateOnOrAfterStartDate(formGroup: AbstractControl): Validati
   styleUrl: './festival-create.css',
 })
 export class FestivalCreateComponent implements OnInit {
-  /** The reactive form group controlling all festival creation fields. */
   festivalForm!: FormGroup;
-
-  /** Tracks whether the user has tried to submit (triggers full error display). */
   hasAttemptedSubmit = false;
-
-  /** Holds any server-side or service-thrown error to display above the form. */
   serviceErrorMessage = '';
 
   constructor(
@@ -48,49 +41,36 @@ export class FestivalCreateComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Build the form with individual field validators and the cross-field date validator.
     this.festivalForm = this.formBuilder.group(
       {
-        name:      ['', Validators.required], // festival display name is mandatory
-        startDate: ['', Validators.required], // opening day is mandatory
-        endDate:   ['', Validators.required], // closing day is mandatory
-        location:  ['', Validators.required], // city or venue is mandatory
+        name:      ['', Validators.required],
+        startDate: ['', Validators.required],
+        endDate:   ['', Validators.required],
+        location:  ['', Validators.required],
       },
       {
-        validators: validateEndDateOnOrAfterStartDate, // cross-field check on the group
+        validators: validateEndDateOnOrAfterStartDate,
       }
     );
   }
 
-  /**
-   * Shorthand accessor for individual form controls.
-   * Used in the template as `fields['name'].errors` etc.
-   */
   get fields() {
     return this.festivalForm.controls;
   }
 
-  /** Handles form submission: validates, saves via service, then navigates to the festivals list. */
   onSubmit(): void {
     this.hasAttemptedSubmit  = true;
     this.serviceErrorMessage = '';
 
-    // Abort if any field or the cross-field validator is still failing.
     if (this.festivalForm.invalid) return;
 
-    try {
-      // Cast the raw form value to the expected shape (id is assigned by the service).
-      const newFestivalData = this.festivalForm.value as Omit<Festival, 'id'>;
-      this.festivalService.createFestival(newFestivalData);
+    const newFestivalData = this.festivalForm.value as Omit<Festival, 'id'>;
 
-      // Navigate back to the festivals list after a successful save.
-      this.router.navigate(['/festivals']);
-    } catch (submissionError: unknown) {
-      // Surface any service-level validation errors (e.g. date range) in the banner.
-      this.serviceErrorMessage =
-        submissionError instanceof Error
-          ? submissionError.message
-          : 'An unexpected error occurred.';
-    }
+    this.festivalService.createFestival(newFestivalData).subscribe({
+      next: () => this.router.navigate(['/festivals']),
+      error: (err: Error) => {
+        this.serviceErrorMessage = err.message ?? 'An unexpected error occurred.';
+      },
+    });
   }
 }
