@@ -26,6 +26,88 @@ npm run build
 
 ---
 
+## MongoDB Setup (Beginner Friendly)
+
+The Angular app is currently frontend-first. MongoDB setup in this repo lives under `server/` so you can seed and validate realistic festival data while backend API work is added.
+
+### 1) Prerequisites
+
+- Node.js 20+
+- npm
+- A running MongoDB instance:
+    - Local MongoDB Community Server, or
+    - MongoDB Atlas connection string
+
+### 2) Configure environment
+
+Create your local env file from the example:
+
+```powershell
+Copy-Item server/music-festival-planner.env.example server/music-festival-planner.env
+```
+
+Then edit `server/music-festival-planner.env` and set:
+
+```env
+MONGODB_URI=mongodb://127.0.0.1:27017/music-festival-planner-dev
+```
+
+### 3) Seed the database (repeatable)
+
+```bash
+npm run seed
+```
+
+What this does:
+
+- Connects to MongoDB using `MONGODB_URI`
+- Clears existing seed collections
+- Inserts data in order: festivals -> stages/artists -> performances
+- Produces deterministic dataset shape on every run
+
+### 4) Verify connection and counts
+
+```bash
+npm run mongo:check
+```
+
+This checks connectivity and prints document counts for each collection.
+
+### 5) Optional manual checks in mongosh
+
+```javascript
+use('music-festival-planner-dev');
+db.festivals.countDocuments();
+db.stages.countDocuments();
+db.artists.countDocuments();
+db.performances.countDocuments();
+```
+
+Expected minimum seeded shape:
+
+- 2 festivals
+- 3-5 stages per festival (8 total)
+- 15+ artists (16 total)
+- 30+ performances across multiple days (32 total)
+
+### MongoDB collection/model map
+
+- `festivals` -> `server/models/festival.js`
+- `stages` -> `server/models/stage.js`
+- `artists` -> `server/models/artist.js`
+- `performances` -> `server/models/performance.js`
+
+`performances` stores these required references and fields:
+
+- `festival` (ObjectId ref)
+- `artist` (ObjectId ref)
+- `stage` (ObjectId ref)
+- `startDateTime`
+- `endDateTime`
+- `day` (derived automatically from `startDateTime`)
+
+---
+
 ## Tech Stack
 
 | Tool | Version | Purpose |
