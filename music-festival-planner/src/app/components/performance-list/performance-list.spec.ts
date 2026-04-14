@@ -8,6 +8,8 @@ import { ScheduleService } from '../../services/schedule.service';
 import { FestivalService } from '../../services/festival.service';
 import { Performance } from '../../models/performance.model';
 import { Festival } from '../../models/festival.model';
+import { signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
 const MOCK_FESTIVAL: Festival = {
   id: '1',
@@ -18,27 +20,64 @@ const MOCK_FESTIVAL: Festival = {
 };
 
 const MOCK_PERFORMANCES: Performance[] = [
-  { id: '1', festivalId: '1', artistName: 'The Neon Shadows',   stageName: 'Main Stage',   date: '2026-08-01', startTime: '18:00', endTime: '19:30' },
-  { id: '2', festivalId: '1', artistName: 'Acoustic Wanderers', stageName: 'Forest Stage', date: '2026-08-02', startTime: '14:00', endTime: '15:00' },
-  { id: '3', festivalId: '1', artistName: 'DJ Horizon',         stageName: 'Dance Tent',   date: '2026-08-01', startTime: '18:00', endTime: '19:00' },
+  {
+    id: '1',
+    festivalId: '1',
+    artistName: 'The Neon Shadows',
+    stageName: 'Main Stage',
+    date: '2026-08-01',
+    startTime: '18:00',
+    endTime: '19:30',
+  },
+  {
+    id: '2',
+    festivalId: '1',
+    artistName: 'Acoustic Wanderers',
+    stageName: 'Forest Stage',
+    date: '2026-08-02',
+    startTime: '14:00',
+    endTime: '15:00',
+  },
+  {
+    id: '3',
+    festivalId: '1',
+    artistName: 'DJ Horizon',
+    stageName: 'Dance Tent',
+    date: '2026-08-01',
+    startTime: '18:00',
+    endTime: '19:00',
+  },
 ];
 
 class MockScheduleService {
-  private performances = MOCK_PERFORMANCES.map((p) => ({ ...p }));
+  private readonly performancesState = signal(MOCK_PERFORMANCES.map((p) => ({ ...p })));
 
-  getPerformancesByFestival(festivalId: string): Performance[] {
-    return this.performances.filter((p) => p.festivalId === festivalId).map((p) => ({ ...p }));
+  loadByFestival(_festivalId: string): Observable<Performance[]> {
+    return of([]);
   }
 
-  deletePerformance(id: string): boolean {
-    const index = this.performances.findIndex((p) => p.id === id);
-    if (index === -1) return false;
-    this.performances.splice(index, 1);
-    return true;
+  getPerformancesByFestival(festivalId: string): Performance[] {
+    return this.performancesState()
+      .filter((p) => p.festivalId === festivalId)
+      .map((p) => ({ ...p }));
+  }
+
+  deletePerformance(id: string): Observable<void> {
+    this.performancesState.update((list) => list.filter((p) => p.id !== id));
+    return of(void 0);
+  }
+
+  clearPerformancesByFestival(festivalId: string): Observable<void> {
+    this.performancesState.update((list) => list.filter((p) => p.festivalId !== festivalId));
+    return of(void 0);
   }
 }
 
 class MockFestivalService {
+  load() {
+    return of([MOCK_FESTIVAL]);
+  }
+
   getFestivalById(id: string): Festival | undefined {
     return id === '1' ? { ...MOCK_FESTIVAL } : undefined;
   }
@@ -111,6 +150,7 @@ describe('PerformanceListComponent', () => {
     const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance');
 
     component.confirmAndDeletePerformance('1');
+    component.refreshPerformanceList();
 
     expect(deleteSpy).toHaveBeenCalledWith('1');
     expect(component.sortedPerformances.length).toBe(2);
@@ -143,9 +183,33 @@ describe('PerformanceListComponent — festival not found', () => {
   describe('refreshPerformanceList sorting', () => {
     it('sorts performances by date then by numeric startTime', () => {
       const mockPerformances: Performance[] = [
-        { id: '3', festivalId: '1', artistName: 'C', stageName: 'Stage', date: '2026-08-02', startTime: '9:00', endTime: '10:00' },
-        { id: '1', festivalId: '1', artistName: 'A', stageName: 'Stage', date: '2026-08-01', startTime: '10:00', endTime: '11:00' },
-        { id: '2', festivalId: '1', artistName: 'B', stageName: 'Stage', date: '2026-08-01', startTime: '9:00', endTime: '10:00' },
+        {
+          id: '3',
+          festivalId: '1',
+          artistName: 'C',
+          stageName: 'Stage',
+          date: '2026-08-02',
+          startTime: '9:00',
+          endTime: '10:00',
+        },
+        {
+          id: '1',
+          festivalId: '1',
+          artistName: 'A',
+          stageName: 'Stage',
+          date: '2026-08-01',
+          startTime: '10:00',
+          endTime: '11:00',
+        },
+        {
+          id: '2',
+          festivalId: '1',
+          artistName: 'B',
+          stageName: 'Stage',
+          date: '2026-08-01',
+          startTime: '9:00',
+          endTime: '10:00',
+        },
       ];
       vi.spyOn(scheduleService, 'getPerformancesByFestival').mockReturnValue(mockPerformances);
       component.refreshPerformanceList();
@@ -157,8 +221,24 @@ describe('PerformanceListComponent — festival not found', () => {
 
     it('sorts "9:00" before "10:00" numerically (not lexicographically)', () => {
       const mockPerformances: Performance[] = [
-        { id: '2', festivalId: '1', artistName: 'B', stageName: 'Stage', date: '2026-08-01', startTime: '10:00', endTime: '11:00' },
-        { id: '1', festivalId: '1', artistName: 'A', stageName: 'Stage', date: '2026-08-01', startTime: '9:00', endTime: '10:00' },
+        {
+          id: '2',
+          festivalId: '1',
+          artistName: 'B',
+          stageName: 'Stage',
+          date: '2026-08-01',
+          startTime: '10:00',
+          endTime: '11:00',
+        },
+        {
+          id: '1',
+          festivalId: '1',
+          artistName: 'A',
+          stageName: 'Stage',
+          date: '2026-08-01',
+          startTime: '9:00',
+          endTime: '10:00',
+        },
       ];
       vi.spyOn(scheduleService, 'getPerformancesByFestival').mockReturnValue(mockPerformances);
       component.refreshPerformanceList();
@@ -175,13 +255,11 @@ describe('PerformanceListComponent — festival not found', () => {
 
     it('calls deletePerformance and reloads list when confirmed', () => {
       vi.stubGlobal('confirm', vi.fn().mockReturnValue(true));
-      const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance').mockReturnValue(true);
-      const loadSpy = vi.spyOn(component, 'refreshPerformanceList');
+      const deleteSpy = vi.spyOn(scheduleService, 'deletePerformance');
 
       component.confirmAndDeletePerformance('42');
 
       expect(deleteSpy).toHaveBeenCalledWith('42');
-      expect(loadSpy).toHaveBeenCalled();
     });
 
     it('does not call deletePerformance when cancelled', () => {

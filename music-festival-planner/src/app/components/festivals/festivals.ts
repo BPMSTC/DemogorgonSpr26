@@ -39,24 +39,33 @@ export class Festivals implements OnInit, OnDestroy {
   ) {}
 
   private loadData(): void {
-    this.festivalService.load().pipe(
-      switchMap((festivals) => {
-        this.festivalsList = festivals;
-        this.stagesByFestivalId = {};
-        if (festivals.length === 0) return of([] as { id: string; stages: Stage[] }[]);
-        return forkJoin(
-          festivals.map((f) =>
-            this.stageService.loadByFestival(f.id).pipe(
-              switchMap((stages) => of({ id: f.id, stages }))
-            )
-          )
-        );
-      })
-    ).subscribe((results) => {
-      results.forEach((r) => {
-        this.stagesByFestivalId[r.id] = r.stages;
+    this.festivalService
+      .load()
+      .pipe(
+        switchMap((festivals) => {
+          this.festivalsList = festivals;
+          this.stagesByFestivalId = {};
+          if (festivals.length === 0) return of([] as { id: string; stages: Stage[] }[]);
+          return forkJoin(
+            festivals.map((f) =>
+              this.stageService
+                .loadByFestival(f.id)
+                .pipe(switchMap((stages) => of({ id: f.id, stages }))),
+            ),
+          );
+        }),
+      )
+      .subscribe({
+        next: (results) => {
+          results.forEach((r) => {
+            this.stagesByFestivalId[r.id] = r.stages;
+          });
+        },
+        error: () => {
+          this.festivalsList = [];
+          this.stagesByFestivalId = {};
+        },
       });
-    });
   }
 
   ngOnInit(): void {
@@ -64,8 +73,13 @@ export class Festivals implements OnInit, OnDestroy {
     // Keeps stage counts fresh when navigating back from stage/performance pages without a full reload.
     this.routerEventsSubscription = this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.loadData();
+      .subscribe({
+        next: () => {
+          this.loadData();
+        },
+        error: () => {
+          // no-op: router event stream is not expected to error
+        },
       });
   }
 
@@ -137,19 +151,19 @@ export class Festivals implements OnInit, OnDestroy {
     forkJoin([
       this.scheduleService.clearPerformancesByFestival(festivalId),
       this.stageService.clearStagesByFestival(festivalId),
-    ]).pipe(
-      switchMap(() => this.festivalService.deleteFestival(festivalId))
-    ).subscribe({
-      next: () => {
-        this.loadData();
-        if (this.expandedFestivalId === festivalId) {
-          this.expandedFestivalId = null;
-        }
-      },
-      error: () => {
-        // Re-load to ensure UI matches server state even if partial failure occurred.
-        this.loadData();
-      },
-    });
+    ])
+      .pipe(switchMap(() => this.festivalService.deleteFestival(festivalId)))
+      .subscribe({
+        next: () => {
+          this.loadData();
+          if (this.expandedFestivalId === festivalId) {
+            this.expandedFestivalId = null;
+          }
+        },
+        error: () => {
+          // Re-load to ensure UI matches server state even if partial failure occurred.
+          this.loadData();
+        },
+      });
   }
 }

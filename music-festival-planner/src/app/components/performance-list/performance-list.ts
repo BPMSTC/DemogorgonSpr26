@@ -21,28 +21,37 @@ export class PerformanceListComponent implements OnInit {
     private router: Router,
     private scheduleService: ScheduleService,
     private festivalService: FestivalService,
-    private injector: Injector
+    private injector: Injector,
   ) {}
 
   ngOnInit(): void {
     this.festivalId = this.activeRoute.snapshot.paramMap.get('id') ?? '';
 
     // Load festival name for the header.
-    this.festivalService.load().subscribe(() => {
-      this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    this.festivalService.load().subscribe({
+      next: () => {
+        this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+      },
+      error: () => {
+        this.currentFestival = undefined;
+      },
     });
 
     // Load performances from the API; the signal update triggers the effect below.
-    this.scheduleService.loadByFestival(this.festivalId).subscribe();
+    this.scheduleService.loadByFestival(this.festivalId).subscribe({
+      error: () => {
+        // keep existing signal state if initial load fails
+      },
+    });
 
     // React to signal changes (initial load + any subsequent add/delete).
     effect(
       () => {
         this.sortedPerformances = this.sortPerformances(
-          this.scheduleService.getPerformancesByFestival(this.festivalId)
+          this.scheduleService.getPerformancesByFestival(this.festivalId),
         );
       },
-      { injector: this.injector }
+      { injector: this.injector },
     );
   }
 
@@ -60,16 +69,16 @@ export class PerformanceListComponent implements OnInit {
 
   refreshPerformanceList(): void {
     this.sortedPerformances = this.sortPerformances(
-      this.scheduleService.getPerformancesByFestival(this.festivalId)
+      this.scheduleService.getPerformancesByFestival(this.festivalId),
     );
   }
 
   formatDisplayTime(timeString: string): string {
     const [hoursText, minutesText] = timeString.split(':');
-    const hours   = Number(hoursText);
+    const hours = Number(hoursText);
     const minutes = Number(minutesText);
     if (Number.isNaN(hours) || Number.isNaN(minutes)) return timeString;
-    const suffix          = hours >= 12 ? 'PM' : 'AM';
+    const suffix = hours >= 12 ? 'PM' : 'AM';
     const normalizedHours = hours % 12 || 12;
     return `${String(normalizedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${suffix}`;
   }

@@ -20,23 +20,33 @@ export class StageListComponent implements OnInit {
     private activeRoute: ActivatedRoute,
     private router: Router,
     private stageService: StageService,
-    private festivalService: FestivalService
+    private festivalService: FestivalService,
   ) {}
 
   ngOnInit(): void {
     this.festivalId = this.activeRoute.snapshot.paramMap.get('id') ?? '';
 
     // Load festival name for the page header.
-    this.festivalService.load().subscribe(() => {
-      this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    this.festivalService.load().subscribe({
+      next: () => {
+        this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+      },
+      error: () => {
+        this.currentFestival = undefined;
+      },
     });
 
     this.refreshStageList();
   }
 
   refreshStageList(): void {
-    this.stageService.loadByFestival(this.festivalId).subscribe((stages) => {
-      this.stageList = stages;
+    this.stageService.loadByFestival(this.festivalId).subscribe({
+      next: (stages) => {
+        this.stageList = stages;
+      },
+      error: () => {
+        this.stageList = [];
+      },
     });
   }
 
@@ -44,8 +54,8 @@ export class StageListComponent implements OnInit {
 
   getStatusDisplayLabel(stageStatus: StageStatus): string {
     const statusToLabel: Record<StageStatus, string> = {
-      'active':       'Active',
-      'inactive':     'Inactive',
+      active: 'Active',
+      inactive: 'Inactive',
       'under-repair': 'Under Repair',
     };
     return statusToLabel[stageStatus];
@@ -53,8 +63,8 @@ export class StageListComponent implements OnInit {
 
   getStatusBadgeClass(stageStatus: StageStatus): string {
     const statusToBadgeClass: Record<StageStatus, string> = {
-      'active':       'badge-active',
-      'inactive':     'badge-inactive',
+      active: 'badge-active',
+      inactive: 'badge-inactive',
       'under-repair': 'badge-repair',
     };
     return statusToBadgeClass[stageStatus];

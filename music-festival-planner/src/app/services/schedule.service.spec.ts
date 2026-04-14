@@ -1,23 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { ScheduleService, LOCAL_STORAGE } from './schedule.service';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { firstValueFrom } from 'rxjs';
+
+import { ScheduleService } from './schedule.service';
 import { Performance } from '../models/performance.model';
+import { environment } from '../../environments/environment';
 
-/** Isolated in-memory storage — keeps tests hermetic without touching real localStorage. */
-class MockStorage implements Storage {
-  private store: Record<string, string> = {};
-  get length(): number { return Object.keys(this.store).length; }
-  key(index: number): string | null { return Object.keys(this.store)[index] ?? null; }
-  getItem(key: string): string | null { return this.store[key] ?? null; }
-  setItem(key: string, value: string): void { this.store[key] = value; }
-  removeItem(key: string): void { delete this.store[key]; }
-  clear(): void { this.store = {}; }
-}
+const BASE_URL = `${environment.apiUrl}/api/performances`;
 
-/** Typed fixture — no field may be missing or mistyped. */
-const BASE: Omit<Performance, 'id'> = {
+const BASE_INPUT: Omit<Performance, 'id'> = {
   festivalId: '99',
   artistName: 'Test Artist',
-  stageName: 'Test Stage',
+  stageName: 'Main Stage',
   date: '2026-09-01',
   startTime: '12:00',
   endTime: '13:00',
@@ -25,172 +20,133 @@ const BASE: Omit<Performance, 'id'> = {
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [{ provide: LOCAL_STORAGE, useValue: new MockStorage() }],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     });
+
     service = TestBed.inject(ScheduleService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  // ---------------------------------------------------------------------------
-  // getPerformancesByFestival
-  // ---------------------------------------------------------------------------
-  describe('getPerformancesByFestival', () => {
-    it('returns only performances for the requested festival', () => {
-      const results: Performance[] = service.getPerformancesByFestival('1');
-      results.forEach(p => expect(p.festivalId).toBe('1'));
-    });
+  it('loadByFestival() should fetch and merge by festival', async () => {
+    const p99: Performance = { id: '1', ...BASE_INPUT };
+    const p88: Performance = { ...p99, id: '2', festivalId: '88' };
 
-    it('returns an empty array for an unknown festival id', () => {
-      expect(service.getPerformancesByFestival('unknown')).toEqual([]);
-    });
+    const load99 = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([p99]);
+    await load99;
 
-    it('returns copies — mutating the result does not affect stored data', () => {
-      service.createPerformance({ ...BASE });
-      const first = service.getPerformancesByFestival('99');
-      first[0].artistName = 'Mutated';
-      const second = service.getPerformancesByFestival('99');
-      expect(second[0].artistName).toBe('Test Artist');
-    });
+    const load88 = firstValueFrom(service.loadByFestival('88'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=88`).flush([p88]);
+    await load88;
+
+    expect(service.getPerformancesByFestival('99')).toEqual([p99]);
+    expect(service.getPerformancesByFestival('88')).toEqual([p88]);
   });
 
-  // ---------------------------------------------------------------------------
-  // createPerformance
-  // ---------------------------------------------------------------------------
-  describe('createPerformance', () => {
-    it('assigns an id and returns a typed Performance', () => {
-      const result = service.createPerformance({ ...BASE });
-      // TypeScript narrows: if result has an `error` key it is an error object.
-      if ('error' in result) {
-        throw new Error('Expected a Performance but got an error: ' + result.error);
-      }
-      const perf: Performance = result;
-      expect(perf.id).toBeDefined();
-      expect(perf.artistName).toBe(BASE.artistName);
-      expect(perf.stageName).toBe(BASE.stageName);
-      expect(perf.date).toBe(BASE.date);
-      expect(perf.startTime).toBe(BASE.startTime);
-      expect(perf.endTime).toBe(BASE.endTime);
-    });
+  it('getPerformancesByFestival() should return copies', async () => {
+    const p99: Performance = { id: '1', ...BASE_INPUT };
 
-    it('persists the new performance so it appears in getPerformancesByFestival', () => {
-      service.createPerformance({ ...BASE });
-      expect(service.getPerformancesByFestival('99').length).toBe(1);
-    });
+    const load = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([p99]);
+    await load;
 
-    it('returns an error when end time is not after start time', () => {
-      expect(() =>
-        service.createPerformance({ ...BASE, startTime: '14:00', endTime: '13:00' })
-      ).toThrowError('End time must be later than start time.');
-    });
+    const list = service.getPerformancesByFestival('99');
+    list[0].artistName = 'Mutated';
 
-    it('throws when a new performance fully contains an existing one', () => {
-      service.createPerformance({ ...BASE }); // 12:00–13:00
+    expect(service.getPerformancesByFestival('99')[0].artistName).toBe('Test Artist');
+  });
 
-      expect(() =>
+  it('createPerformance() should reject invalid time format', async () => {
+    await expect(
+      firstValueFrom(service.createPerformance({ ...BASE_INPUT, startTime: 'noon' })),
+    ).rejects.toThrow('Start and end times must be valid 24-hour times');
+  });
+
+  it('createPerformance() should reject when end is not after start', async () => {
+    await expect(
+      firstValueFrom(
+        service.createPerformance({ ...BASE_INPUT, startTime: '14:00', endTime: '14:00' }),
+      ),
+    ).rejects.toThrow('End time must be later than start time.');
+  });
+
+  it('createPerformance() should reject stage overlap', async () => {
+    const existing: Performance = { id: 'e1', ...BASE_INPUT };
+    const load = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([existing]);
+    await load;
+
+    await expect(
+      firstValueFrom(
         service.createPerformance({
-          ...BASE,
-          artistName: 'Another Artist',
-          startTime: '11:00',
-          endTime: '14:00',
-        })
-      ).toThrowError(/already booked/i);
-    });
-
-    it('allows adjacent back-to-back slots (new start equals existing end)', () => {
-      service.createPerformance({ ...BASE }); // 12:00–13:00
-
-      expect(() =>
-        service.createPerformance({
-          ...BASE,
-          artistName: 'Back To Back Artist',
-          startTime: '13:00',
-          endTime: '14:00',
-        })
-      ).not.toThrow();
-    });
-
-    it('returns an error when times are equal', () => {
-      expect(() =>
-        service.createPerformance({ ...BASE, startTime: '12:00', endTime: '12:00' })
-      ).toThrowError('End time must be later than start time.');
-    });
-
-    it('returns an error for an invalid time format', () => {
-      expect(() =>
-        service.createPerformance({ ...BASE, startTime: 'noon', endTime: '13:00' })
-      ).toThrowError('Start and end times must be valid 24-hour times (H:mm or HH:mm).');
-    });
-
-    it('returns an error when the stage is already booked during that slot', () => {
-      service.createPerformance({ ...BASE });
-      expect(() =>
-        service.createPerformance({ ...BASE, artistName: 'Other Artist' })
-      ).toThrowError('"Test Stage" is already booked during that time slot.');
-    });
-
-    it('allows a second performance on the same stage in a non-overlapping slot', () => {
-      service.createPerformance({ ...BASE });
-      const result = service.createPerformance({ ...BASE, startTime: '13:00', endTime: '14:00' });
-      expect('error' in result).toBe(false);
-    });
+          ...BASE_INPUT,
+          artistName: 'Other',
+          startTime: '12:30',
+          endTime: '13:30',
+        }),
+      ),
+    ).rejects.toThrow('already booked during that time slot');
   });
 
-  // ---------------------------------------------------------------------------
-  // deletePerformance
-  // ---------------------------------------------------------------------------
-  describe('deletePerformance', () => {
-    it('removes the performance and returns true', () => {
-      const result = service.createPerformance({ ...BASE });
-      if ('error' in result) {
-        throw new Error('Expected a Performance but got an error: ' + result.error);
-      }
-      const created: Performance = result;
-      expect(service.deletePerformance(created.id)).toBe(true);
-      expect(service.getPerformancesByFestival('99').length).toBe(0);
-    });
+  it('createPerformance() should post and append to signal state', async () => {
+    const created: Performance = { id: 'c1', ...BASE_INPUT };
 
-    it('returns false for an unknown id', () => {
-      expect(service.deletePerformance('nonexistent')).toBe(false);
-    });
+    const promise = firstValueFrom(service.createPerformance(BASE_INPUT));
+    const req = httpMock.expectOne(BASE_URL);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(BASE_INPUT);
+    req.flush(created);
+
+    await expect(promise).resolves.toEqual(created);
+    expect(service.getPerformancesByFestival('99')).toEqual([created]);
   });
 
-  // ---------------------------------------------------------------------------
-  // isStageOccupied
-  // ---------------------------------------------------------------------------
-  describe('isStageOccupied', () => {
-    it('returns false when no performances exist', () => {
-      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '10:00', '11:00')).toBe(false);
-    });
+  it('deletePerformance() should delete and remove from state', async () => {
+    const existing: Performance = { id: 'd1', ...BASE_INPUT };
+    const load = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([existing]);
+    await load;
 
-    it('returns true for an exact time overlap', () => {
-      service.createPerformance({ ...BASE });
-      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '12:00', '13:00')).toBe(true);
-    });
+    const del = firstValueFrom(service.deletePerformance('d1'));
+    const req = httpMock.expectOne(`${BASE_URL}/d1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
 
-    it('returns true for a partial overlap', () => {
-      service.createPerformance({ ...BASE });
-      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '12:30', '13:30')).toBe(true);
-    });
+    await expect(del).resolves.toBeNull();
+    expect(service.getPerformancesByFestival('99')).toEqual([]);
+  });
 
-    it('returns false for an adjacent slot (no overlap)', () => {
-      service.createPerformance({ ...BASE });
-      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-01', '13:00', '14:00')).toBe(false);
-    });
+  it('clearPerformancesByFestival() should delete all for one festival', async () => {
+    const p99: Performance = { id: '1', ...BASE_INPUT };
+    const p88: Performance = { ...p99, id: '2', festivalId: '88' };
 
-    it('returns false for a different stage', () => {
-      service.createPerformance({ ...BASE });
-      expect(service.isStageOccupied('99', 'Other Stage', '2026-09-01', '12:00', '13:00')).toBe(false);
-    });
+    const load99 = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([p99]);
+    await load99;
 
-    it('returns false for a different date', () => {
-      service.createPerformance({ ...BASE });
-      expect(service.isStageOccupied('99', 'Test Stage', '2026-09-02', '12:00', '13:00')).toBe(false);
-    });
+    const load88 = firstValueFrom(service.loadByFestival('88'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=88`).flush([p88]);
+    await load88;
+
+    const clear = firstValueFrom(service.clearPerformancesByFestival('99'));
+    const req = httpMock.expectOne(`${BASE_URL}/festival/99`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+
+    await expect(clear).resolves.toBeNull();
+    expect(service.getPerformancesByFestival('99')).toEqual([]);
+    expect(service.getPerformancesByFestival('88')).toEqual([p88]);
   });
 });

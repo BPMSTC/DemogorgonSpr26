@@ -1,5 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScheduleService } from '../../services/schedule.service';
 import { StageService } from '../../services/stage.service';
@@ -10,8 +16,16 @@ import { Stage } from '../../models/stage.model';
 // ---- Genre Options ---------------------------------------------------------
 
 export const AVAILABLE_GENRES = [
-  'Rock', 'Electronic', 'Jazz', 'Hip-Hop', 'Folk',
-  'Pop', 'Metal', 'Classical', 'R&B', 'World',
+  'Rock',
+  'Electronic',
+  'Jazz',
+  'Hip-Hop',
+  'Folk',
+  'Pop',
+  'Metal',
+  'Classical',
+  'R&B',
+  'World',
 ];
 
 // ---- Random Placeholder Pool -----------------------------------------------
@@ -39,7 +53,7 @@ function validateNoWhitespaceOnly(control: AbstractControl): ValidationErrors | 
 
 function validateEndTimeAfterStartTime(formGroup: AbstractControl): ValidationErrors | null {
   const startTimeValue = formGroup.get('startTime')?.value as string;
-  const endTimeValue   = formGroup.get('endTime')?.value as string;
+  const endTimeValue = formGroup.get('endTime')?.value as string;
   if (!startTimeValue || !endTimeValue) return null;
   const parseTimeToMinutes = (t: string): number => {
     const [h, m] = t.split(':').map(Number);
@@ -75,7 +89,7 @@ export class PerformanceCreateComponent implements OnInit {
     private router: Router,
     private scheduleService: ScheduleService,
     private stageService: StageService,
-    private festivalService: FestivalService
+    private festivalService: FestivalService,
   ) {
     const randomIndex = Math.floor(Math.random() * ARTIST_NAME_PLACEHOLDER_POOL.length);
     this.artistNamePlaceholder = ARTIST_NAME_PLACEHOLDER_POOL[randomIndex];
@@ -85,36 +99,46 @@ export class PerformanceCreateComponent implements OnInit {
     this.festivalId = this.activeRoute.snapshot.paramMap.get('id') ?? '';
 
     // Load festival name for the header.
-    this.festivalService.load().subscribe(() => {
-      this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    this.festivalService.load().subscribe({
+      next: () => {
+        this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+      },
+      error: () => {
+        this.currentFestival = undefined;
+      },
     });
 
     // Load stages for the stage dropdown and load existing performances so
     // the local conflict-detection signal has up-to-date data.
-    this.stageService.loadByFestival(this.festivalId).subscribe((stages) => {
-      this.availableStages = stages;
+    this.stageService.loadByFestival(this.festivalId).subscribe({
+      next: (stages) => {
+        this.availableStages = stages;
+      },
+      error: () => {
+        this.availableStages = [];
+      },
     });
-    this.scheduleService.loadByFestival(this.festivalId).subscribe();
+    this.scheduleService.loadByFestival(this.festivalId).subscribe({
+      error: () => {
+        // Keep form usable even if preloading performances fails.
+      },
+    });
 
     this.performanceForm = this.formBuilder.group(
       {
         artistName: [
           '',
-          [
-            Validators.required,
-            validateNoWhitespaceOnly,
-            Validators.maxLength(100),
-          ],
+          [Validators.required, validateNoWhitespaceOnly, Validators.maxLength(100)],
         ],
         stageName: ['', Validators.required],
-        genre:     [''],
-        date:      ['', Validators.required],
+        genre: [''],
+        date: ['', Validators.required],
         startTime: ['', Validators.required],
-        endTime:   ['', Validators.required],
+        endTime: ['', Validators.required],
       },
       {
         validators: validateEndTimeAfterStartTime,
-      }
+      },
     );
   }
 
@@ -123,25 +147,27 @@ export class PerformanceCreateComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.hasAttemptedSubmit  = true;
+    this.hasAttemptedSubmit = true;
     this.serviceErrorMessage = '';
 
     if (this.performanceForm.invalid) return;
 
-    this.scheduleService.createPerformance({
-      festivalId: this.festivalId,
-      artistName: this.fields['artistName'].value.trim(),
-      stageName:  this.fields['stageName'].value,
-      genre:      this.fields['genre'].value || undefined,
-      date:       this.fields['date'].value,
-      startTime:  this.fields['startTime'].value,
-      endTime:    this.fields['endTime'].value,
-    }).subscribe({
-      next: () => this.router.navigate(['/festivals', this.festivalId, 'performances']),
-      error: (err: Error) => {
-        this.serviceErrorMessage = err.message ?? 'An unexpected error occurred.';
-      },
-    });
+    this.scheduleService
+      .createPerformance({
+        festivalId: this.festivalId,
+        artistName: this.fields['artistName'].value.trim(),
+        stageName: this.fields['stageName'].value,
+        genre: this.fields['genre'].value || undefined,
+        date: this.fields['date'].value,
+        startTime: this.fields['startTime'].value,
+        endTime: this.fields['endTime'].value,
+      })
+      .subscribe({
+        next: () => this.router.navigate(['/festivals', this.festivalId, 'performances']),
+        error: (err: Error) => {
+          this.serviceErrorMessage = err.message ?? 'An unexpected error occurred.';
+        },
+      });
   }
 
   onCancel(): void {

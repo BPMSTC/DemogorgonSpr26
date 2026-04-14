@@ -3,7 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ScheduleService } from '../../services/schedule.service';
 import { FestivalService } from '../../services/festival.service';
-import { PersonalScheduleService, PersonalConflict } from '../../services/personal-schedule.service';
+import {
+  PersonalScheduleService,
+  PersonalConflict,
+} from '../../services/personal-schedule.service';
 import { Performance } from '../../models/performance.model';
 
 // ---- Filter Sentinels ------------------------------------------------------
@@ -31,7 +34,6 @@ export type ActiveView = 'festival' | 'personal';
   styleUrl: './my-schedule.css',
 })
 export class MySchedule implements OnInit, OnDestroy {
-
   activeView: ActiveView = 'festival';
 
   festivalId: string = '';
@@ -80,34 +82,48 @@ export class MySchedule implements OnInit, OnDestroy {
     this.festivalId = this.route.snapshot.paramMap.get('id') ?? '';
 
     // Load all festivals so the name-lookup map is populated.
-    this.festivalService.load().subscribe((festivals) => {
-      this.festivalNameById = festivals.reduce(
-        (lookup, f) => { lookup[f.id] = f.name; return lookup; },
-        {} as Record<string, string>
-      );
-      this.festivalName = this.festivalId
-        ? (festivals.find((f) => f.id === this.festivalId)?.name ?? '')
-        : '';
+    this.festivalService.load().subscribe({
+      next: (festivals) => {
+        this.festivalNameById = festivals.reduce(
+          (lookup, f) => {
+            lookup[f.id] = f.name;
+            return lookup;
+          },
+          {} as Record<string, string>,
+        );
+        this.festivalName = this.festivalId
+          ? (festivals.find((f) => f.id === this.festivalId)?.name ?? '')
+          : '';
+      },
+      error: () => {
+        this.festivalNameById = {};
+        this.festivalName = '';
+      },
     });
 
     if (this.festivalId) {
       // Fetch performances from the API; the signal update fires the effect below.
-      this.scheduleService.loadByFestival(this.festivalId).subscribe();
+      this.scheduleService.loadByFestival(this.festivalId).subscribe({
+        error: () => {
+          this.allPerformances = [];
+          this.syncViewStateFromStore();
+        },
+      });
 
       effect(
         () => {
           this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
           this.syncViewStateFromStore();
         },
-        { injector: this.injector }
+        { injector: this.injector },
       );
     }
 
     this.savedSub = this.personalSchedule.saved$.subscribe((saved) => {
-      this.savedPerformances  = saved;
-      this.savedIds           = new Set(saved.map((p) => p.id));
-      this.personalConflicts  = this.personalSchedule.getPersonalConflicts();
-      this.personalDays       = [...new Set(saved.map((p) => p.date))].sort();
+      this.savedPerformances = saved;
+      this.savedIds = new Set(saved.map((p) => p.id));
+      this.personalConflicts = this.personalSchedule.getPersonalConflicts();
+      this.personalDays = [...new Set(saved.map((p) => p.date))].sort();
     });
   }
 
@@ -124,7 +140,7 @@ export class MySchedule implements OnInit, OnDestroy {
   // ---- User Interaction Handlers (Festival Schedule) ---------------------
 
   selectDay(day: string): void {
-    this.selectedDay   = day;
+    this.selectedDay = day;
     this.selectedStage = ALL_STAGES;
     this.selectedGenre = ALL_GENRES;
     this.refreshFilterOptionsForSelectedDay();
@@ -145,7 +161,7 @@ export class MySchedule implements OnInit, OnDestroy {
     this.festivalDays = [...new Set(this.allPerformances.map((p) => p.date))].sort();
 
     if (this.festivalDays.length === 0) {
-      this.selectedDay   = '';
+      this.selectedDay = '';
       this.selectedStage = ALL_STAGES;
       this.selectedGenre = ALL_GENRES;
       this.allStagesForDay = [];
@@ -155,7 +171,7 @@ export class MySchedule implements OnInit, OnDestroy {
     }
 
     if (!this.selectedDay || !this.festivalDays.includes(this.selectedDay)) {
-      this.selectedDay   = this.festivalDays[0];
+      this.selectedDay = this.festivalDays[0];
       this.selectedStage = ALL_STAGES;
       this.selectedGenre = ALL_GENRES;
     }
@@ -198,7 +214,10 @@ export class MySchedule implements OnInit, OnDestroy {
   }
 
   savedForDay(date: string): Performance[] {
-    const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const toMin = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
     return this.savedPerformances
       .filter((p) => p.date === date)
       .sort((a, b) => toMin(a.startTime) - toMin(b.startTime));
@@ -206,10 +225,10 @@ export class MySchedule implements OnInit, OnDestroy {
 
   formatDisplayTime(timeString: string): string {
     const [hoursText, minutesText] = timeString.split(':');
-    const hours   = Number(hoursText);
+    const hours = Number(hoursText);
     const minutes = Number(minutesText);
     if (Number.isNaN(hours) || Number.isNaN(minutes)) return timeString;
-    const suffix          = hours >= 12 ? 'PM' : 'AM';
+    const suffix = hours >= 12 ? 'PM' : 'AM';
     const normalizedHours = hours % 12 || 12;
     return `${String(normalizedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${suffix}`;
   }
@@ -241,8 +260,9 @@ export class MySchedule implements OnInit, OnDestroy {
       const [h, m] = t.split(':').map(Number);
       return h * 60 + m;
     };
-    this.times = [...new Set(this.filteredPerformances.map((p) => p.startTime))]
-      .sort((a, b) => timeToMinutes(a) - timeToMinutes(b));
+    this.times = [...new Set(this.filteredPerformances.map((p) => p.startTime))].sort(
+      (a, b) => timeToMinutes(a) - timeToMinutes(b),
+    );
 
     this.performanceGrid = {};
     for (const perf of this.filteredPerformances) {
@@ -261,7 +281,10 @@ export class MySchedule implements OnInit, OnDestroy {
       byStage[perf.stageName].push(perf);
     }
 
-    const toMin    = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const toMin = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
     const toTimeStr = (m: number) =>
       `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
@@ -273,16 +296,15 @@ export class MySchedule implements OnInit, OnDestroy {
           const a = perfs[i];
           const b = perfs[j];
           const overlap =
-            toMin(a.startTime) < toMin(b.endTime) &&
-            toMin(a.endTime)   > toMin(b.startTime);
+            toMin(a.startTime) < toMin(b.endTime) && toMin(a.endTime) > toMin(b.startTime);
           if (overlap) {
             const overlapStart = Math.max(toMin(a.startTime), toMin(b.startTime));
-            const overlapEnd   = Math.min(toMin(a.endTime),   toMin(b.endTime));
+            const overlapEnd = Math.min(toMin(a.endTime), toMin(b.endTime));
             found.push({
-              time:    `${toTimeStr(overlapStart)}–${toTimeStr(overlapEnd)}`,
+              time: `${toTimeStr(overlapStart)}–${toTimeStr(overlapEnd)}`,
               stage,
               artists: [a.artistName, b.artistName],
-              ids:     [a.id, b.id],
+              ids: [a.id, b.id],
             });
           }
         }

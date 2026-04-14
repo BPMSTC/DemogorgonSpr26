@@ -51,24 +51,24 @@ export class StageCreateComponent implements OnInit {
   ];
 
   readonly STAGE_STATUS_OPTIONS: { value: StageStatus; label: string }[] = [
-    { value: 'active',       label: 'Active' },
-    { value: 'inactive',     label: 'Inactive' },
+    { value: 'active', label: 'Active' },
+    { value: 'inactive', label: 'Inactive' },
     { value: 'under-repair', label: 'Under Repair' },
   ];
 
   readonly STAGE_ENVIRONMENT_OPTIONS: { value: StageEnvironment; label: string }[] = [
     { value: 'outdoor', label: 'Outdoor' },
-    { value: 'indoor',  label: 'Indoor' },
+    { value: 'indoor', label: 'Indoor' },
   ];
 
   readonly SUGGESTED_CAPACITIES_BY_STAGE_NAME: Record<string, number> = {
-    'Main Stage':      5000,
-    'Indie Stage':     1500,
-    'Dance Tent':       800,
-    'Forest Stage':     600,
-    'Side Stage':       400,
-    'Acoustic Corner':  300,
-    'VIP Lounge':       150,
+    'Main Stage': 5000,
+    'Indie Stage': 1500,
+    'Dance Tent': 800,
+    'Forest Stage': 600,
+    'Side Stage': 400,
+    'Acoustic Corner': 300,
+    'VIP Lounge': 150,
   };
 
   constructor(
@@ -76,28 +76,38 @@ export class StageCreateComponent implements OnInit {
     private activeRoute: ActivatedRoute,
     private router: Router,
     private stageService: StageService,
-    private festivalService: FestivalService
+    private festivalService: FestivalService,
   ) {}
 
   ngOnInit(): void {
     this.festivalId = this.activeRoute.snapshot.paramMap.get('id') ?? '';
 
     // Load festival name for the header.
-    this.festivalService.load().subscribe(() => {
-      this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    this.festivalService.load().subscribe({
+      next: () => {
+        this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+      },
+      error: () => {
+        this.currentFestival = undefined;
+      },
     });
 
     // Load existing stages for duplicate-name checking.
-    this.stageService.loadByFestival(this.festivalId).subscribe((stages) => {
-      this.existingFestivalStages = stages;
+    this.stageService.loadByFestival(this.festivalId).subscribe({
+      next: (stages) => {
+        this.existingFestivalStages = stages;
+      },
+      error: () => {
+        this.existingFestivalStages = [];
+      },
     });
 
     this.stageForm = this.formBuilder.group({
-      name:        ['', Validators.required],
-      capacity:    ['', [Validators.required, validatePositiveInteger]],
+      name: ['', Validators.required],
+      capacity: ['', [Validators.required, validatePositiveInteger]],
       environment: ['outdoor', Validators.required],
-      status:      ['active',  Validators.required],
-      notes:       ['', Validators.maxLength(300)],
+      status: ['active', Validators.required],
+      notes: ['', Validators.maxLength(300)],
     });
 
     this.stageForm.get('name')!.valueChanges.subscribe((selectedStageName: string) => {
@@ -122,15 +132,15 @@ export class StageCreateComponent implements OnInit {
 
   getStatusBadgeClass(stageStatus: StageStatus): string {
     const statusToBadgeClass: Record<StageStatus, string> = {
-      'active':       'badge-active',
-      'inactive':     'badge-inactive',
+      active: 'badge-active',
+      inactive: 'badge-inactive',
       'under-repair': 'badge-repair',
     };
     return statusToBadgeClass[stageStatus];
   }
 
   onSubmit(): void {
-    this.hasAttemptedSubmit  = true;
+    this.hasAttemptedSubmit = true;
     this.serviceErrorMessage = '';
 
     if (this.stageForm.invalid) return;
@@ -142,19 +152,21 @@ export class StageCreateComponent implements OnInit {
       return;
     }
 
-    this.stageService.createStage({
-      festivalId:  this.festivalId,
-      name:        chosenStageName,
-      capacity:    Number(this.fields['capacity'].value),
-      environment: this.fields['environment'].value,
-      status:      this.fields['status'].value,
-      notes:       this.fields['notes'].value ?? '',
-    }).subscribe({
-      next: () => this.router.navigate(['/festivals', this.festivalId, 'stages']),
-      error: (err: Error) => {
-        this.serviceErrorMessage = err.message ?? 'An unexpected error occurred.';
-      },
-    });
+    this.stageService
+      .createStage({
+        festivalId: this.festivalId,
+        name: chosenStageName,
+        capacity: Number(this.fields['capacity'].value),
+        environment: this.fields['environment'].value,
+        status: this.fields['status'].value,
+        notes: this.fields['notes'].value ?? '',
+      })
+      .subscribe({
+        next: () => this.router.navigate(['/festivals', this.festivalId, 'stages']),
+        error: (err: Error) => {
+          this.serviceErrorMessage = err.message ?? 'An unexpected error occurred.';
+        },
+      });
   }
 
   onCancel(): void {
