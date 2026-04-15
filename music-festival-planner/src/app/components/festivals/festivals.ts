@@ -8,6 +8,8 @@ import { PersonalScheduleService } from '../../services/personal-schedule.servic
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
 
+type FestivalStageLookup = { id: string; stages: Stage[] };
+
 @Component({
   selector: 'app-festivals',
   standalone: false,
@@ -45,7 +47,7 @@ export class Festivals implements OnInit, OnDestroy {
         switchMap((festivals) => {
           this.festivalsList = festivals;
           this.stagesByFestivalId = {};
-          if (festivals.length === 0) return of([] as { id: string; stages: Stage[] }[]);
+          if (festivals.length === 0) return of([] as FestivalStageLookup[]);
           return forkJoin(
             festivals.map((f) =>
               this.stageService
@@ -56,7 +58,7 @@ export class Festivals implements OnInit, OnDestroy {
         }),
       )
       .subscribe({
-        next: (results: { id: string; stages: Stage[] }[]) => {
+        next: (results: FestivalStageLookup[]) => {
           results.forEach((r) => {
             this.stagesByFestivalId[r.id] = r.stages;
           });

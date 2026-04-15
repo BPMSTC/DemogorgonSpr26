@@ -16,6 +16,7 @@ export class FestivalService {
 
   constructor(private http: HttpClient) {}
 
+  /** Shallow clone; Festival model currently contains only primitive fields. */
   private cloneFestival(festival: Festival): Festival {
     return { ...festival };
   }

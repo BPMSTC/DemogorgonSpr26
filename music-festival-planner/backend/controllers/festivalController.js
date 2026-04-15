@@ -42,6 +42,7 @@ exports.getAllFestivals = async (req, res) => {
 // Returns the festival with its stages and performances embedded.
 exports.getFestivalById = async (req, res) => {
   try {
+    // Load current values so partial updates can preserve the start/end date invariant.
     const festival = await Festival.findById(req.params.id);
     if (!festival) return res.status(404).json({ message: 'Festival not found.' });
 

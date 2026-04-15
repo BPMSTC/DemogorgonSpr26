@@ -29,6 +29,7 @@ const ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || '')
   .filter(Boolean);
 const corsOptions = {
   origin(origin, callback) {
+    // Allow requests without an Origin header (server-to-server, curl, health checks).
     if (ALLOWED_ORIGINS.length === 0 || !origin || ALLOWED_ORIGINS.includes(origin)) {
       return callback(null, true);
     }

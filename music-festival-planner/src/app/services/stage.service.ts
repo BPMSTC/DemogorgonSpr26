@@ -16,6 +16,7 @@ export class StageService {
 
   constructor(private http: HttpClient) {}
 
+  /** Shallow clone; Stage model currently contains only primitive fields. */
   private cloneStage(stage: Stage): Stage {
     return { ...stage };
   }
