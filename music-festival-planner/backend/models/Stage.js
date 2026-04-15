@@ -1,23 +1,45 @@
 const mongoose = require('mongoose');
 
-const StageSchema = new mongoose.Schema(
+const { Schema } = mongoose;
+
+// Stage documents belong to a specific festival and represent physical venues.
+const stageSchema = new Schema(
   {
-    festivalId:  { type: String, required: true, index: true },
-    name:        { type: String, required: true, trim: true },
-    capacity:    { type: Number, required: true },
-    environment: { type: String, enum: ['indoor', 'outdoor'], required: true },
-    status:      { type: String, enum: ['active', 'inactive', 'under-repair'], required: true },
-    notes:       { type: String, default: '' },
+    // Reference back to the parent festival.
+    festival: {
+      type: Schema.Types.ObjectId,
+      ref: 'Festival',
+      required: true,
+      index: true,
+    },
+    // Stage display name shown in schedule and stage management pages.
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    // Simple enum for environment-specific UI badges/filtering.
+    environment: {
+      type: String,
+      enum: ['indoor', 'outdoor', 'tent', 'club'],
+      default: 'outdoor',
+    },
+    // Capacity helps with realism and potential planning features later.
+    capacity: {
+      type: Number,
+      min: 100,
+      max: 200000,
+      default: 1000,
+    },
   },
   {
-    toJSON: {
-      transform(_doc, ret) {
-        ret.id = ret._id.toString();
-        delete ret._id;
-        delete ret.__v;
-      },
-    },
+    collection: 'stages',
+    timestamps: true,
   }
 );
 
-module.exports = mongoose.model('Stage', StageSchema);
+// A festival cannot have two stages with the same name.
+stageSchema.index({ festival: 1, name: 1 }, { unique: true });
+
+// Reuse existing model in watch/hot-reload contexts to avoid OverwriteModelError.
+module.exports = mongoose.models.Stage || mongoose.model('Stage', stageSchema);
