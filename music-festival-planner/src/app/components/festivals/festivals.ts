@@ -32,7 +32,6 @@ export class Festivals implements OnInit, OnDestroy {
 
   private routerEventsSubscription?: Subscription;
   private loadDataSubscription?: Subscription;
-  // private stageLoadSubscriptions: Subscription[] = [];
 
   constructor(
     private festivalService: FestivalService,
