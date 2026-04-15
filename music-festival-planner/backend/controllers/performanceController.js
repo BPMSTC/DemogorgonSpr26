@@ -1,39 +1,140 @@
-const Performance = require('../models/Performance');
+const Performance = require('../models/performance');
+const Stage = require('../models/stage');
+const Artist = require('../models/artist');
 
-// ---- Time helpers ----------------------------------------------------------
+const PERF_SORT_FIELDS = new Set(['date', 'startTime', 'endTime', 'artistName', 'stageName', 'genre']);
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 function toMinutes(time) {
   const match = /^(\d{1,2}):(\d{2})$/.exec((time || '').trim());
   if (!match) return null;
-  const h = Number(match[1]);
-  const m = Number(match[2]);
-  if (h < 0 || h > 23 || m < 0 || m > 59) return null;
-  return h * 60 + m;
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  return hours * 60 + minutes;
 }
 
-// Returns true if the requested time window overlaps any existing performance
-// on the same stage/date.  Pass excludeId when editing an existing performance
-// so it doesn't conflict with itself.
-async function isStageOccupied(festivalId, stageName, date, startTime, endTime, excludeId) {
-  const newStart = toMinutes(startTime);
-  const newEnd   = toMinutes(endTime);
-  if (newStart === null || newEnd === null || newStart >= newEnd) return false;
+function toDateOnly(value) {
+  if (!value) return '';
+  const dateValue = new Date(value);
+  if (Number.isNaN(dateValue.getTime())) return '';
+  return dateValue.toISOString().slice(0, 10);
+}
 
-  const query = { festivalId, stageName, date };
-  if (excludeId) query._id = { $ne: excludeId };
+function toTimeOnly(value) {
+  if (!value) return '';
+  const dateValue = new Date(value);
+  if (Number.isNaN(dateValue.getTime())) return '';
+  return dateValue.toISOString().slice(11, 16);
+}
 
-  const existing = await Performance.find(query);
-  return existing.some((p) => {
-    const s = toMinutes(p.startTime);
-    const e = toMinutes(p.endTime);
-    if (s === null || e === null) return false;
-    return newStart < e && newEnd > s; // standard interval-overlap test
+function buildUtcDate(dateText, timeText) {
+  const timeMatch = /^(\d{1,2}):(\d{2})$/.exec((timeText || '').trim());
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateText)) || !timeMatch) {
+    return null;
+  }
+
+  const hours = Number(timeMatch[1]);
+  const minutes = Number(timeMatch[2]);
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+
+  const isoValue = `${dateText}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00.000Z`;
+  const parsed = new Date(isoValue);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function mapPerformance(doc) {
+  const stageName = typeof doc.stage === 'object' && doc.stage?.name ? doc.stage.name : '';
+  const artistName = typeof doc.artist === 'object' && doc.artist?.name ? doc.artist.name : '';
+
+  return {
+    id: doc._id.toString(),
+    festivalId: doc.festival.toString(),
+    artistName,
+    stageName,
+    date: toDateOnly(doc.startDateTime),
+    startTime: toTimeOnly(doc.startDateTime),
+    endTime: toTimeOnly(doc.endDateTime),
+    genre: doc.genre || (typeof doc.artist === 'object' ? doc.artist?.genre : undefined),
+  };
+}
+
+async function resolveStage(festivalId, stageName) {
+  return Stage.findOne({
+    festival: festivalId,
+    name: { $regex: new RegExp(`^${escapeRegex(stageName)}$`, 'i') },
   });
 }
 
-// ----------------------------------------------------------------------------
+async function resolveArtist(artistName, genre) {
+  const existing = await Artist.findOne({
+    name: { $regex: new RegExp(`^${escapeRegex(artistName)}$`, 'i') },
+  });
 
-const PERF_SORT_FIELDS = new Set(['date', 'startTime', 'endTime', 'artistName', 'stageName', 'genre']);
+  if (existing) {
+    if (!existing.genre && genre) {
+      existing.genre = genre;
+      await existing.save();
+    }
+    return existing;
+  }
+
+  const artist = new Artist({
+    name: artistName,
+    genre: genre || 'Unknown',
+    description: '',
+  });
+  return artist.save();
+}
+
+async function isStageOccupied(festivalId, stageId, startDateTime, endDateTime, excludeId) {
+  const query = {
+    festival: festivalId,
+    stage: stageId,
+    startDateTime: { $lt: endDateTime },
+    endDateTime: { $gt: startDateTime },
+  };
+  if (excludeId) {
+    query._id = { $ne: excludeId };
+  }
+
+  const conflict = await Performance.exists(query);
+  return Boolean(conflict);
+}
+
+function sortPerformances(items, sortBy = 'date', order = 'asc') {
+  const direction = order === 'desc' ? -1 : 1;
+  const field = PERF_SORT_FIELDS.has(sortBy) ? sortBy : 'date';
+
+  const sorted = [...items].sort((a, b) => {
+    const left = a[field] ?? '';
+    const right = b[field] ?? '';
+
+    if (field === 'startTime' || field === 'endTime') {
+      const leftMinutes = toMinutes(left) ?? 0;
+      const rightMinutes = toMinutes(right) ?? 0;
+      return (leftMinutes - rightMinutes) * direction;
+    }
+
+    return String(left).localeCompare(String(right)) * direction;
+  });
+
+  if (field === 'date') {
+    sorted.sort((a, b) => {
+      if (a.date === b.date) {
+        return ((toMinutes(a.startTime) ?? 0) - (toMinutes(b.startTime) ?? 0)) * direction;
+      }
+      return a.date.localeCompare(b.date) * direction;
+    });
+  }
+
+  return sorted;
+}
 
 // GET /api/performances?festivalId=<id>
 // Optional: &sortBy=date&order=asc&page=1&limit=20
@@ -43,33 +144,30 @@ exports.getPerformancesByFestival = async (req, res) => {
     return res.status(400).json({ message: 'festivalId query parameter is required.' });
   }
 
-  const sortField = PERF_SORT_FIELDS.has(sortBy) ? sortBy : 'date';
-  const sortOrder = order === 'desc' ? -1 : 1;
-  // Secondary sort by startTime when primary is date.
-  const sort = sortField === 'date'
-    ? { date: sortOrder, startTime: sortOrder }
-    : { [sortField]: sortOrder };
-
   try {
+    const docs = await Performance.find({ festival: festivalId })
+      .populate('artist', 'name genre')
+      .populate('stage', 'name')
+      .sort({ startDateTime: 1 });
+
+    const sorted = sortPerformances(docs.map(mapPerformance), sortBy, order);
+
     if (page || limit) {
-      const pageNum  = Math.max(1, parseInt(page, 10) || 1);
+      const pageNum = Math.max(1, parseInt(page, 10) || 1);
       const limitNum = Math.min(200, Math.max(1, parseInt(limit, 10) || 20));
-      const skip     = (pageNum - 1) * limitNum;
-      const [performances, total] = await Promise.all([
-        Performance.find({ festivalId }).sort(sort).skip(skip).limit(limitNum),
-        Performance.countDocuments({ festivalId }),
-      ]);
+      const start = (pageNum - 1) * limitNum;
+      const data = sorted.slice(start, start + limitNum);
+
       return res.json({
-        data: performances,
-        total,
+        data,
+        total: sorted.length,
         page: pageNum,
         limit: limitNum,
-        totalPages: Math.ceil(total / limitNum),
+        totalPages: Math.ceil(sorted.length / limitNum),
       });
     }
 
-    const performances = await Performance.find({ festivalId }).sort(sort);
-    res.json(performances);
+    res.json(sorted);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -80,7 +178,11 @@ exports.createPerformance = async (req, res) => {
   const { festivalId, artistName, stageName, date, startTime, endTime, genre } = req.body;
 
   const startMinutes = toMinutes(startTime);
-  const endMinutes   = toMinutes(endTime);
+  const endMinutes = toMinutes(endTime);
+
+  if (!festivalId || !artistName || !stageName || !date) {
+    return res.status(400).json({ message: 'festivalId, artistName, stageName, and date are required.' });
+  }
 
   if (startMinutes === null || endMinutes === null) {
     return res.status(400).json({
@@ -91,36 +193,55 @@ exports.createPerformance = async (req, res) => {
     return res.status(400).json({ message: 'End time must be later than start time.' });
   }
 
+  const startDateTime = buildUtcDate(date, startTime);
+  const endDateTime = buildUtcDate(date, endTime);
+  if (!startDateTime || !endDateTime) {
+    return res.status(400).json({ message: 'date must be in YYYY-MM-DD format.' });
+  }
+
   try {
-    const conflict = await isStageOccupied(festivalId, stageName, date, startTime, endTime);
-    if (conflict) {
-      return res
-        .status(409)
-        .json({ message: `"${stageName}" is already booked during that time slot.` });
+    const stage = await resolveStage(festivalId, stageName);
+    if (!stage) {
+      return res.status(400).json({ message: `Stage "${stageName}" was not found for this festival.` });
     }
 
+    const conflict = await isStageOccupied(festivalId, stage._id, startDateTime, endDateTime);
+    if (conflict) {
+      return res.status(409).json({ message: `"${stageName}" is already booked during that time slot.` });
+    }
+
+    const artist = await resolveArtist(artistName, genre);
+
     const performance = new Performance({
-      festivalId,
-      artistName,
-      stageName,
-      date,
-      startTime,
-      endTime,
-      genre,
+      festival: festivalId,
+      artist: artist._id,
+      stage: stage._id,
+      startDateTime,
+      endDateTime,
+      genre: genre || artist.genre || '',
     });
+
     const saved = await performance.save();
-    res.status(201).json(saved);
+    const hydrated = await Performance.findById(saved._id)
+      .populate('artist', 'name genre')
+      .populate('stage', 'name');
+
+    res.status(201).json(mapPerformance(hydrated));
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-// PUT /api/performances/:id — full replacement (festivalId is immutable)
+// PUT /api/performances/:id — full replacement (festival reference is immutable)
 exports.replacePerformance = async (req, res) => {
   const { artistName, stageName, date, startTime, endTime, genre } = req.body;
 
   const startMinutes = toMinutes(startTime);
-  const endMinutes   = toMinutes(endTime);
+  const endMinutes = toMinutes(endTime);
+
+  if (!artistName || !stageName || !date) {
+    return res.status(400).json({ message: 'artistName, stageName, and date are required.' });
+  }
 
   if (startMinutes === null || endMinutes === null) {
     return res.status(400).json({
@@ -129,32 +250,49 @@ exports.replacePerformance = async (req, res) => {
   }
   if (startMinutes >= endMinutes) {
     return res.status(400).json({ message: 'End time must be later than start time.' });
+  }
+
+  const startDateTime = buildUtcDate(date, startTime);
+  const endDateTime = buildUtcDate(date, endTime);
+  if (!startDateTime || !endDateTime) {
+    return res.status(400).json({ message: 'date must be in YYYY-MM-DD format.' });
   }
 
   try {
     const existing = await Performance.findById(req.params.id);
     if (!existing) return res.status(404).json({ message: 'Performance not found.' });
 
-    const { festivalId } = existing;
-
-    const conflict = await isStageOccupied(
-      festivalId, stageName, date, startTime, endTime, req.params.id
-    );
-    if (conflict) {
-      return res
-        .status(409)
-        .json({ message: `"${stageName}" is already booked during that time slot.` });
+    const stage = await resolveStage(existing.festival, stageName);
+    if (!stage) {
+      return res.status(400).json({ message: `Stage "${stageName}" was not found for this festival.` });
     }
 
-    const replacement = { festivalId, artistName, stageName, date, startTime, endTime };
-    if (genre != null) replacement.genre = genre;
-
-    const performance = await Performance.findOneAndReplace(
-      { _id: req.params.id },
-      replacement,
-      { new: true, runValidators: true }
+    const conflict = await isStageOccupied(
+      existing.festival,
+      stage._id,
+      startDateTime,
+      endDateTime,
+      req.params.id
     );
-    res.json(performance);
+    if (conflict) {
+      return res.status(409).json({ message: `"${stageName}" is already booked during that time slot.` });
+    }
+
+    const artist = await resolveArtist(artistName, genre);
+
+    existing.artist = artist._id;
+    existing.stage = stage._id;
+    existing.startDateTime = startDateTime;
+    existing.endDateTime = endDateTime;
+    existing.genre = genre || artist.genre || '';
+
+    await existing.save();
+
+    const hydrated = await Performance.findById(existing._id)
+      .populate('artist', 'name genre')
+      .populate('stage', 'name');
+
+    res.json(mapPerformance(hydrated));
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
@@ -164,7 +302,7 @@ exports.replacePerformance = async (req, res) => {
 // Deletes ALL performances for a festival (cascade delete helper).
 exports.deletePerformancesByFestival = async (req, res) => {
   try {
-    await Performance.deleteMany({ festivalId: req.params.festivalId });
+    await Performance.deleteMany({ festival: req.params.festivalId });
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ message: err.message });

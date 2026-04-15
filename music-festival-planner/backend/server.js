@@ -12,11 +12,10 @@
  * The server listens on the PORT env variable (default 3000).
  */
 
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 
-const connectDB = require('./db');
+const { connectToDatabase } = require('./config/database');
 const festivalsRouter = require('./routes/festivals');
 const stagesRouter = require('./routes/stages');
 const performancesRouter = require('./routes/performances');
@@ -86,8 +85,13 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // ---- Start -----------------------------------------------------------------
 
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Music Festival Planner API listening on http://localhost:${PORT}`);
+connectToDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Music Festival Planner API listening on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to start API server:', err.message);
+    process.exit(1);
   });
-});

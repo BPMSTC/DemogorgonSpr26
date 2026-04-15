@@ -31,6 +31,18 @@ const stageSchema = new Schema(
       max: 200000,
       default: 1000,
     },
+    // Optional operational status expected by the frontend stage list.
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'under-repair'],
+      default: 'active',
+    },
+    // Optional free-text notes expected by the stage create/list UI.
+    notes: {
+      type: String,
+      default: '',
+      trim: true,
+    },
   },
   {
     collection: 'stages',

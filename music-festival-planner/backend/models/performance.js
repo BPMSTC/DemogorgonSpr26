@@ -57,6 +57,12 @@ const performanceSchema = new Schema(
       default: '',
       trim: true,
     },
+    // Optional genre mirrored from request payload for convenience in UI sorting/filtering.
+    genre: {
+      type: String,
+      default: '',
+      trim: true,
+    },
   },
   {
     collection: 'performances',
