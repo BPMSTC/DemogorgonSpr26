@@ -1,14 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, forkJoin, of } from 'rxjs';
-import { filter, switchMap } from 'rxjs/operators';
+import { catchError, filter, switchMap } from 'rxjs/operators';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
 import { PersonalScheduleService } from '../../services/personal-schedule.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
 
-type FestivalStageLookup = { id: string; stages: Stage[] };
+type FestivalStageLookup = { id: string; stages: Stage[]; failed: boolean };
 
 @Component({
   selector: 'app-festivals',
@@ -25,7 +25,8 @@ export class Festivals implements OnInit, OnDestroy {
   expandedFestivalId: string | null = null;
 
   /** Pre-fetched on init so the template doesn't call the service on every render. */
-  stagesByFestivalId: Record<string, Stage[]> = {};
+  stagesByFestivalId: Record<string, Stage[] | undefined> = {};
+  stageLoadFailedByFestivalId: Record<string, boolean | undefined> = {};
 
   openKebabMenuFestivalId: string | null = null;
 
@@ -47,12 +48,21 @@ export class Festivals implements OnInit, OnDestroy {
         switchMap((festivals) => {
           this.festivalsList = festivals;
           this.stagesByFestivalId = {};
+          this.stageLoadFailedByFestivalId = {};
+
+          festivals.forEach((festival) => {
+            this.stageLoadFailedByFestivalId[festival.id] = false;
+          });
+
           if (festivals.length === 0) return of([] as FestivalStageLookup[]);
           return forkJoin(
             festivals.map((f) =>
-              this.stageService
-                .loadByFestival(f.id)
-                .pipe(switchMap((stages) => of({ id: f.id, stages }))),
+              this.stageService.loadByFestival(f.id).pipe(
+                switchMap((stages) => of({ id: f.id, stages, failed: false })),
+                catchError(() =>
+                  of({ id: f.id, stages: [] as Stage[], failed: true }),
+                ),
+              ),
             ),
           );
         }),
@@ -61,11 +71,13 @@ export class Festivals implements OnInit, OnDestroy {
         next: (results: FestivalStageLookup[]) => {
           results.forEach((r) => {
             this.stagesByFestivalId[r.id] = r.stages;
+            this.stageLoadFailedByFestivalId[r.id] = r.failed;
           });
         },
         error: () => {
           this.festivalsList = [];
           this.stagesByFestivalId = {};
+          this.stageLoadFailedByFestivalId = {};
         },
       });
   }
@@ -88,6 +100,7 @@ export class Festivals implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routerEventsSubscription?.unsubscribe();
     this.loadDataSubscription?.unsubscribe();
+    //  this.stageLoadSubscriptions.forEach((s) => s.unsubscribe());
   }
 
   toggleFestivalCard(festivalId: string, clickEvent: MouseEvent): void {

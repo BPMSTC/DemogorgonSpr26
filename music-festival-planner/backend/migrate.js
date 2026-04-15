@@ -3,32 +3,18 @@
  *
  * Usage (from the backend/ directory):
  *   npm run migrate -- --file path/to/export.json
- *
- * Expected JSON format (export from the Angular app's localStorage):
- * {
- *   "festivals":    [{ "id": "...", "name": "...", "startDate": "...", ... }],
- *   "stages":       [{ "id": "...", "festivalId": "...", "name": "...", ... }],
- *   "performances": [{ "id": "...", "festivalId": "...", "artistName": "...", ... }]
- * }
- *
- * The script maps the old string IDs (UUIDs or any strings) to new MongoDB
- * ObjectIds so all cross-references (stage.festivalId, performance.festivalId)
- * remain consistent.
- *
- * Records that already exist in MongoDB are skipped (idempotent by name+date
- * for festivals, name+festivalId for stages, and all key fields for performances).
  */
 
-require('dotenv').config();
-const fs         = require('fs');
-const path       = require('path');
-const mongoose   = require('mongoose');
-const connectDB  = require('./db');
-const Festival   = require('./models/Festival');
-const Stage      = require('./models/Stage');
-const Performance = require('./models/Performance');
-
-// ---- Argument parsing -------------------------------------------------------
+const fs = require('fs');
+const path = require('path');
+const {
+  connectToDatabase,
+  disconnectFromDatabase,
+} = require('./config/database');
+const Festival = require('./models/festival');
+const Stage = require('./models/stage');
+const Artist = require('./models/artist');
+const Performance = require('./models/performance');
 
 function getFilePath() {
   const args = process.argv.slice(2);
@@ -36,13 +22,34 @@ function getFilePath() {
   if (idx !== -1 && args[idx + 1]) {
     return path.resolve(args[idx + 1]);
   }
-  // Positional fallback: first non-flag arg
-  const positional = args.find((a) => !a.startsWith('-'));
-  if (positional) return path.resolve(positional);
-  return null;
+
+  const positional = args.find((arg) => !arg.startsWith('-'));
+  return positional ? path.resolve(positional) : null;
 }
 
-// ---- Main -------------------------------------------------------------------
+function parseDateOrNull(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+function parseDateAndTime(dateText, timeText) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateText))) return null;
+  const match = /^(\d{1,2}):(\d{2})$/.exec((timeText || '').trim());
+  if (!match) return null;
+
+  const h = Number(match[1]);
+  const m = Number(match[2]);
+  if (!Number.isInteger(h) || !Number.isInteger(m)) return null;
+  if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+
+  const parsed = new Date(
+    `${dateText}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`
+  );
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
 
 async function migrate() {
   const filePath = getFilePath();
@@ -65,94 +72,185 @@ async function migrate() {
   }
 
   const { festivals = [], stages = [], performances = [] } = data;
-  console.log(`Loaded ${festivals.length} festival(s), ${stages.length} stage(s), ${performances.length} performance(s) from file.`);
+  console.log(
+    `Loaded ${festivals.length} festival(s), ${stages.length} stage(s), ${performances.length} performance(s).`
+  );
 
-  await connectDB();
+  await connectToDatabase();
 
-  // Map old string ID → new MongoDB ObjectId string
-  const festivalIdMap = new Map(); // oldId → newId
-  let festCreated = 0, festSkipped = 0;
+  const festivalIdMap = new Map();
+  const stageIdByFestivalAndName = new Map();
 
-  // ---- Festivals -------------------------------------------------------------
-  for (const f of festivals) {
-    const { id: oldId, name, startDate, endDate, location, genre, capacity } = f;
+  let festivalsCreated = 0;
+  let festivalsSkipped = 0;
+  let stagesCreated = 0;
+  let stagesSkipped = 0;
+  let performancesCreated = 0;
+  let performancesSkipped = 0;
 
-    // Idempotency check: skip if a festival with the same name+startDate exists.
-    const existing = await Festival.findOne({ name, startDate });
+  // ---- Festivals -----------------------------------------------------------
+  for (const inputFestival of festivals) {
+    const startDate = parseDateOrNull(inputFestival.startDate);
+    const endDate = parseDateOrNull(inputFestival.endDate);
+
+    if (!inputFestival.name || !startDate || !endDate || !inputFestival.location) {
+      continue;
+    }
+
+    const existing = await Festival.findOne({
+      name: inputFestival.name,
+      startDate,
+    });
+
     if (existing) {
-      festivalIdMap.set(oldId, existing._id.toString());
-      festSkipped++;
+      festivalIdMap.set(inputFestival.id, existing._id.toString());
+      festivalsSkipped++;
       continue;
     }
 
-    const created = await new Festival({ name, startDate, endDate, location, genre, capacity }).save();
-    festivalIdMap.set(oldId, created._id.toString());
-    festCreated++;
+    const created = await new Festival({
+      name: inputFestival.name,
+      startDate,
+      endDate,
+      location: inputFestival.location,
+      genre: inputFestival.genre || '',
+      capacity:
+        typeof inputFestival.capacity === 'number' ? inputFestival.capacity : 0,
+    }).save();
+
+    festivalIdMap.set(inputFestival.id, created._id.toString());
+    festivalsCreated++;
   }
-  console.log(`Festivals — created: ${festCreated}, skipped (already exist): ${festSkipped}`);
 
-  // ---- Stages ---------------------------------------------------------------
-  let stageCreated = 0, stageSkipped = 0;
+  console.log(
+    `Festivals — created: ${festivalsCreated}, skipped(existing): ${festivalsSkipped}`
+  );
 
-  for (const s of stages) {
-    const { festivalId: oldFestivalId, name, capacity, environment, status, notes } = s;
-    const newFestivalId = festivalIdMap.get(oldFestivalId);
+  // ---- Stages --------------------------------------------------------------
+  for (const inputStage of stages) {
+    const mappedFestivalId = festivalIdMap.get(inputStage.festivalId);
+    if (!mappedFestivalId || !inputStage.name) continue;
 
-    if (!newFestivalId) {
-      console.warn(`  Skipping stage "${name}": no matching festival for oldId ${oldFestivalId}`);
-      continue;
-    }
-
-    // Idempotency check: skip if a stage with the same name exists in this festival.
     const existing = await Stage.findOne({
-      festivalId: newFestivalId,
-      name: { $regex: new RegExp(`^${name}$`, 'i') },
+      festival: mappedFestivalId,
+      name: { $regex: new RegExp(`^${inputStage.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
     });
+
     if (existing) {
-      stageSkipped++;
+      const existingKey = `${mappedFestivalId}::${existing.name.toLowerCase()}`;
+      stageIdByFestivalAndName.set(existingKey, existing._id.toString());
+      stagesSkipped++;
       continue;
     }
 
-    await new Stage({ festivalId: newFestivalId, name, capacity, environment, status, notes }).save();
-    stageCreated++;
+    const created = await new Stage({
+      festival: mappedFestivalId,
+      name: inputStage.name,
+      capacity:
+        Number.isInteger(inputStage.capacity) && inputStage.capacity > 0
+          ? inputStage.capacity
+          : 1000,
+      environment: inputStage.environment || 'outdoor',
+      status: inputStage.status || 'active',
+      notes: inputStage.notes || '',
+    }).save();
+
+    const key = `${mappedFestivalId}::${created.name.toLowerCase()}`;
+    stageIdByFestivalAndName.set(key, created._id.toString());
+    stagesCreated++;
   }
-  console.log(`Stages — created: ${stageCreated}, skipped (already exist): ${stageSkipped}`);
 
-  // ---- Performances ---------------------------------------------------------
-  let perfCreated = 0, perfSkipped = 0;
+  console.log(`Stages — created: ${stagesCreated}, skipped(existing): ${stagesSkipped}`);
 
-  for (const p of performances) {
-    const { festivalId: oldFestivalId, artistName, stageName, date, startTime, endTime, genre } = p;
-    const newFestivalId = festivalIdMap.get(oldFestivalId);
+  // ---- Performances --------------------------------------------------------
+  for (const inputPerformance of performances) {
+    const mappedFestivalId = festivalIdMap.get(inputPerformance.festivalId);
+    if (!mappedFestivalId) continue;
 
-    if (!newFestivalId) {
-      console.warn(`  Skipping performance "${artistName}": no matching festival for oldId ${oldFestivalId}`);
-      continue;
+    const stageKey = `${mappedFestivalId}::${String(
+      inputPerformance.stageName || ''
+    ).toLowerCase()}`;
+
+    let stageId = stageIdByFestivalAndName.get(stageKey);
+    if (!stageId) {
+      const stageDoc = await Stage.findOne({
+        festival: mappedFestivalId,
+        name: {
+          $regex: new RegExp(
+            `^${String(inputPerformance.stageName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+            'i'
+          ),
+        },
+      });
+      if (!stageDoc) continue;
+      stageId = stageDoc._id.toString();
+      stageIdByFestivalAndName.set(stageKey, stageId);
     }
 
-    // Idempotency check: same artist + stage + date + startTime.
+    if (!inputPerformance.artistName) continue;
+
+    let artist = await Artist.findOne({
+      name: {
+        $regex: new RegExp(
+          `^${String(inputPerformance.artistName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+          'i'
+        ),
+      },
+    });
+
+    if (!artist) {
+      artist = await new Artist({
+        name: inputPerformance.artistName,
+        genre: inputPerformance.genre || 'Unknown',
+        description: '',
+      }).save();
+    }
+
+    const startDateTime = parseDateAndTime(
+      inputPerformance.date,
+      inputPerformance.startTime
+    );
+    const endDateTime = parseDateAndTime(
+      inputPerformance.date,
+      inputPerformance.endTime
+    );
+
+    if (!startDateTime || !endDateTime || startDateTime >= endDateTime) continue;
+
     const existing = await Performance.findOne({
-      festivalId: newFestivalId,
-      artistName,
-      stageName,
-      date,
-      startTime,
+      festival: mappedFestivalId,
+      stage: stageId,
+      artist: artist._id,
+      startDateTime,
     });
+
     if (existing) {
-      perfSkipped++;
+      performancesSkipped++;
       continue;
     }
 
-    await new Performance({ festivalId: newFestivalId, artistName, stageName, date, startTime, endTime, genre }).save();
-    perfCreated++;
+    await new Performance({
+      festival: mappedFestivalId,
+      stage: stageId,
+      artist: artist._id,
+      startDateTime,
+      endDateTime,
+      genre: inputPerformance.genre || artist.genre || '',
+    }).save();
+
+    performancesCreated++;
   }
-  console.log(`Performances — created: ${perfCreated}, skipped (already exist): ${perfSkipped}`);
+
+  console.log(
+    `Performances — created: ${performancesCreated}, skipped(existing): ${performancesSkipped}`
+  );
 
   console.log('\nMigration complete!');
-  await mongoose.disconnect();
+  await disconnectFromDatabase();
 }
 
-migrate().catch((err) => {
+migrate().catch(async (err) => {
   console.error('Migration failed:', err);
+  await disconnectFromDatabase();
   process.exit(1);
 });

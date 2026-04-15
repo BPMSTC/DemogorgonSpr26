@@ -18,7 +18,8 @@
     class="view-tab"
     [class.view-tab--active]="activeView === 'festival'"
     [attr.aria-selected]="activeView === 'festival'"
-    (click)="setView('festival')">
+    (click)="setView('festival')"
+  >
     <span class="view-tab-icon" aria-hidden="true">🗓️</span>
     Festival Schedule
   </button>
@@ -27,7 +28,8 @@
     class="view-tab"
     [class.view-tab--active]="activeView === 'personal'"
     [attr.aria-selected]="activeView === 'personal'"
-    (click)="setView('personal')">
+    (click)="setView('personal')"
+  >
     <span class="view-tab-icon" aria-hidden="true">⭐</span>
     My Schedule
     @if (savedPerformances.length > 0) {
@@ -42,206 +44,206 @@
      TAB 1: FESTIVAL SCHEDULE
      ================================================================ -->
 @if (activeView === 'festival') {
-
   @if (!festivalId) {
     <!-- ---- No Festival Selected State ------------------------------------- -->
     <div class="schedule-empty" role="status" aria-live="polite">
       <span class="empty-icon" aria-hidden="true">📋</span>
       <p><strong>No Festival Selected</strong></p>
-      <p>Please choose a festival from the <a routerLink="/festivals">Festivals page</a> to view its schedule.</p>
+      <p>
+        Please choose a festival from the <a routerLink="/festivals">Festivals page</a> to view its
+        schedule.
+      </p>
     </div>
   } @else {
-
-  <!-- ---- Day Selector Tabs ----------------------------------------------- -->
-  <div class="schedule-summary" role="tablist" aria-label="Festival days">
-    @for (day of festivalDays; track day) {
-      <button
-        role="tab"
-        (click)="selectDay(day)"
-        class="summary-stat"
-        [class.day-active]="day === selectedDay"
-        [attr.aria-selected]="day === selectedDay"
-        [attr.aria-label]="'Select ' + (day | date:'EEEE, MMMM d':'UTC')">
-        <strong>{{ day | date:'EEEE':'UTC' }}</strong>
-        {{ day | date:'MMM d':'UTC' }}
-      </button>
-    }
-  </div>
-
-  <!-- ---- Conflict Alert Banner ------------------------------------------- -->
-  @if (conflicts.length > 0) {
-    <div class="conflict-alert" role="alert" aria-live="assertive">
-      <span class="conflict-icon" aria-hidden="true">⚠️</span>
-      <div class="conflict-text">
-        <strong>Scheduling Conflict{{ conflicts.length > 1 ? 's' : '' }} Detected</strong>
-        @for (c of conflicts; track $index) {
-          <span>{{ c.stage }}: {{ c.artists.join(' & ') }} overlap at {{ c.time }}</span>
-        }
-      </div>
-    </div>
-  }
-
-  <!-- ---- Filter Bars ----------------------------------------------------- -->
-  @if (festivalDays.length > 0) {
-    <div class="filter-row">
-
-      <div class="stage-filter" role="group" aria-label="Filter by stage">
-        <span class="stage-filter-label">Stage:</span>
+    <!-- ---- Day Selector Tabs ----------------------------------------------- -->
+    <div class="schedule-summary" role="tablist" aria-label="Festival days">
+      @for (day of festivalDays; track day) {
         <button
-          class="stage-filter-btn"
-          [class.stage-filter-active]="selectedStage === ALL_STAGES"
-          (click)="selectStage(ALL_STAGES)"
-          [attr.aria-pressed]="selectedStage === ALL_STAGES">
-          All Stages
+          role="tab"
+          (click)="selectDay(day)"
+          class="summary-stat"
+          [class.day-active]="day === selectedDay"
+          [attr.aria-selected]="day === selectedDay"
+          [attr.aria-label]="'Select ' + (day | date: 'EEEE, MMMM d' : 'UTC')"
+        >
+          <strong>{{ day | date: 'EEEE' : 'UTC' }}</strong>
+          {{ day | date: 'MMM d' : 'UTC' }}
         </button>
-        @for (stage of allStagesForDay; track stage) {
-          <button
-            class="stage-filter-btn"
-            [class.stage-filter-active]="selectedStage === stage"
-            (click)="selectStage(stage)"
-            [attr.aria-pressed]="selectedStage === stage">
-            {{ stage }}
-          </button>
-        }
-      </div>
+      }
+    </div>
 
-      @if (allGenresForDay.length > 0) {
-        <div class="stage-filter" role="group" aria-label="Filter by genre">
-          <span class="stage-filter-label">Genre:</span>
+    <!-- ---- Filter Bars ----------------------------------------------------- -->
+    @if (festivalDays.length > 0) {
+      <div class="filter-row">
+        <div class="stage-filter" role="group" aria-label="Filter by stage">
+          <span class="stage-filter-label">Stage:</span>
           <button
             class="stage-filter-btn"
-            [class.stage-filter-active]="selectedGenre === ALL_GENRES"
-            (click)="selectGenre(ALL_GENRES)"
-            [attr.aria-pressed]="selectedGenre === ALL_GENRES">
-            All
+            [class.stage-filter-active]="selectedStage === ALL_STAGES"
+            (click)="selectStage(ALL_STAGES)"
+            [attr.aria-pressed]="selectedStage === ALL_STAGES"
+          >
+            All Stages
           </button>
-          @for (genre of allGenresForDay; track genre) {
+          @for (stage of allStagesForDay; track stage) {
             <button
-              class="stage-filter-btn stage-filter-btn--genre"
-              [class.stage-filter-active]="selectedGenre === genre"
-              (click)="selectGenre(genre)"
-              [attr.aria-pressed]="selectedGenre === genre">
-              {{ genre }}
+              class="stage-filter-btn"
+              [class.stage-filter-active]="selectedStage === stage"
+              (click)="selectStage(stage)"
+              [attr.aria-pressed]="selectedStage === stage"
+            >
+              {{ stage }}
             </button>
           }
         </div>
-      }
 
-    </div>
-  }
+        @if (allGenresForDay.length > 0) {
+          <div class="stage-filter" role="group" aria-label="Filter by genre">
+            <span class="stage-filter-label">Genre:</span>
+            <button
+              class="stage-filter-btn"
+              [class.stage-filter-active]="selectedGenre === ALL_GENRES"
+              (click)="selectGenre(ALL_GENRES)"
+              [attr.aria-pressed]="selectedGenre === ALL_GENRES"
+            >
+              All
+            </button>
+            @for (genre of allGenresForDay; track genre) {
+              <button
+                class="stage-filter-btn stage-filter-btn--genre"
+                [class.stage-filter-active]="selectedGenre === genre"
+                (click)="selectGenre(genre)"
+                [attr.aria-pressed]="selectedGenre === genre"
+              >
+                {{ genre }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
 
-  <!-- ---- Timetable Grid -------------------------------------------------- -->
-  @if (filteredPerformances.length > 0) {
-    <div
-      class="timetable"
-      [style.--stage-count]="stages.length"
-      role="grid"
-      [attr.aria-label]="'Schedule grid for ' + (selectedDay | date:'EEEE, MMMM d':'UTC')">
+    <!-- ---- Timetable Grid -------------------------------------------------- -->
+    @if (filteredPerformances.length > 0) {
+      <div
+        class="timetable"
+        [style.--stage-count]="stages.length"
+        role="grid"
+        [attr.aria-label]="'Schedule grid for ' + (selectedDay | date: 'EEEE, MMMM d' : 'UTC')"
+      >
+        <!-- Header row -->
+        <div class="timetable-row" role="row">
+          <div class="timetable-corner" role="presentation"></div>
+          @for (stage of stages; track stage) {
+            <div class="timetable-stage-label" role="columnheader">{{ stage }}</div>
+          }
+        </div>
 
-      <!-- Header row -->
-      <div class="timetable-row" role="row">
-        <div class="timetable-corner" role="presentation"></div>
-        @for (stage of stages; track stage) {
-          <div class="timetable-stage-label" role="columnheader">{{ stage }}</div>
+        <!-- Time-slot rows -->
+        @for (time of times; track time) {
+          <div class="timetable-row" role="row">
+            <div class="timetable-time" role="rowheader">{{ formatDisplayTime(time) }}</div>
+
+            @for (stage of stages; track stage) {
+              <div class="timetable-slot" role="gridcell" [attr.aria-label]="time + ' ' + stage">
+                @if (performanceGrid[time + '-' + stage]; as perf) {
+                  <div
+                    class="timetable-event"
+                    [class.is-saved]="savedIds.has(perf.id)"
+                    [class.has-conflict]="hasConflict(perf.id)"
+                    [attr.aria-label]="
+                      perf.artistName +
+                      ' at ' +
+                      formatDisplayTime(perf.startTime) +
+                      ' on ' +
+                      perf.stageName +
+                      (perf.genre ? ', ' + perf.genre : '') +
+                      (savedIds.has(perf.id) ? ' — in your schedule' : '') +
+                      (hasConflict(perf.id) ? ' — schedule conflict' : '')
+                    "
+                  >
+                    @if (hasConflict(perf.id)) {
+                      <div class="event-conflict-badge" aria-label="Schedule conflict">Conflict</div>
+                    }
+
+                    <div class="event-name">{{ perf.artistName }}</div>
+                    <div class="event-stage">{{ perf.stageName }}</div>
+                    <div class="event-time">
+                      {{ formatDisplayTime(perf.startTime) }} -
+                      {{ formatDisplayTime(perf.endTime) }}
+                    </div>
+
+                    @if (perf.genre) {
+                      <div class="event-genre">{{ perf.genre }}</div>
+                    }
+
+                    <!-- ---- Add / Remove from My Schedule button ------------ -->
+                    <button
+                      class="btn-save-perf"
+                      [class.btn-save-perf--saved]="savedIds.has(perf.id)"
+                      (click)="toggleSaved(perf, $event)"
+                      [attr.aria-label]="
+                        savedIds.has(perf.id)
+                          ? 'Remove ' + perf.artistName + ' from My Schedule'
+                          : 'Add ' + perf.artistName + ' to My Schedule'
+                      "
+                      [attr.aria-pressed]="savedIds.has(perf.id)"
+                    >
+                      @if (savedIds.has(perf.id)) {
+                        <span class="btn-save-perf__icon" aria-hidden="true">★</span>
+                        <span class="btn-save-perf__label">Saved</span>
+                      } @else {
+                        <span class="btn-save-perf__icon" aria-hidden="true">☆</span>
+                        <span class="btn-save-perf__label">Add</span>
+                      }
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
         }
       </div>
 
-      <!-- Time-slot rows -->
-      @for (time of times; track time) {
-        <div class="timetable-row" role="row">
-          <div class="timetable-time" role="rowheader">{{ formatDisplayTime(time) }}</div>
-
-          @for (stage of stages; track stage) {
-            <div
-              class="timetable-slot"
-              role="gridcell"
-              [attr.aria-label]="time + ' ' + stage">
-
-              @if (performanceGrid[time + '-' + stage]; as perf) {
-                <div
-                  class="timetable-event"
-                  [class.has-conflict]="hasConflict(time, stage)"
-                  [class.is-saved]="savedIds.has(perf.id)"
-                  [attr.aria-label]="
-                    perf.artistName +
-                    ' at ' + formatDisplayTime(perf.startTime) +
-                    ' on ' + perf.stageName +
-                    (perf.genre ? ', ' + perf.genre : '') +
-                    (hasConflict(time, stage) ? ' — scheduling conflict' : '') +
-                    (savedIds.has(perf.id) ? ' — in your schedule' : '')
-                  ">
-
-                  @if (hasConflict(time, stage)) {
-                    <span class="conflict-badge" aria-hidden="true">⚠</span>
-                  }
-
-                  <div class="event-name">{{ perf.artistName }}</div>
-                  <div class="event-stage">{{ perf.stageName }}</div>
-                  <div class="event-time">{{ formatDisplayTime(perf.startTime) }} - {{ formatDisplayTime(perf.endTime) }}</div>
-
-                  @if (perf.genre) {
-                    <div class="event-genre">{{ perf.genre }}</div>
-                  }
-
-                  <!-- ---- Add / Remove from My Schedule button ------------ -->
-                  <button
-                    class="btn-save-perf"
-                    [class.btn-save-perf--saved]="savedIds.has(perf.id)"
-                    (click)="toggleSaved(perf, $event)"
-                    [attr.aria-label]="savedIds.has(perf.id)
-                      ? 'Remove ' + perf.artistName + ' from My Schedule'
-                      : 'Add ' + perf.artistName + ' to My Schedule'"
-                    [attr.aria-pressed]="savedIds.has(perf.id)">
-                    @if (savedIds.has(perf.id)) {
-                      <span class="btn-save-perf__icon" aria-hidden="true">★</span>
-                      <span class="btn-save-perf__label">Saved</span>
-                    } @else {
-                      <span class="btn-save-perf__icon" aria-hidden="true">☆</span>
-                      <span class="btn-save-perf__label">Add</span>
-                    }
-                  </button>
-
-                </div>
-              }
-
-            </div>
-          }
-        </div>
-      }
-    </div>
-
-  <!-- ---- Empty State ----------------------------------------------------- -->
-  } @else {
-    <div class="schedule-empty" role="status" aria-live="polite">
-      <span class="empty-icon" aria-hidden="true">🎵</span>
-      @if (selectedGenre !== ALL_GENRES) {
-        <p>No {{ selectedGenre }} performances
-          @if (selectedStage !== ALL_STAGES) { on {{ selectedStage }} }
-          @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
-        </p>
-      } @else if (selectedStage !== ALL_STAGES) {
-        <p>No performances scheduled for {{ selectedStage }}
-          @if (selectedDay) { on {{ selectedDay | date:'EEEE, MMM d':'UTC' }} }.
-        </p>
-      } @else if (selectedDay) {
-        <p>No performances scheduled for {{ selectedDay | date:'EEEE, MMM d':'UTC' }} yet.</p>
-      } @else {
-        <p>No performances scheduled.</p>
-      }
-    </div>
+      <!-- ---- Empty State ----------------------------------------------------- -->
+    } @else {
+      <div class="schedule-empty" role="status" aria-live="polite">
+        <span class="empty-icon" aria-hidden="true">🎵</span>
+        @if (selectedGenre !== ALL_GENRES) {
+          <p>
+            No {{ selectedGenre }} performances
+            @if (selectedStage !== ALL_STAGES) {
+              on {{ selectedStage }}
+            }
+            @if (selectedDay) {
+              on {{ selectedDay | date: 'EEEE, MMM d' : 'UTC' }}
+            }
+            .
+          </p>
+        } @else if (selectedStage !== ALL_STAGES) {
+          <p>
+            No performances scheduled for {{ selectedStage }}
+            @if (selectedDay) {
+              on {{ selectedDay | date: 'EEEE, MMM d' : 'UTC' }}
+            }
+            .
+          </p>
+        } @else if (selectedDay) {
+          <p>No performances scheduled for {{ selectedDay | date: 'EEEE, MMM d' : 'UTC' }} yet.</p>
+        } @else {
+          <p>No performances scheduled.</p>
+        }
+      </div>
+    }
   }
-
-  } <!-- end if (!festivalId) -->
-
+  <!-- end if (!festivalId) -->
 }
 <!-- end TAB 1 -->
-
 
 <!-- ================================================================
      TAB 2: MY SCHEDULE (Personal Itinerary)
      ================================================================ -->
 @if (activeView === 'personal') {
-
   <!-- ---- Personal Conflict Alert ----------------------------------------- -->
   @if (personalConflicts.length > 0) {
     <div class="conflict-alert conflict-alert--personal" role="alert" aria-live="assertive">
@@ -253,8 +255,8 @@
         </strong>
         @for (c of personalConflicts; track $index) {
           <span>
-            {{ c.a.artistName }} &amp; {{ c.b.artistName }} overlap {{ c.overlapWindow }}
-            on {{ c.a.date | date:'MMM d':'UTC' }}
+            {{ c.a.artistName }} &amp; {{ c.b.artistName }} overlap {{ c.overlapWindow }} on
+            {{ c.a.date | date: 'MMM d' : 'UTC' }}
           </span>
         }
       </div>
@@ -263,7 +265,6 @@
 
   <!-- ---- Personal Schedule: Populated State ------------------------------ -->
   @if (savedPerformances.length > 0) {
-
     <!-- Header row with count + clear-all -->
     <div class="personal-header">
       <p class="personal-count">
@@ -273,19 +274,19 @@
       <button
         class="btn-clear-all"
         (click)="clearPersonalSchedule()"
-        aria-label="Remove all performances from My Schedule">
+        aria-label="Remove all performances from My Schedule"
+      >
         Clear All
       </button>
     </div>
 
     <!-- Itinerary: grouped by day, sorted by start time -->
     @for (day of personalDays; track day) {
-      <section class="personal-day" [attr.aria-label]="day | date:'EEEE, MMMM d':'UTC'">
-
+      <section class="personal-day" [attr.aria-label]="day | date: 'EEEE, MMMM d' : 'UTC'">
         <!-- Day heading -->
         <div class="personal-day-header">
-          <span class="personal-day-weekday">{{ day | date:'EEEE':'UTC' }}</span>
-          <span class="personal-day-date">{{ day | date:'MMMM d':'UTC' }}</span>
+          <span class="personal-day-weekday">{{ day | date: 'EEEE' : 'UTC' }}</span>
+          <span class="personal-day-date">{{ day | date: 'MMMM d' : 'UTC' }}</span>
           <span class="personal-day-count">
             {{ savedForDay(day).length }} show{{ savedForDay(day).length !== 1 ? 's' : '' }}
           </span>
@@ -298,15 +299,15 @@
               class="personal-card"
               [class.personal-card--conflict]="hasPersonalConflict(perf.id)"
               [attr.aria-label]="
-                perf.artistName + ' at ' + formatDisplayTime(perf.startTime) +
+                perf.artistName +
+                ' at ' +
+                formatDisplayTime(perf.startTime) +
                 (hasPersonalConflict(perf.id) ? ' — time clash detected' : '')
-              ">
-
+              "
+            >
               <!-- Conflict badge -->
               @if (hasPersonalConflict(perf.id)) {
-                <div class="personal-card__conflict-tag" aria-hidden="true">
-                  ⚠ Time Clash
-                </div>
+                <div class="personal-card__conflict-tag" aria-hidden="true">⚠ Time Clash</div>
               }
 
               <!-- Time strip -->
@@ -318,7 +319,9 @@
 
               <!-- Main info -->
               <div class="personal-card__info">
-                <div class="personal-card__festival">{{ festivalLabelForPerformance(perf) }} Festival</div>
+                <div class="personal-card__festival">
+                  {{ festivalLabelForPerformance(perf) }} Festival
+                </div>
                 <div class="personal-card__artist">{{ perf.artistName }}</div>
                 <div class="personal-card__stage">{{ perf.stageName }}</div>
                 @if (perf.genre) {
@@ -330,18 +333,18 @@
               <button
                 class="btn-remove-perf"
                 (click)="removeSaved(perf.id, $event)"
-                [attr.aria-label]="'Remove ' + perf.artistName + ' from My Schedule'">
+                title="Remove performance from My Schedule"
+                [attr.aria-label]="'Remove ' + perf.artistName + ' from My Schedule'"
+              >
                 <span aria-hidden="true">✕</span>
               </button>
-
             </div>
           }
         </div>
-
       </section>
     }
 
-  <!-- ---- Personal Schedule: Empty State ---------------------------------- -->
+    <!-- ---- Personal Schedule: Empty State ---------------------------------- -->
   } @else {
     <div class="schedule-empty personal-empty" role="status" aria-live="polite">
       <span class="empty-icon" aria-hidden="true">⭐</span>
@@ -354,11 +357,11 @@
       <button
         class="btn-go-festival"
         (click)="setView('festival')"
-        aria-label="Go to Festival Schedule tab">
+        aria-label="Go to Festival Schedule tab"
+      >
         View Festival Schedule
       </button>
     </div>
   }
-
 }
 <!-- end TAB 2 -->

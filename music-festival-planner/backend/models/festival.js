@@ -39,6 +39,18 @@ const festivalSchema = new Schema(
       default: '',
       trim: true,
     },
+    // Optional genre used by merged frontend/API flows.
+    genre: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    // Optional festival-level capacity used by merged frontend/API flows.
+    capacity: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
     // Hero/banner image URL placeholder for future UI use.
     imageUrl: {
       type: String,
