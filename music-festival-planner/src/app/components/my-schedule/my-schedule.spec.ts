@@ -203,3 +203,20 @@ describe('MySchedule — festival with no performances', () => {
     expect(component.festivalDays.length).toBe(0);
   });
 });
+
+describe('MySchedule — no selected festival route', () => {
+  let component: MySchedule;
+  let fixture: ComponentFixture<MySchedule>;
+
+  beforeEach(async () => {
+    await makeTestBed('');
+    fixture = TestBed.createComponent(MySchedule);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  it('defaults to the personal tab on /my-schedule', () => {
+    expect(component.activeView).toBe('personal');
+  });
+});
