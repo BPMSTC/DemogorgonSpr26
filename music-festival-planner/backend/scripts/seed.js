@@ -28,6 +28,13 @@ const FESTIVAL_SEED = [
   },
 ];
 
+const FESTIVAL_WINDOW_BY_NAME = new Map(
+  FESTIVAL_SEED.map((festival) => [
+    festival.name,
+    { startDate: festival.startDate, endDate: festival.endDate },
+  ]),
+);
+
 // Stages are grouped by festival name to make mapping easier during insert.
 const STAGE_SEED = {
   'North Coast Pulse 2026': [
@@ -389,6 +396,65 @@ const PERFORMANCE_SEED = [
   },
 ];
 
+/**
+ * @typedef {Object} PerformanceSeedEntry
+ * @property {string} festivalName
+ * @property {string} stageName
+ * @property {string} artistName
+ * @property {string} start
+ * @property {string} end
+ */
+
+/** @param {string} isoDateTime @param {number} daysToAdd */
+function shiftIsoDateTimeByDays(isoDateTime, daysToAdd) {
+  const shifted = new Date(isoDateTime);
+  shifted.setUTCDate(shifted.getUTCDate() + daysToAdd);
+  return shifted.toISOString();
+}
+
+/**
+ * @param {string} festivalName
+ * @param {string} shiftedStartIso
+ * @param {string} shiftedEndIso
+ */
+function isWithinFestivalWindow(festivalName, shiftedStartIso, shiftedEndIso) {
+  const window = FESTIVAL_WINDOW_BY_NAME.get(festivalName);
+  if (!window) return false;
+
+  const shiftedStart = new Date(shiftedStartIso);
+  const shiftedEnd = new Date(shiftedEndIso);
+
+  return shiftedStart >= window.startDate && shiftedEnd <= window.endDate;
+}
+
+/** @param {PerformanceSeedEntry[]} baseSeed */
+function buildExpandedPerformanceSeed(baseSeed) {
+  const dayShifts = [0, 1, 2];
+  /** @type {PerformanceSeedEntry[]} */
+  const expanded = [];
+
+  baseSeed.forEach((entry) => {
+    dayShifts.forEach((dayShift) => {
+      const shiftedStart = shiftIsoDateTimeByDays(entry.start, dayShift);
+      const shiftedEnd = shiftIsoDateTimeByDays(entry.end, dayShift);
+
+      if (!isWithinFestivalWindow(entry.festivalName, shiftedStart, shiftedEnd)) {
+        return;
+      }
+
+      expanded.push({
+        ...entry,
+        start: shiftedStart,
+        end: shiftedEnd,
+      });
+    });
+  });
+
+  return expanded;
+}
+
+const EXPANDED_PERFORMANCE_SEED = buildExpandedPerformanceSeed(PERFORMANCE_SEED);
+
 // Repeatable seeding means clearing old docs before inserting fresh data.
 // Delete order starts from child collections to avoid future FK-like constraints.
 async function resetCollections() {
@@ -411,7 +477,9 @@ async function seedFestivals() {
 // Insert stage docs by resolving each festival name to its ObjectId.
 // Returns map:
 //   "<festivalId>::<stageName>" -> stage ObjectId
+/** @param {Map<string, any>} festivalIdByName */
 async function seedStages(festivalIdByName) {
+  /** @type {Array<Record<string, any>>} */
   const stageDocuments = [];
 
   Object.entries(STAGE_SEED).forEach(([festivalName, stages]) => {
@@ -435,7 +503,7 @@ async function seedStages(festivalIdByName) {
       // use the same stage name like "Main Stage".
       const key = `${stage.festival.toString()}::${stage.name}`;
       return [key, stage._id];
-    })
+    }),
   );
 }
 
@@ -448,8 +516,13 @@ async function seedArtists() {
 
 // Convert human-readable performance rows into normalized DB documents.
 // Each row becomes a document with ObjectId references + Date values.
+/**
+ * @param {Map<string, any>} festivalIdByName
+ * @param {Map<string, any>} stageIdByFestivalAndName
+ * @param {Map<string, any>} artistIdByName
+ */
 async function seedPerformances(festivalIdByName, stageIdByFestivalAndName, artistIdByName) {
-  const performanceDocuments = PERFORMANCE_SEED.map((entry) => {
+  const performanceDocuments = EXPANDED_PERFORMANCE_SEED.map((entry) => {
     const festivalId = festivalIdByName.get(entry.festivalName);
     const stageId = stageIdByFestivalAndName.get(`${festivalId.toString()}::${entry.stageName}`);
     const artistId = artistIdByName.get(entry.artistName);
@@ -479,6 +552,7 @@ async function printSummary() {
     Artist.countDocuments(),
     Performance.countDocuments(),
   ]);
+  const totalDocuments = festivalCount + stageCount + artistCount + performanceCount;
 
   console.log('Seed completed successfully.');
   console.table({
@@ -486,6 +560,8 @@ async function printSummary() {
     stages: stageCount,
     artists: artistCount,
     performances: performanceCount,
+    totalDocuments,
+    meetsHundredDocTarget: totalDocuments >= 100,
   });
 }
 
