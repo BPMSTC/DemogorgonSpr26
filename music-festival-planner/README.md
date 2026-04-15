@@ -156,6 +156,8 @@ This project satisfies submission expectations using the festival domain (not we
 - Test cases demonstrating functionality (project-based):
   - Angular unit tests under `src/app/**/*.spec.ts`
   - Run with: `npm test -- --watch=false`
+  - Backend model/integration/edge tests under `backend/tests/*.test.js`
+  - Run with: `npm run test:backend`
 - Evidence of 100+ records:
   - Run `npm run seed`
   - Run `npm run mongo:check`
