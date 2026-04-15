@@ -28,7 +28,7 @@ npm run build
 
 ## MongoDB Setup (Beginner Friendly)
 
-The Angular app is currently frontend-first. MongoDB setup in this repo lives under `server/` so you can seed and validate realistic festival data while backend API work is added.
+The Angular app is currently frontend-first. MongoDB setup in this repo lives under `backend/` so you can seed and validate realistic festival data while backend API work is added.
 
 ### 1) Prerequisites
 
@@ -43,10 +43,10 @@ The Angular app is currently frontend-first. MongoDB setup in this repo lives un
 Create your local env file from the example:
 
 ```powershell
-Copy-Item server/music-festival-planner.env.example server/music-festival-planner.env
+Copy-Item backend/.env.example backend/.env.local
 ```
 
-Then edit `server/music-festival-planner.env` and set:
+Then edit `backend/.env.local` and set:
 
 ```env
 MONGODB_URI=mongodb://127.0.0.1:27017/music-festival-planner-dev
@@ -92,10 +92,10 @@ Expected minimum seeded shape:
 
 ### MongoDB collection/model map
 
-- `festivals` -> `server/models/festival.js`
-- `stages` -> `server/models/stage.js`
-- `artists` -> `server/models/artist.js`
-- `performances` -> `server/models/performance.js`
+- `festivals` -> `backend/models/festival.js`
+- `stages` -> `backend/models/stage.js`
+- `artists` -> `backend/models/artist.js`
+- `performances` -> `backend/models/performance.js`
 
 `performances` stores these required references and fields:
 
