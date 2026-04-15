@@ -1,6 +1,11 @@
+const mongoose = require('mongoose');
 const Stage = require('../models/stage');
 
 const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function isValidObjectId(value) {
+  return mongoose.Types.ObjectId.isValid(value);
+}
 
 function mapEnvironment(environment) {
   // Frontend stage model expects only indoor/outdoor.
@@ -25,6 +30,11 @@ exports.getStagesByFestival = async (req, res) => {
   if (!festivalId) {
     return res.status(400).json({ message: 'festivalId query parameter is required.' });
   }
+
+  if (!isValidObjectId(festivalId)) {
+    return res.status(400).json({ message: 'festivalId must be a valid ObjectId.' });
+  }
+
   try {
     const stages = await Stage.find({ festival: festivalId }).sort({ name: 1 });
     res.json(stages.map(mapStage));
@@ -39,6 +49,10 @@ exports.createStage = async (req, res) => {
 
   if (!festivalId || !name) {
     return res.status(400).json({ message: 'festivalId and name are required.' });
+  }
+
+  if (!isValidObjectId(festivalId)) {
+    return res.status(400).json({ message: 'festivalId must be a valid ObjectId.' });
   }
 
   if (!Number.isInteger(capacity) || capacity <= 0) {
