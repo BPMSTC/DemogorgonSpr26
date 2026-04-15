@@ -26,11 +26,13 @@ export class Festivals implements OnInit, OnDestroy {
 
   /** Pre-fetched on init so the template doesn't call the service on every render. */
   stagesByFestivalId: Record<string, Stage[] | undefined> = {};
+  stageLoadFailedByFestivalId: Record<string, boolean | undefined> = {};
 
   openKebabMenuFestivalId: string | null = null;
 
   private routerEventsSubscription?: Subscription;
   private loadDataSubscription?: Subscription;
+  // private stageLoadSubscriptions: Subscription[] = [];
 
   constructor(
     private festivalService: FestivalService,
@@ -88,6 +90,7 @@ export class Festivals implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routerEventsSubscription?.unsubscribe();
     this.loadDataSubscription?.unsubscribe();
+    //  this.stageLoadSubscriptions.forEach((s) => s.unsubscribe());
   }
 
   toggleFestivalCard(festivalId: string, clickEvent: MouseEvent): void {

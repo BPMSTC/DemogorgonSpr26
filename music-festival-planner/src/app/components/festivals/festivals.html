@@ -7,6 +7,7 @@
   <div class="card-grid" role="list" aria-labelledby="festivals-heading">
     @for (festival of festivalsList; track festival.id) {
       @let festivalStages = stagesByFestivalId[festival.id] ?? [];
+      @let stageLoadFailed = stageLoadFailedByFestivalId[festival.id] ?? false;
       <div class="card" [class.card-expanded]="expandedFestivalId === festival.id" role="listitem">
         <div class="card-header">
           <button
@@ -107,7 +108,9 @@
 
         @if (expandedFestivalId === festival.id) {
           <div class="stage-panel" [id]="'festival-panel-' + festival.id">
-            @if (festivalStages.length === 0) {
+            @if (stageLoadFailed) {
+              <p class="no-stages">Could not load stages right now. Please try again.</p>
+            } @else if (festivalStages.length === 0) {
               <p class="no-stages">No stages yet.</p>
             } @else {
               <div class="stage-rows">
