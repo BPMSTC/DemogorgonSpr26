@@ -25,7 +25,7 @@ export class Festivals implements OnInit, OnDestroy {
   expandedFestivalId: string | null = null;
 
   /** Pre-fetched on init so the template doesn't call the service on every render. */
-  stagesByFestivalId: Record<string, Stage[]> = {};
+  stagesByFestivalId: Record<string, Stage[] | undefined> = {};
 
   openKebabMenuFestivalId: string | null = null;
 
