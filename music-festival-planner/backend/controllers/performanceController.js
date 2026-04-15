@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Performance = require('../models/performance');
 const Stage = require('../models/stage');
 const Artist = require('../models/artist');
@@ -149,6 +150,9 @@ exports.getPerformancesByFestival = async (req, res) => {
   const { festivalId, sortBy = 'date', order = 'asc', page, limit } = req.query;
   if (!festivalId) {
     return res.status(400).json({ message: 'festivalId query parameter is required.' });
+  }
+  if (!mongoose.isValidObjectId(festivalId)) {
+    return res.status(400).json({ message: 'festivalId must be a valid ObjectId.' });
   }
 
   try {
