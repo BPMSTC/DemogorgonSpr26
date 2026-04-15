@@ -19,13 +19,13 @@ async function clearCollections() {
 
 test.before(async () => {
   await connectToDatabase();
+  await clearCollections();
   await Promise.all([
     Festival.syncIndexes(),
     Stage.syncIndexes(),
     Artist.syncIndexes(),
     Performance.syncIndexes(),
   ]);
-  await clearCollections();
 });
 
 test.after(async () => {
