@@ -10,6 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "seed": "node backend/scripts/seed.js",
+    "seed:reset": "node backend/scripts/seed.js --reset --confirm WIPE",
     "mongo:check": "node backend/scripts/check-mongo.js"
   },
   "private": true,
