@@ -69,17 +69,20 @@ The Angular app is currently frontend-first. MongoDB setup in this repo lives un
 
 ### 2) Configure environment
 
-Create your local env file from the example:
+Create your Atlas env file from the example:
 
 ```powershell
-Copy-Item backend/.env.example backend/.env.local
+Copy-Item backend/.env.example backend/.env
 ```
 
-Then edit `backend/.env.local` and set:
+Then edit `backend/.env` and set:
 
 ```env
-MONGODB_URI=mongodb://127.0.0.1:27017/music-festival-planner-dev
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/music-festival-planner?retryWrites=true&w=majority&appName=Cluster0
+MONGODB_DNS_FALLBACK_SERVERS=1.1.1.1,8.8.8.8
 ```
+
+If your network blocks SRV DNS lookups, the backend now automatically retries Atlas resolution using `MONGODB_DNS_FALLBACK_SERVERS`.
 
 ### 3) Seed the database (repeatable)
 
@@ -105,7 +108,7 @@ This checks connectivity and prints document counts for each collection.
 ### 5) Optional manual checks in mongosh
 
 ```javascript
-use('music-festival-planner-dev');
+use('music-festival-planner');
 db.festivals.countDocuments();
 db.stages.countDocuments();
 db.artists.countDocuments();

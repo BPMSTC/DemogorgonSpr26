@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const dns = require('dns');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
@@ -11,6 +12,7 @@ const DEFAULT_ENV_FILES = [
   path.resolve(__dirname, '../.env'),
   path.resolve(__dirname, '../.env.local'),
 ];
+const DEFAULT_DNS_FALLBACK_SERVERS = ['1.1.1.1', '8.8.8.8'];
 
 // Prevent dotenv from reloading the same env file repeatedly.
 let isEnvLoaded = false;
@@ -47,13 +49,92 @@ function getMongoUri() {
   return process.env.MONGODB_URI || DEFAULT_MONGODB_URI;
 }
 
-async function connectToDatabase() {
-  const mongoUri = getMongoUri();
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
+function getErrorMessage(error) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
 
+/**
+ * @param {string | undefined} rawValue
+ * @returns {string[]}
+ */
+function parseDnsFallbackServers(rawValue) {
+  if (!rawValue || !String(rawValue).trim()) {
+    return DEFAULT_DNS_FALLBACK_SERVERS;
+  }
+
+  return String(rawValue)
+    .split(',')
+    .map((server) => server.trim())
+    .filter(Boolean);
+}
+
+/**
+ * @param {unknown} error
+ * @param {string} mongoUri
+ * @returns {boolean}
+ */
+function isAtlasSrvLookupError(error, mongoUri) {
+  if (!mongoUri.startsWith('mongodb+srv://') || !error) {
+    return false;
+  }
+
+  const err = /** @type {{ hostname?: string; syscall?: string }} */ (error);
+  const srvHost = String(err.hostname || '');
+  const isSrvSyscall = String(err.syscall || '').toLowerCase() === 'querysrv';
+  const isSrvHost = srvHost.startsWith('_mongodb._tcp.');
+
+  return isSrvSyscall || isSrvHost;
+}
+
+/**
+ * @param {string} mongoUri
+ * @returns {Promise<void>}
+ */
+async function connectWithUri(mongoUri) {
   // serverSelectionTimeoutMS avoids hanging too long on invalid/offline hosts.
   await mongoose.connect(mongoUri, {
     serverSelectionTimeoutMS: 5000,
   });
+}
+
+async function connectToDatabase() {
+  const mongoUri = getMongoUri();
+
+  try {
+    await connectWithUri(mongoUri);
+  } catch (error) {
+    if (!isAtlasSrvLookupError(error, mongoUri)) {
+      throw error;
+    }
+
+    const dnsServers = parseDnsFallbackServers(process.env.MONGODB_DNS_FALLBACK_SERVERS);
+    if (dnsServers.length === 0) {
+      throw error;
+    }
+
+    dns.setServers(dnsServers);
+
+    try {
+      await connectWithUri(mongoUri);
+      console.warn(
+        `MongoDB SRV lookup succeeded after DNS fallback (${dnsServers.join(', ')}).`
+      );
+    } catch (retryError) {
+      const enrichedError = new Error(
+        `MongoDB SRV lookup failed using system DNS and fallback DNS servers (${dnsServers.join(', ')}). ` +
+          `Initial error: ${getErrorMessage(error)}. Retry error: ${getErrorMessage(retryError)}`
+      );
+      enrichedError.cause = retryError;
+      throw enrichedError;
+    }
+  }
 
   // Return active connection for scripts that need db metadata or ping.
   return mongoose.connection;
