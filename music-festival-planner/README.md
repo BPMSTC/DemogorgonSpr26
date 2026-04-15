@@ -34,7 +34,7 @@ npm run dev
 npm start
 ```
 
-The API listens on **http://localhost:3000** by default (override with the `PORT` env var).
+The API listens on **<http://localhost:3000>** by default (override with the `PORT` env var).
 
 ### 2. Start the Angular app
 
@@ -65,8 +65,8 @@ The Angular app is currently frontend-first. MongoDB setup in this repo lives un
 - Node.js 20+
 - npm
 - A running MongoDB instance:
-    - Local MongoDB Community Server, or
-    - MongoDB Atlas connection string
+  - Local MongoDB Community Server, or
+  - MongoDB Atlas connection string
 
 ### 2) Configure environment
 
@@ -118,7 +118,8 @@ Expected minimum seeded shape:
 - 2 festivals
 - 3-5 stages per festival (8 total)
 - 15+ artists (16 total)
-- 30+ performances across multiple days (32 total)
+- 30+ performances across multiple days (80 total)
+- 100+ total MongoDB documents across core collections (106 total)
 
 ### MongoDB collection/model map
 
@@ -136,11 +137,47 @@ Expected minimum seeded shape:
 - `endDateTime`
 - `day` (derived automatically from `startDateTime`)
 
+### Submission checklist coverage (project-based)
+
+This project satisfies submission expectations using the festival domain (not weather-specific), which is the intended app scope.
+
+- Working MongoDB + Mongoose integration:
+  - Backend connection helper: `backend/config/database.js`
+  - Mongoose models: `backend/models/*.js`
+- Schema design + validation documentation:
+  - Model-level comments and validation rules in:
+    - `backend/models/festival.js`
+    - `backend/models/stage.js`
+    - `backend/models/artist.js`
+    - `backend/models/performance.js`
+- Repeatable data generation + seeding:
+  - `npm run seed` (script: `backend/scripts/seed.js`)
+  - Clears and reseeds deterministically in dependency order.
+- Test cases demonstrating functionality (project-based):
+  - Angular unit tests under `src/app/**/*.spec.ts`
+  - Run with: `npm test -- --watch=false`
+  - Backend model/integration/edge tests under `backend/tests/*.test.js`
+  - Run with: `npm run test:backend`
+- Evidence of 100+ records:
+  - Run `npm run seed`
+  - Run `npm run mongo:check`
+  - Output shows counts and total documents (`totalDocuments >= 100`).
+
+### Challenges encountered and solutions
+
+- Challenge: Maintaining referential integrity while seeding related collections.
+  - Solution: Seed order is enforced (festivals -> stages/artists -> performances) with explicit ObjectId mapping by festival/stage/artist keys.
+- Challenge: Preventing duplicate growth across repeated seeds.
+  - Solution: Seed script clears target collections first, then inserts a deterministic dataset shape.
+- Challenge: Meeting the 100+ document evidence requirement while keeping realistic sample data.
+  - Solution: Performance seed rows are expanded by safe date shifts constrained by each festival's date window, resulting in a repeatable 100+ total document count.
+
 ---
 
 ## Tech Stack
 
 ### Frontend
+
 | Tool | Version | Purpose |
 |---|---|---|
 | Angular | 21.2.x | Framework |
@@ -150,6 +187,7 @@ Expected minimum seeded shape:
 | Angular CLI | 21.2.x | Scaffolding & build |
 
 ### Backend
+
 | Tool | Version | Purpose |
 |---|---|---|
 | Node.js | ≥18 | Runtime |
