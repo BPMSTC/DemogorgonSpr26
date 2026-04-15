@@ -8,6 +8,10 @@ function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function normalizeName(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ');
+}
+
 function toMinutes(time) {
   const match = /^(\d{1,2}):(\d{2})$/.exec((time || '').trim());
   if (!match) return null;
@@ -65,15 +69,18 @@ function mapPerformance(doc) {
 }
 
 async function resolveStage(festivalId, stageName) {
+  const normalizedStageName = normalizeName(stageName);
+
   return Stage.findOne({
     festival: festivalId,
-    name: { $regex: new RegExp(`^${escapeRegex(stageName)}$`, 'i') },
+    name: { $regex: new RegExp(`^${escapeRegex(normalizedStageName)}$`, 'i') },
   });
 }
 
 async function resolveArtist(artistName, genre) {
+  const normalizedArtistName = normalizeName(artistName);
   const existing = await Artist.findOne({
-    name: { $regex: new RegExp(`^${escapeRegex(artistName)}$`, 'i') },
+    name: { $regex: new RegExp(`^${escapeRegex(normalizedArtistName)}$`, 'i') },
   });
 
   if (existing) {
@@ -85,7 +92,7 @@ async function resolveArtist(artistName, genre) {
   }
 
   const artist = new Artist({
-    name: artistName,
+    name: normalizedArtistName,
     genre: genre || 'Unknown',
     description: '',
   });
