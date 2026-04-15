@@ -3,12 +3,13 @@ const path = require('path');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
-// Safe default for local development if no env file value is found.
-const DEFAULT_MONGODB_URI = 'mongodb://127.0.0.1:27017/music-festival-planner-dev';
-// Preferred backend env files (first one found wins).
+// Safe fallback if no env file value is found.
+const DEFAULT_MONGODB_URI =
+  'mongodb+srv://darienmaverick_db_user:7wJUhmrICmd7Hndz@cluster0.rne3zjb.mongodb.net/?appName=Cluster0';
+// Preferred backend env files (first one found wins). The primary default is .env.
 const DEFAULT_ENV_FILES = [
-  path.resolve(__dirname, '../.env.local'),
   path.resolve(__dirname, '../.env'),
+  path.resolve(__dirname, '../.env.local'),
 ];
 
 // Prevent dotenv from reloading the same env file repeatedly.
@@ -42,7 +43,7 @@ function loadEnvironment() {
 function getMongoUri() {
   // Ensure environment variables are available before reading them.
   loadEnvironment();
-  // Fall back to default local URI so beginner setup still works quickly.
+  // Fall back to the Atlas URI so the default developer experience is consistent.
   return process.env.MONGODB_URI || DEFAULT_MONGODB_URI;
 }
 

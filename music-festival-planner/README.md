@@ -21,11 +21,10 @@ cd music-festival-planner/backend
 # Install backend dependencies (first time only)
 npm install
 
-# Create your local environment file
+# Create your Atlas environment file
 cp .env.example .env
-# Open .env and set MONGODB_URI to your MongoDB connection string, e.g.:
-#   Local:  mongodb://localhost:27017/music-festival-planner
-#   Atlas:  mongodb+srv://<user>:<password>@<cluster>.mongodb.net/music-festival-planner
+# Open .env and set MONGODB_URI to your Atlas connection string.
+# Local MongoDB is still available for explicit local-only scripts via backend/.env.local.
 
 # Start with auto-reload (development)
 npm run dev
@@ -34,7 +33,7 @@ npm run dev
 npm start
 ```
 
-The API listens on **http://localhost:3000** by default (override with the `PORT` env var).
+The API listens on **<http://localhost:3000>** by default (override with the `PORT` env var).
 
 ### 2. Start the Angular app
 
@@ -65,8 +64,8 @@ The Angular app is currently frontend-first. MongoDB setup in this repo lives un
 - Node.js 20+
 - npm
 - A running MongoDB instance:
-    - Local MongoDB Community Server, or
-    - MongoDB Atlas connection string
+  - Local MongoDB Community Server, or
+  - MongoDB Atlas connection string
 
 ### 2) Configure environment
 
@@ -141,6 +140,7 @@ Expected minimum seeded shape:
 ## Tech Stack
 
 ### Frontend
+
 | Tool | Version | Purpose |
 |---|---|---|
 | Angular | 21.2.x | Framework |
@@ -150,6 +150,7 @@ Expected minimum seeded shape:
 | Angular CLI | 21.2.x | Scaffolding & build |
 
 ### Backend
+
 | Tool | Version | Purpose |
 |---|---|---|
 | Node.js | ≥18 | Runtime |
