@@ -43,6 +43,12 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
+# Local backend environment files
+backend/.env
+backend/.env.local
+backend/.env.atlas
+!backend/.env.example
+
 # AI Assistant files
 .claude/
 .copilot-agent/
