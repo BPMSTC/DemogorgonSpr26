@@ -123,13 +123,11 @@ async function connectToDatabase() {
 
     try {
       await connectWithUri(mongoUri);
-      console.warn(
-        `MongoDB SRV lookup succeeded after DNS fallback (${dnsServers.join(', ')}).`
-      );
+      console.warn(`MongoDB SRV lookup succeeded after DNS fallback (${dnsServers.join(', ')}).`);
     } catch (retryError) {
       const enrichedError = new Error(
         `MongoDB SRV lookup failed using system DNS and fallback DNS servers (${dnsServers.join(', ')}). ` +
-          `Initial error: ${getErrorMessage(error)}. Retry error: ${getErrorMessage(retryError)}`
+          `Initial error: ${getErrorMessage(error)}. Retry error: ${getErrorMessage(retryError)}`,
       );
       enrichedError.cause = retryError;
       throw enrichedError;
