@@ -3,18 +3,71 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MySchedule, ALL_STAGES } from './my-schedule';
 import { ScheduleService } from '../../services/schedule.service';
+import { FestivalService } from '../../services/festival.service';
+import { PersonalScheduleService } from '../../services/personal-schedule.service';
 import { Performance } from '../../models/performance.model';
+import { Observable, of } from 'rxjs';
 
 const MOCK_PERFORMANCES: Performance[] = [
-  { id: '1', festivalId: '1', artistName: 'The Neon Shadows', stageName: 'Main Stage',   date: '2026-08-01', startTime: '18:00', endTime: '19:30' },
-  { id: '2', festivalId: '1', artistName: 'DJ Horizon',       stageName: 'Dance Tent',   date: '2026-08-01', startTime: '18:00', endTime: '19:00' },
-  { id: '3', festivalId: '1', artistName: 'Electric Pulse',   stageName: 'Main Stage',   date: '2026-08-01', startTime: '20:00', endTime: '21:30' },
-  { id: '4', festivalId: '1', artistName: 'Acoustic Wanderers', stageName: 'Forest Stage', date: '2026-08-02', startTime: '14:00', endTime: '15:00' },
+  {
+    id: '1',
+    festivalId: '1',
+    artistName: 'The Neon Shadows',
+    stageName: 'Main Stage',
+    date: '2026-08-01',
+    startTime: '18:00',
+    endTime: '19:30',
+  },
+  {
+    id: '2',
+    festivalId: '1',
+    artistName: 'DJ Horizon',
+    stageName: 'Dance Tent',
+    date: '2026-08-01',
+    startTime: '18:00',
+    endTime: '19:00',
+  },
+  {
+    id: '3',
+    festivalId: '1',
+    artistName: 'Electric Pulse',
+    stageName: 'Main Stage',
+    date: '2026-08-01',
+    startTime: '20:00',
+    endTime: '21:30',
+  },
+  {
+    id: '4',
+    festivalId: '1',
+    artistName: 'Acoustic Wanderers',
+    stageName: 'Forest Stage',
+    date: '2026-08-02',
+    startTime: '14:00',
+    endTime: '15:00',
+  },
 ];
 
 class MockScheduleService {
+  loadByFestival(festivalId: string): Observable<Performance[]> {
+    return of(this.getPerformancesByFestival(festivalId));
+  }
+
   getPerformancesByFestival(festivalId: string): Performance[] {
-    return MOCK_PERFORMANCES.filter(p => p.festivalId === festivalId).map(p => ({ ...p }));
+    return MOCK_PERFORMANCES.filter((p) => p.festivalId === festivalId).map((p) => ({ ...p }));
+  }
+}
+
+class MockFestivalService {
+  load() {
+    return of([{ id: '1', name: 'Mock Festival' }]);
+  }
+}
+
+class MockPersonalScheduleService {
+  saved$ = of([]);
+
+  getPersonalConflicts() {
+    return [];
   }
 }
 
@@ -25,10 +78,12 @@ function makeTestBed(festivalId = '1') {
     providers: [
       {
         provide: ActivatedRoute,
-        useValue: { snapshot: { paramMap: { get: () => festivalId } } }
+        useValue: { snapshot: { paramMap: { get: () => festivalId } } },
       },
-      { provide: ScheduleService, useClass: MockScheduleService }
-    ]
+      { provide: ScheduleService, useClass: MockScheduleService },
+      { provide: FestivalService, useClass: MockFestivalService },
+      { provide: PersonalScheduleService, useClass: MockPersonalScheduleService },
+    ],
   }).compileComponents();
 }
 
@@ -59,7 +114,7 @@ describe('MySchedule', () => {
 
     it('shows performances for the selected day', () => {
       expect(component.filteredPerformances.length).toBe(3);
-      component.filteredPerformances.forEach(p => expect(p.date).toBe('2026-08-01'));
+      component.filteredPerformances.forEach((p) => expect(p.date).toBe('2026-08-01'));
     });
 
     it('switches to a different day when selectDay is called', () => {
@@ -89,7 +144,7 @@ describe('MySchedule', () => {
     it('filters performances to the selected stage', () => {
       component.selectStage('Main Stage');
       expect(component.filteredPerformances.length).toBe(2);
-      component.filteredPerformances.forEach(p => expect(p.stageName).toBe('Main Stage'));
+      component.filteredPerformances.forEach((p) => expect(p.stageName).toBe('Main Stage'));
     });
 
     it('shows all performances when All Stages is selected', () => {

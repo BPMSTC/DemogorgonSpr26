@@ -43,6 +43,10 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
+# Environment / secrets — NEVER commit these
+.env
+**/.env
+
 # AI Assistant files
 .claude/
 .copilot-agent/

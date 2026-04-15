@@ -1,12 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { filter, switchMap } from 'rxjs/operators';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
-import { ScheduleService } from '../../services/schedule.service';
 import { PersonalScheduleService } from '../../services/personal-schedule.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
+
+type FestivalStageLookup = { id: string; stages: Stage[] };
 
 @Component({
   selector: 'app-festivals',
@@ -28,20 +30,44 @@ export class Festivals implements OnInit, OnDestroy {
   openKebabMenuFestivalId: string | null = null;
 
   private routerEventsSubscription?: Subscription;
+  private loadDataSubscription?: Subscription;
 
   constructor(
     private festivalService: FestivalService,
     private stageService: StageService,
-    private scheduleService: ScheduleService,
     private personalScheduleService: PersonalScheduleService,
     private router: Router,
   ) {}
 
   private loadData(): void {
-    this.festivalsList = this.festivalService.getFestivals();
-    this.festivalsList.forEach((festival) => {
-      this.stagesByFestivalId[festival.id] = this.stageService.getStagesByFestival(festival.id);
-    });
+    this.loadDataSubscription?.unsubscribe();
+    this.loadDataSubscription = this.festivalService
+      .load()
+      .pipe(
+        switchMap((festivals) => {
+          this.festivalsList = festivals;
+          this.stagesByFestivalId = {};
+          if (festivals.length === 0) return of([] as FestivalStageLookup[]);
+          return forkJoin(
+            festivals.map((f) =>
+              this.stageService
+                .loadByFestival(f.id)
+                .pipe(switchMap((stages) => of({ id: f.id, stages }))),
+            ),
+          );
+        }),
+      )
+      .subscribe({
+        next: (results: FestivalStageLookup[]) => {
+          results.forEach((r) => {
+            this.stagesByFestivalId[r.id] = r.stages;
+          });
+        },
+        error: () => {
+          this.festivalsList = [];
+          this.stagesByFestivalId = {};
+        },
+      });
   }
 
   ngOnInit(): void {
@@ -49,13 +75,19 @@ export class Festivals implements OnInit, OnDestroy {
     // Keeps stage counts fresh when navigating back from stage/performance pages without a full reload.
     this.routerEventsSubscription = this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.loadData();
+      .subscribe({
+        next: () => {
+          this.loadData();
+        },
+        error: () => {
+          // no-op: router event stream is not expected to error
+        },
       });
   }
 
   ngOnDestroy(): void {
     this.routerEventsSubscription?.unsubscribe();
+    this.loadDataSubscription?.unsubscribe();
   }
 
   toggleFestivalCard(festivalId: string, clickEvent: MouseEvent): void {
@@ -98,48 +130,37 @@ export class Festivals implements OnInit, OnDestroy {
   // ---- Cascade Delete ----------------------------------------------------
 
   /**
-   * Orchestrates the deletion of a festival and all its nested resources (stages, performances).
-   * Prompts the user for confirmation before proceeding.
+   * Deletes a festival via the backend cascade-delete endpoint and refreshes
+   * local UI state afterwards.
    */
   deleteFestivalWithCascade(festivalId: string, clickEvent: MouseEvent): void {
-    // Stop the click from opening the card
     clickEvent.stopPropagation();
-
-    // Close the kebab menu since the item is about to be deleted
     this.closeAllKebabMenus();
 
-    // The component does not hold the exact festival name in a handy lookup map,
-    // so we extract it from the currently loaded list for a nicer confirmation message.
-    const festivalToDelete = this.festivalsList.find(f => f.id === festivalId);
-    if (!festivalToDelete) return; // Should not happen
+    const festivalToDelete = this.festivalsList.find((f) => f.id === festivalId);
+    if (!festivalToDelete) return;
 
-    const confirmMessage = `Are you sure you want to permanently delete "${festivalToDelete.name}"?\n\nThis will also delete ALL stages and performances associated with it. This action cannot be undone.`;
+    const confirmMessage =
+      `Are you sure you want to permanently delete "${festivalToDelete.name}"?\n\n` +
+      `This will also delete ALL stages and performances associated with it. This action cannot be undone.`;
 
-    // Real apps might use a nice modal here; we use the native browser confirm for simplicity.
-    if (!window.confirm(confirmMessage)) {
-      return; // User canceled
-    }
+    if (!window.confirm(confirmMessage)) return;
 
-    // --- Execute the cascade delete ---
-    // 1. Delete the children (Performances) from personal schedule
+    // Remove from personal schedule immediately (local-only, no API needed).
     this.personalScheduleService.removePerformancesByFestival(festivalId);
 
-    // 2. Delete the children (Performances) from schedule
-    this.scheduleService.clearPerformancesByFestival(festivalId);
-
-    // 3. Delete the children (Stages)
-    this.stageService.clearStagesByFestival(festivalId);
-
-    // 4. Delete the parent (Festival)
-    this.festivalService.deleteFestival(festivalId);
-
-    // --- Update the UI ---
-    // Instead of doing a full page reload, just reload the data arrays
-    this.loadData();
-
-    // If the deleted festival was currently expanded, collapse it
-    if (this.expandedFestivalId === festivalId) {
-      this.expandedFestivalId = null;
-    }
+    // API handles cascade delete for nested stages/performances.
+    this.festivalService.deleteFestival(festivalId).subscribe({
+      next: () => {
+        this.loadData();
+        if (this.expandedFestivalId === festivalId) {
+          this.expandedFestivalId = null;
+        }
+      },
+      error: () => {
+        // Re-load to ensure UI matches server state even if failure occurred.
+        this.loadData();
+      },
+    });
   }
 }

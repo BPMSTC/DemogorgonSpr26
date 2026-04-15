@@ -10,8 +10,38 @@ This project lives inside the `DemogorgonSpr26` repository. All project document
 
 ## Quick Start
 
+The app now requires a running backend API connected to MongoDB.  Start the
+backend first, then the Angular dev server.
+
+### 1. Start the backend
+
 ```bash
-# Install dependencies
+cd music-festival-planner/backend
+
+# Install backend dependencies (first time only)
+npm install
+
+# Create your local environment file
+cp .env.example .env
+# Open .env and set MONGODB_URI to your MongoDB connection string, e.g.:
+#   Local:  mongodb://localhost:27017/music-festival-planner
+#   Atlas:  mongodb+srv://<user>:<password>@<cluster>.mongodb.net/music-festival-planner
+
+# Start with auto-reload (development)
+npm run dev
+
+# — or — plain Node (production-like)
+npm start
+```
+
+The API listens on **http://localhost:3000** by default (override with the `PORT` env var).
+
+### 2. Start the Angular app
+
+```bash
+cd music-festival-planner
+
+# Install frontend dependencies (first time only)
 npm install
 
 # Start dev server (http://localhost:4200)
@@ -110,6 +140,7 @@ Expected minimum seeded shape:
 
 ## Tech Stack
 
+### Frontend
 | Tool | Version | Purpose |
 |---|---|---|
 | Angular | 21.2.x | Framework |
@@ -117,6 +148,14 @@ Expected minimum seeded shape:
 | Bootstrap | 5.3.x | UI / layout |
 | Vitest | 4.x | Unit testing |
 | Angular CLI | 21.2.x | Scaffolding & build |
+
+### Backend
+| Tool | Version | Purpose |
+|---|---|---|
+| Node.js | ≥18 | Runtime |
+| Express | 4.x | HTTP server |
+| Mongoose | 8.x | MongoDB ODM |
+| dotenv | 16.x | Environment config |
 
 ---
 
@@ -127,7 +166,8 @@ Expected minimum seeded shape:
 - Manage stages per festival (add, delete; pre-seeded demo data for festival 1)
 - Schedule performances per festival with double-booking conflict detection
 - Timetable view with day tabs, stage/genre filters, and conflict highlighting
-- Performance data persists across page refreshes via `localStorage`
+- Festival, stage, and performance data stored in MongoDB via a Node.js/Express REST API
+- Personal "My Schedule" bookmarks still persisted locally via `localStorage`
 
 ---
 
