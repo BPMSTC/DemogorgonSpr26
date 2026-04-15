@@ -80,6 +80,9 @@ export class MySchedule implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.festivalId = this.route.snapshot.paramMap.get('id') ?? '';
+    if (!this.festivalId) {
+      this.activeView = 'personal';
+    }
 
     // Load all festivals so the name-lookup map is populated.
     this.festivalService.load().subscribe({
