@@ -3,11 +3,13 @@
 Generated from origin/main on 2026-04-01.
 
 ## Ownership Mapping
+
 - copilot-swe-agent[bot] = me
 - MavScript.blu = me
 - Claude = me
 
 ## Headline Stats
+
 - My commits: **65**
 - Total commits on origin/main: **77**
 - My share: **84.4%**
@@ -15,7 +17,7 @@ Generated from origin/main on 2026-04-01.
 ### Author Breakdown (my identities)
 
 | Author | Commits |
-|---|---:|
+| --- | ---: |
 | copilot-swe-agent[bot] | 27 |
 | MavScript.blu | 26 |
 | Claude | 12 |
@@ -23,7 +25,7 @@ Generated from origin/main on 2026-04-01.
 ## Full Commit List (my identities only, since 2026-03-18)
 
 | Hash | Date | Author | Message |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `3b5fb2f` | 2026-03-31 | MavScript.blu | feat: Add Person B Walkthrough for UI/UX polish and validation improvements |
 | `d809df9` | 2026-03-31 | MavScript.blu | Merge pull request #82 from BPMSTC/DEM-75-Adding-to-the-landing-page |
 | `f59dd38` | 2026-03-31 | copilot-swe-agent[bot] | DEM-75: Apply PR review feedback — fix image paths, footer semantics, centralize spacing |
@@ -93,7 +95,7 @@ Generated from origin/main on 2026-04-01.
 ## Most-Touched Files (my identities only)
 
 | Touches | File |
-|---:|---|
+| ---: | --- |
 | 8 | `music-festival-planner/src/app/components/festivals/festivals.css` |
 | 7 | `music-festival-planner/src/app/services/schedule.service.spec.ts` |
 | 7 | `music-festival-planner/src/app/components/performance-create/performance-create.ts` |
@@ -150,7 +152,7 @@ Generated from origin/main on 2026-04-01.
 ## Daily Commit Trend (my identities only)
 
 | Date | Commits |
-|---|---:|
+| --- | ---: |
 | 2026-03-31 | 3 |
 | 2026-03-29 | 8 |
 | 2026-03-20 | 11 |

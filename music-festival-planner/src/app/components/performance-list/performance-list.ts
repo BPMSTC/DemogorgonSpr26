@@ -12,13 +12,8 @@ import { Performance } from '../../models/performance.model';
   styleUrl: './performance-list.css',
 })
 export class PerformanceListComponent implements OnInit {
-  /** The parent festival record (used to show the festival name in the header). */
   currentFestival: Festival | undefined;
-
-  /** All performances for this festival, sorted by date then start time. */
   sortedPerformances: Performance[] = [];
-
-  /** Festival ID extracted from the URL (:id route param). */
   festivalId = '';
 
   constructor(
@@ -26,106 +21,91 @@ export class PerformanceListComponent implements OnInit {
     private router: Router,
     private scheduleService: ScheduleService,
     private festivalService: FestivalService,
-    private injector: Injector
+    private injector: Injector,
   ) {}
 
   ngOnInit(): void {
-    // Pull festival ID from URL and load the parent festival for the header.
-    this.festivalId   = this.activeRoute.snapshot.paramMap.get('id') ?? '';
-    this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    this.festivalId = this.activeRoute.snapshot.paramMap.get('id') ?? '';
 
-    // React to all schedule mutations from the shared service state.
-    effect(() => {
-      this.sortedPerformances = this.sortPerformances(
-        this.scheduleService.getPerformancesByFestival(this.festivalId)
-      );
-    }, { injector: this.injector });
-  }
-
-  /** Pure sort helper used by both reactive state sync and tests. */
-  private sortPerformances(performances: Performance[]): Performance[] {
-    // Helper to convert "HH:mm" → total minutes for numeric time comparison.
-    const convertTimeToMinutes = (timeString: string): number => {
-      const [hours, minutes] = timeString.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
-
-    return [...performances].sort((performanceA, performanceB) => {
-      // Primary sort: date string comparison (ISO format sorts lexicographically).
-      if (performanceA.date !== performanceB.date) {
-        return performanceA.date.localeCompare(performanceB.date);
-      }
-      // Secondary sort: earlier start times come first within the same day.
-      return convertTimeToMinutes(performanceA.startTime) -
-             convertTimeToMinutes(performanceB.startTime);
+    // Load festival name for the header.
+    this.festivalService.loadById(this.festivalId).subscribe({
+      next: (festival) => {
+        this.currentFestival = festival;
+      },
+      error: () => {
+        this.currentFestival = undefined;
+      },
     });
-  }
 
-  /**
-   * Fetches the current performance list from the service and sorts it
-   * chronologically: first by date (ascending), then by start time within each date.
-   * Called on init and after every add/delete/clear operation.
-   */
-  refreshPerformanceList(): void {
-    this.sortedPerformances = this.sortPerformances(
-      this.scheduleService.getPerformancesByFestival(this.festivalId)
+    // Load performances from the API; the signal update triggers the effect below.
+    this.scheduleService.loadByFestival(this.festivalId).subscribe({
+      error: () => {
+        // keep existing signal state if initial load fails
+      },
+    });
+
+    // React to signal changes (initial load + any subsequent add/delete).
+    effect(
+      () => {
+        this.sortedPerformances = this.sortPerformances(
+          this.scheduleService.getPerformancesByFestival(this.festivalId),
+        );
+      },
+      { injector: this.injector },
     );
   }
 
-  /**
-   * Formats a stored 24-hour time string for display in 12-hour format.
-   *
-   * @param timeString Time string in HH:mm or H:mm format.
-   * @returns Formatted time string such as "06:00 PM".
-   */
+  private sortPerformances(performances: Performance[]): Performance[] {
+    const convertTimeToMinutes = (t: string): number => {
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    };
+
+    return [...performances].sort((a, b) => {
+      if (a.date !== b.date) return a.date.localeCompare(b.date);
+      return convertTimeToMinutes(a.startTime) - convertTimeToMinutes(b.startTime);
+    });
+  }
+
+  refreshPerformanceList(): void {
+    this.sortedPerformances = this.sortPerformances(
+      this.scheduleService.getPerformancesByFestival(this.festivalId),
+    );
+  }
+
   formatDisplayTime(timeString: string): string {
     const [hoursText, minutesText] = timeString.split(':');
     const hours = Number(hoursText);
     const minutes = Number(minutesText);
-
-    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
-      return timeString;
-    }
-
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return timeString;
     const suffix = hours >= 12 ? 'PM' : 'AM';
     const normalizedHours = hours % 12 || 12;
     return `${String(normalizedHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${suffix}`;
   }
 
-  // ---- Navigation Helpers ------------------------------------------------
+  // ---- Navigation --------------------------------------------------------
 
-  /** Routes to the "Add Performance" form for this festival. */
   navigateToAddPerformance(): void {
     this.router.navigate(['/festivals', this.festivalId, 'performances', 'new']);
   }
 
-  /** Routes back to the festivals overview page. */
   navigateBackToFestivals(): void {
     this.router.navigate(['/festivals']);
   }
 
   // ---- Action Handlers ---------------------------------------------------
 
-  /**
-   * Prompts the user to confirm, then removes a single performance by its ID.
-   * Refreshes the list so the deleted entry disappears immediately.
-   */
   confirmAndDeletePerformance(performanceId: string): void {
     if (confirm('Remove this performance from the lineup?')) {
-      this.scheduleService.deletePerformance(performanceId);
-      this.refreshPerformanceList(); // re-fetch so the card disappears
+      this.scheduleService.deletePerformance(performanceId).subscribe();
+      // The signal update inside deletePerformance() will trigger the effect()
+      // which re-sorts sortedPerformances automatically.
     }
   }
 
-  /**
-   * Prompts the user to confirm, then removes ALL performances for this festival
-   * in a single operation (the "Clear All" button).
-   * Refreshes the list so it shows the empty state immediately.
-   */
   confirmAndClearAllPerformances(): void {
     if (confirm('Clear ALL performances for this festival? This cannot be undone.')) {
-      this.scheduleService.clearPerformancesByFestival(this.festivalId);
-      this.refreshPerformanceList(); // re-fetch to show the empty state
+      this.scheduleService.clearPerformancesByFestival(this.festivalId).subscribe();
     }
   }
 }
