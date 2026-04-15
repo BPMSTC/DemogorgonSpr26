@@ -64,6 +64,22 @@ describe('StageService', () => {
     expect(service.getStagesByFestival('88')).toEqual([other]);
   });
 
+  it('should return cloned stages from synchronous reads', async () => {
+    const loadPromise = firstValueFrom(service.loadByFestival('99'));
+    httpMock.expectOne(`${BASE_URL}?festivalId=99`).flush([STAGE_A]);
+    await loadPromise;
+
+    const list = service.getStagesByFestival('99');
+    const byId = service.getStageById('a');
+    list[0].name = 'Mutated';
+    if (byId) {
+      byId.name = 'Mutated too';
+    }
+
+    expect(service.getStagesByFestival('99')[0].name).toBe(STAGE_A.name);
+    expect(service.getStageById('a')?.name).toBe(STAGE_A.name);
+  });
+
   it('createStage() should post and append to cache', async () => {
     const input: Omit<Stage, 'id'> = {
       festivalId: STAGE_A.festivalId,

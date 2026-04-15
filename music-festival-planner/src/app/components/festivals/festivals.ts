@@ -4,7 +4,6 @@ import { Subscription, forkJoin, of } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
-import { ScheduleService } from '../../services/schedule.service';
 import { PersonalScheduleService } from '../../services/personal-schedule.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
@@ -29,17 +28,18 @@ export class Festivals implements OnInit, OnDestroy {
   openKebabMenuFestivalId: string | null = null;
 
   private routerEventsSubscription?: Subscription;
+  private loadDataSubscription?: Subscription;
 
   constructor(
     private festivalService: FestivalService,
     private stageService: StageService,
-    private scheduleService: ScheduleService,
     private personalScheduleService: PersonalScheduleService,
     private router: Router,
   ) {}
 
   private loadData(): void {
-    this.festivalService
+    this.loadDataSubscription?.unsubscribe();
+    this.loadDataSubscription = this.festivalService
       .load()
       .pipe(
         switchMap((festivals) => {
@@ -56,7 +56,7 @@ export class Festivals implements OnInit, OnDestroy {
         }),
       )
       .subscribe({
-        next: (results) => {
+        next: (results: { id: string; stages: Stage[] }[]) => {
           results.forEach((r) => {
             this.stagesByFestivalId[r.id] = r.stages;
           });
@@ -85,6 +85,7 @@ export class Festivals implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routerEventsSubscription?.unsubscribe();
+    this.loadDataSubscription?.unsubscribe();
   }
 
   toggleFestivalCard(festivalId: string, clickEvent: MouseEvent): void {
@@ -127,9 +128,8 @@ export class Festivals implements OnInit, OnDestroy {
   // ---- Cascade Delete ----------------------------------------------------
 
   /**
-   * Orchestrates the deletion of a festival and all its nested resources
-   * (stages, performances).  Calls the API in parallel for children, then
-   * removes the festival, and finally refreshes the UI.
+   * Deletes a festival via the backend cascade-delete endpoint and refreshes
+   * local UI state afterwards.
    */
   deleteFestivalWithCascade(festivalId: string, clickEvent: MouseEvent): void {
     clickEvent.stopPropagation();
@@ -147,23 +147,18 @@ export class Festivals implements OnInit, OnDestroy {
     // Remove from personal schedule immediately (local-only, no API needed).
     this.personalScheduleService.removePerformancesByFestival(festivalId);
 
-    // Delete stages and performances in parallel, then delete the festival.
-    forkJoin([
-      this.scheduleService.clearPerformancesByFestival(festivalId),
-      this.stageService.clearStagesByFestival(festivalId),
-    ])
-      .pipe(switchMap(() => this.festivalService.deleteFestival(festivalId)))
-      .subscribe({
-        next: () => {
-          this.loadData();
-          if (this.expandedFestivalId === festivalId) {
-            this.expandedFestivalId = null;
-          }
-        },
-        error: () => {
-          // Re-load to ensure UI matches server state even if partial failure occurred.
-          this.loadData();
-        },
-      });
+    // API handles cascade delete for nested stages/performances.
+    this.festivalService.deleteFestival(festivalId).subscribe({
+      next: () => {
+        this.loadData();
+        if (this.expandedFestivalId === festivalId) {
+          this.expandedFestivalId = null;
+        }
+      },
+      error: () => {
+        // Re-load to ensure UI matches server state even if failure occurred.
+        this.loadData();
+      },
+    });
   }
 }

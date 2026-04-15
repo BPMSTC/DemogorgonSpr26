@@ -3,6 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MySchedule, ALL_STAGES } from './my-schedule';
 import { ScheduleService } from '../../services/schedule.service';
+import { FestivalService } from '../../services/festival.service';
+import { PersonalScheduleService } from '../../services/personal-schedule.service';
 import { Performance } from '../../models/performance.model';
 import { Observable, of } from 'rxjs';
 
@@ -55,6 +57,20 @@ class MockScheduleService {
   }
 }
 
+class MockFestivalService {
+  load() {
+    return of([{ id: '1', name: 'Mock Festival' }]);
+  }
+}
+
+class MockPersonalScheduleService {
+  saved$ = of([]);
+
+  getPersonalConflicts() {
+    return [];
+  }
+}
+
 function makeTestBed(festivalId = '1') {
   return TestBed.configureTestingModule({
     declarations: [MySchedule],
@@ -65,6 +81,8 @@ function makeTestBed(festivalId = '1') {
         useValue: { snapshot: { paramMap: { get: () => festivalId } } },
       },
       { provide: ScheduleService, useClass: MockScheduleService },
+      { provide: FestivalService, useClass: MockFestivalService },
+      { provide: PersonalScheduleService, useClass: MockPersonalScheduleService },
     ],
   }).compileComponents();
 }

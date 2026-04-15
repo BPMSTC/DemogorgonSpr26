@@ -27,9 +27,9 @@ export class StageListComponent implements OnInit {
     this.festivalId = this.activeRoute.snapshot.paramMap.get('id') ?? '';
 
     // Load festival name for the page header.
-    this.festivalService.load().subscribe({
-      next: () => {
-        this.currentFestival = this.festivalService.getFestivalById(this.festivalId);
+    this.festivalService.loadById(this.festivalId).subscribe({
+      next: (festival) => {
+        this.currentFestival = festival;
       },
       error: () => {
         this.currentFestival = undefined;

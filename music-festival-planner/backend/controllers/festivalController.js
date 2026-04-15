@@ -3,6 +3,7 @@ const Stage       = require('../models/Stage');
 const Performance = require('../models/Performance');
 
 const SORT_FIELDS = new Set(['startDate', 'endDate', 'name', 'location', 'capacity']);
+const PATCHABLE_FIELDS = new Set(['name', 'startDate', 'endDate', 'location', 'genre', 'capacity']);
 
 // GET /api/festivals
 // Optional: ?sortBy=startDate&order=asc&page=1&limit=10
@@ -108,13 +109,29 @@ exports.replaceFestival = async (req, res) => {
 // PATCH /api/festivals/:id
 exports.updateFestival = async (req, res) => {
   try {
-    const festival = await Festival.findByIdAndUpdate(
+    const festival = await Festival.findById(req.params.id);
+    if (!festival) return res.status(404).json({ message: 'Festival not found.' });
+
+    const updates = Object.entries(req.body).reduce((acc, [key, value]) => {
+      if (PATCHABLE_FIELDS.has(key)) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    const nextStartDate = updates.startDate ?? festival.startDate;
+    const nextEndDate = updates.endDate ?? festival.endDate;
+    if (nextEndDate < nextStartDate) {
+      return res.status(400).json({ message: 'The end date must be on or after the start date.' });
+    }
+
+    const updatedFestival = await Festival.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: updates },
       { new: true, runValidators: true }
     );
-    if (!festival) return res.status(404).json({ message: 'Festival not found.' });
-    res.json(festival);
+    if (!updatedFestival) return res.status(404).json({ message: 'Festival not found.' });
+    res.json(updatedFestival);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

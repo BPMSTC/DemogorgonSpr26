@@ -16,6 +16,14 @@ export class StageService {
 
   constructor(private http: HttpClient) {}
 
+  private cloneStage(stage: Stage): Stage {
+    return { ...stage };
+  }
+
+  private cloneStageList(stages: Stage[]): Stage[] {
+    return stages.map((stage) => this.cloneStage(stage));
+  }
+
   // ---- Data loading ---------------------------------------------------------
 
   /**
@@ -27,10 +35,11 @@ export class StageService {
       .get<Stage[]>(`${this.apiUrl}?festivalId=${encodeURIComponent(festivalId)}`)
       .pipe(
         tap((stages) => {
+          const clonedStages = this.cloneStageList(stages);
           // Replace cached entries for this festival only.
           this.cache = [
             ...this.cache.filter((s) => s.festivalId !== festivalId),
-            ...stages,
+            ...clonedStages,
           ];
         }),
         catchError(this.handleError)
@@ -41,12 +50,15 @@ export class StageService {
 
   /** Returns cached stages for the given festival. */
   getStagesByFestival(festivalId: string): Stage[] {
-    return this.cache.filter((s) => s.festivalId === festivalId);
+    return this.cache
+      .filter((s) => s.festivalId === festivalId)
+      .map((s) => this.cloneStage(s));
   }
 
   /** Returns a cached stage by ID, or undefined. */
   getStageById(id: string): Stage | undefined {
-    return this.cache.find((s) => s.id === id);
+    const stage = this.cache.find((s) => s.id === id);
+    return stage ? this.cloneStage(stage) : undefined;
   }
 
   // ---- Mutations ------------------------------------------------------------
@@ -55,7 +67,7 @@ export class StageService {
   createStage(data: Omit<Stage, 'id'>): Observable<Stage> {
     return this.http.post<Stage>(this.apiUrl, data).pipe(
       tap((stage) => {
-        this.cache.push(stage);
+        this.cache.push(this.cloneStage(stage));
       }),
       catchError(this.handleError)
     );

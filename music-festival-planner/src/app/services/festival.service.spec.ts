@@ -52,6 +52,36 @@ describe('FestivalService', () => {
     expect(service.getFestivalById('1')).toEqual(expected[0]);
   });
 
+  it('loadById() should fetch one festival and cache it', async () => {
+    const expected: Festival = { id: '1', ...SAMPLE_DATA };
+
+    const promise = firstValueFrom(service.loadById('1'));
+    const req = httpMock.expectOne(`${BASE_URL}/1`);
+    expect(req.request.method).toBe('GET');
+    req.flush(expected);
+
+    await expect(promise).resolves.toEqual(expected);
+    expect(service.getFestivalById('1')).toEqual(expected);
+  });
+
+  it('should return cloned festivals from synchronous reads', async () => {
+    const expected: Festival[] = [{ id: '1', ...SAMPLE_DATA }];
+
+    const loadPromise = firstValueFrom(service.load());
+    httpMock.expectOne(BASE_URL).flush(expected);
+    await loadPromise;
+
+    const list = service.getFestivals();
+    const byId = service.getFestivalById('1');
+    list[0].name = 'Mutated';
+    if (byId) {
+      byId.name = 'Mutated too';
+    }
+
+    expect(service.getFestivals()[0].name).toBe(SAMPLE_DATA.name);
+    expect(service.getFestivalById('1')?.name).toBe(SAMPLE_DATA.name);
+  });
+
   it('createFestival() should post and append to cache', async () => {
     const created: Festival = { id: '99', ...SAMPLE_DATA };
 

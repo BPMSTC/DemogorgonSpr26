@@ -1,5 +1,7 @@
 const Stage = require('../models/Stage');
 
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // GET /api/stages?festivalId=<id>
 exports.getStagesByFestival = async (req, res) => {
   const { festivalId } = req.query;
@@ -23,10 +25,11 @@ exports.createStage = async (req, res) => {
   }
 
   try {
+    const escapedName = escapeRegex(name);
     // Stage names must be unique within a festival (case-insensitive).
     const duplicate = await Stage.findOne({
       festivalId,
-      name: { $regex: new RegExp(`^${name}$`, 'i') },
+      name: { $regex: new RegExp(`^${escapedName}$`, 'i') },
     });
     if (duplicate) {
       return res
@@ -56,10 +59,11 @@ exports.replaceStage = async (req, res) => {
 
     const { festivalId } = existing;
 
+    const escapedName = escapeRegex(name);
     // Stage names must be unique within the festival, excluding this stage itself.
     const duplicate = await Stage.findOne({
       festivalId,
-      name: { $regex: new RegExp(`^${name}$`, 'i') },
+      name: { $regex: new RegExp(`^${escapedName}$`, 'i') },
       _id: { $ne: req.params.id },
     });
     if (duplicate) {

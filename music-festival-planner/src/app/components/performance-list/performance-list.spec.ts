@@ -9,7 +9,7 @@ import { FestivalService } from '../../services/festival.service';
 import { Performance } from '../../models/performance.model';
 import { Festival } from '../../models/festival.model';
 import { signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 
 const MOCK_FESTIVAL: Festival = {
   id: '1',
@@ -74,12 +74,11 @@ class MockScheduleService {
 }
 
 class MockFestivalService {
-  load() {
-    return of([MOCK_FESTIVAL]);
-  }
-
-  getFestivalById(id: string): Festival | undefined {
-    return id === '1' ? { ...MOCK_FESTIVAL } : undefined;
+  loadById(id: string): Observable<Festival> {
+    if (id === '1') {
+      return of({ ...MOCK_FESTIVAL });
+    }
+    return throwError(() => new Error('Festival not found'));
   }
 }
 

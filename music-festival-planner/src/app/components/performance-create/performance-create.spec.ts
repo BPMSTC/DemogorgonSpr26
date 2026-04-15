@@ -61,12 +61,11 @@ class MockStageService {
 }
 
 class MockFestivalService {
-  load(): Observable<Festival[]> {
-    return of([MOCK_FESTIVAL]);
-  }
-
-  getFestivalById(id: string): Festival | undefined {
-    return id === '1' ? { ...MOCK_FESTIVAL } : undefined;
+  loadById(id: string): Observable<Festival> {
+    if (id === '1') {
+      return of({ ...MOCK_FESTIVAL });
+    }
+    return throwError(() => new Error('Festival not found'));
   }
 }
 

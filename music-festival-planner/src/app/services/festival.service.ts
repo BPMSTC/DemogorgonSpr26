@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { Festival } from '../models/festival.model';
 import { environment } from '../../environments/environment';
 
@@ -16,6 +16,14 @@ export class FestivalService {
 
   constructor(private http: HttpClient) {}
 
+  private cloneFestival(festival: Festival): Festival {
+    return { ...festival };
+  }
+
+  private cloneFestivalList(festivals: Festival[]): Festival[] {
+    return festivals.map((festival) => this.cloneFestival(festival));
+  }
+
   // ---- Data loading ---------------------------------------------------------
 
   /**
@@ -25,8 +33,26 @@ export class FestivalService {
   load(): Observable<Festival[]> {
     return this.http.get<Festival[]>(this.apiUrl).pipe(
       tap((festivals) => {
-        this.cache = festivals;
+        this.cache = this.cloneFestivalList(festivals);
       }),
+      map(() => this.cloneFestivalList(this.cache)),
+      catchError(this.handleError)
+    );
+  }
+
+  /** Fetches a single festival by ID and updates/adds it in the local cache. */
+  loadById(id: string): Observable<Festival> {
+    return this.http.get<Festival>(`${this.apiUrl}/${id}`).pipe(
+      tap((festival) => {
+        const clonedFestival = this.cloneFestival(festival);
+        const idx = this.cache.findIndex((f) => f.id === id);
+        if (idx === -1) {
+          this.cache.push(clonedFestival);
+        } else {
+          this.cache[idx] = clonedFestival;
+        }
+      }),
+      map((festival) => this.cloneFestival(festival)),
       catchError(this.handleError)
     );
   }
@@ -35,12 +61,13 @@ export class FestivalService {
 
   /** Returns a shallow copy of the cached festival list. */
   getFestivals(): Festival[] {
-    return [...this.cache];
+    return this.cloneFestivalList(this.cache);
   }
 
   /** Finds a cached festival by ID, or undefined if not found. */
   getFestivalById(id: string): Festival | undefined {
-    return this.cache.find((f) => f.id === id);
+    const festival = this.cache.find((f) => f.id === id);
+    return festival ? this.cloneFestival(festival) : undefined;
   }
 
   // ---- Mutations ------------------------------------------------------------
@@ -49,7 +76,7 @@ export class FestivalService {
   createFestival(data: Omit<Festival, 'id'>): Observable<Festival> {
     return this.http.post<Festival>(this.apiUrl, data).pipe(
       tap((festival) => {
-        this.cache.push(festival);
+        this.cache.push(this.cloneFestival(festival));
       }),
       catchError(this.handleError)
     );
@@ -63,7 +90,7 @@ export class FestivalService {
     return this.http.patch<Festival>(`${this.apiUrl}/${id}`, fields).pipe(
       tap((updated) => {
         const idx = this.cache.findIndex((f) => f.id === id);
-        if (idx !== -1) this.cache[idx] = updated;
+        if (idx !== -1) this.cache[idx] = this.cloneFestival(updated);
       }),
       catchError(this.handleError)
     );
