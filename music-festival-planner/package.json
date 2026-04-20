@@ -9,7 +9,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:backend": "npm --prefix backend exec -- node --test tests/*.test.js",
+    "test:backend": "npm --prefix backend exec -- node --test tests",
     "seed": "node backend/scripts/seed.js",
     "mongo:check": "node backend/scripts/check-mongo.js"
   },
