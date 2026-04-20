@@ -1,6 +1,12 @@
 const { connectToDatabase, disconnectFromDatabase } = require('../config/database');
 const { Festival, Stage, Artist, Performance } = require('../models');
 
+const RESET_FLAG = '--reset';
+const CONFIRM_FLAG = '--confirm';
+const RESET_CONFIRM_TOKEN = 'WIPE';
+const FORCE_RESET_ENV = 'SEED_FORCE_RESET';
+const RESET_CONFIRM_ENV = 'SEED_RESET_CONFIRM';
+
 // Seed strategy overview:
 // 1) Insert top-level festivals first.
 // 2) Insert stages and artists.
@@ -169,7 +175,7 @@ const ARTIST_SEED = [
 
 // Performance rows are authored with readable names (festival/stage/artist).
 // During insertion we translate these names into ObjectId references.
-const PERFORMANCE_SEED = [
+const BASE_PERFORMANCE_SEED = [
   {
     festivalName: 'North Coast Pulse 2026',
     stageName: 'Main Horizon',
@@ -565,14 +571,108 @@ async function printSummary() {
   });
 }
 
+async function getCollectionCounts() {
+  const [festivalCount, stageCount, artistCount, performanceCount] = await Promise.all([
+    Festival.countDocuments(),
+    Stage.countDocuments(),
+    Artist.countDocuments(),
+    Performance.countDocuments(),
+  ]);
+
+  return {
+    festivals: festivalCount,
+    stages: stageCount,
+    artists: artistCount,
+    performances: performanceCount,
+  };
+}
+
+function shouldResetData() {
+  const hasResetFlag = process.argv.includes(RESET_FLAG);
+  const forceResetFromEnv = process.env[FORCE_RESET_ENV] === 'true';
+  return hasResetFlag || forceResetFromEnv;
+}
+
+function getCliConfirmValue() {
+  const confirmFlagIndex = process.argv.indexOf(CONFIRM_FLAG);
+  if (confirmFlagIndex === -1) {
+    return '';
+  }
+  return process.argv[confirmFlagIndex + 1] || '';
+}
+
+function hasValidResetConfirmation() {
+  const cliConfirm = getCliConfirmValue();
+  const envConfirm = process.env[RESET_CONFIRM_ENV] || '';
+  return cliConfirm === RESET_CONFIRM_TOKEN || envConfirm === RESET_CONFIRM_TOKEN;
+}
+
+/**
+ * Prevent accidental destructive reseeds unless an explicit reset mode is enabled.
+ * @param {boolean} canReset
+ */
+async function ensureSafeSeedMode(canReset) {
+  const counts = await getCollectionCounts();
+  const hasExistingData = Object.values(counts).some((count) => count > 0);
+
+  if (!hasExistingData || canReset) {
+    return { counts, hasExistingData };
+  }
+
+  console.error('Seed aborted to protect existing data.');
+  console.table(counts);
+  console.error(
+    `Use \`npm run seed:reset\` or pass ${RESET_FLAG} to perform a destructive reseed intentionally.`,
+  );
+  console.error(`You can also set ${FORCE_RESET_ENV}=true for CI-style non-interactive resets.`);
+  process.exitCode = 1;
+  return null;
+}
+
+/**
+ * Require explicit human confirmation before destructive reset mode can run.
+ * @param {boolean} canReset
+ */
+function ensureResetConfirmed(canReset) {
+  if (!canReset) {
+    return true;
+  }
+
+  if (hasValidResetConfirmation()) {
+    return true;
+  }
+
+  console.error('Seed reset aborted: confirmation token missing.');
+  console.error(
+    `When using ${RESET_FLAG}, also pass ${CONFIRM_FLAG} ${RESET_CONFIRM_TOKEN} to confirm destructive reset.`,
+  );
+  console.error(
+    `Alternative: set ${FORCE_RESET_ENV}=true and ${RESET_CONFIRM_ENV}=${RESET_CONFIRM_TOKEN}.`,
+  );
+  process.exitCode = 1;
+  return false;
+}
+
 // Main script orchestration.
 async function runSeed() {
   try {
     // Open DB connection once for the full seed transaction-like flow.
     await connectToDatabase();
 
-    // Start from a known clean state.
-    await resetCollections();
+    const allowReset = shouldResetData();
+    if (!ensureResetConfirmed(allowReset)) {
+      return;
+    }
+
+    const safetyCheck = await ensureSafeSeedMode(allowReset);
+    if (!safetyCheck) {
+      return;
+    }
+
+    // Start from a known clean state only when explicitly requested.
+    if (allowReset) {
+      await resetCollections();
+    }
 
     // Insert in dependency order.
     const festivalIdByName = await seedFestivals();
