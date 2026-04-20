@@ -9,6 +9,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:backend": "npm --prefix backend exec -- node --test tests",
     "seed": "node backend/scripts/seed.js",
     "seed:local": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.local'; require('./backend/scripts/seed');\"",
     "seed:atlas": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.atlas'; require('./backend/scripts/seed');\"",

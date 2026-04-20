@@ -34,6 +34,13 @@ const FESTIVAL_SEED = [
   },
 ];
 
+const FESTIVAL_WINDOW_BY_NAME = new Map(
+  FESTIVAL_SEED.map((festival) => [
+    festival.name,
+    { startDate: festival.startDate, endDate: festival.endDate },
+  ]),
+);
+
 // Stages are grouped by festival name to make mapping easier during insert.
 const STAGE_SEED = {
   'North Coast Pulse 2026': [
@@ -395,72 +402,64 @@ const BASE_PERFORMANCE_SEED = [
   },
 ];
 
-// Additional generated schedule rows ensure we consistently exceed the
-// assignment requirement of at least 100 MongoDB documents.
-const GENERATED_SLOT_STARTS = ['12:00', '13:15', '14:30', '15:45', '17:00'];
-const GENERATED_SLOT_DURATION_MINUTES = 45;
-
-const GENERATED_FESTIVAL_PLANS = [
-  {
-    festivalName: 'North Coast Pulse 2026',
-    dates: ['2026-07-18', '2026-07-19', '2026-07-20'],
-    stages: ['Main Horizon', 'River Tent', 'Warehouse Club', 'Sunset Garden'],
-  },
-  {
-    festivalName: 'Sunset Echo Weekend 2026',
-    dates: ['2026-09-04', '2026-09-05', '2026-09-06'],
-    stages: ['City Lights Main', 'Oak Hall', 'Midnight Dome', 'Rooftop Sessions'],
-  },
-];
-
 /**
- * @param {string} timeHHMM
- * @param {number} minutesToAdd
+ * @typedef {Object} PerformanceSeedEntry
+ * @property {string} festivalName
+ * @property {string} stageName
+ * @property {string} artistName
+ * @property {string} start
+ * @property {string} end
  */
-function addMinutesToTime(timeHHMM, minutesToAdd) {
-  const [hourText, minuteText] = timeHHMM.split(':');
-  const baseMinutes = Number(hourText) * 60 + Number(minuteText);
-  const totalMinutes = baseMinutes + minutesToAdd;
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+/** @param {string} isoDateTime @param {number} daysToAdd */
+function shiftIsoDateTimeByDays(isoDateTime, daysToAdd) {
+  const shifted = new Date(isoDateTime);
+  shifted.setUTCDate(shifted.getUTCDate() + daysToAdd);
+  return shifted.toISOString();
 }
 
 /**
- * @param {string} dateYYYYMMDD
- * @param {string} timeHHMM
+ * @param {string} festivalName
+ * @param {string} shiftedStartIso
+ * @param {string} shiftedEndIso
  */
-function toUtcIso(dateYYYYMMDD, timeHHMM) {
-  return `${dateYYYYMMDD}T${timeHHMM}:00.000Z`;
+function isWithinFestivalWindow(festivalName, shiftedStartIso, shiftedEndIso) {
+  const window = FESTIVAL_WINDOW_BY_NAME.get(festivalName);
+  if (!window) return false;
+
+  const shiftedStart = new Date(shiftedStartIso);
+  const shiftedEnd = new Date(shiftedEndIso);
+
+  return shiftedStart >= window.startDate && shiftedEnd <= window.endDate;
 }
 
-function buildGeneratedPerformanceSeed() {
-  const artistNames = ARTIST_SEED.map((artist) => artist.name);
-  const generated = [];
-  let artistCursor = 0;
+/** @param {PerformanceSeedEntry[]} baseSeed */
+function buildExpandedPerformanceSeed(baseSeed) {
+  const dayShifts = [0, 1, 2];
+  /** @type {PerformanceSeedEntry[]} */
+  const expanded = [];
 
-  for (const plan of GENERATED_FESTIVAL_PLANS) {
-    for (const date of plan.dates) {
-      for (const stageName of plan.stages) {
-        for (const startTime of GENERATED_SLOT_STARTS) {
-          const endTime = addMinutesToTime(startTime, GENERATED_SLOT_DURATION_MINUTES);
-          generated.push({
-            festivalName: plan.festivalName,
-            stageName,
-            artistName: artistNames[artistCursor % artistNames.length],
-            start: toUtcIso(date, startTime),
-            end: toUtcIso(date, endTime),
-          });
-          artistCursor += 1;
-        }
+  baseSeed.forEach((entry) => {
+    dayShifts.forEach((dayShift) => {
+      const shiftedStart = shiftIsoDateTimeByDays(entry.start, dayShift);
+      const shiftedEnd = shiftIsoDateTimeByDays(entry.end, dayShift);
+
+      if (!isWithinFestivalWindow(entry.festivalName, shiftedStart, shiftedEnd)) {
+        return;
       }
-    }
-  }
 
-  return generated;
+      expanded.push({
+        ...entry,
+        start: shiftedStart,
+        end: shiftedEnd,
+      });
+    });
+  });
+
+  return expanded;
 }
 
-const PERFORMANCE_SEED = [...BASE_PERFORMANCE_SEED, ...buildGeneratedPerformanceSeed()];
+const EXPANDED_PERFORMANCE_SEED = buildExpandedPerformanceSeed(PERFORMANCE_SEED);
 
 // Repeatable seeding means clearing old docs before inserting fresh data.
 // Delete order starts from child collections to avoid future FK-like constraints.
@@ -484,9 +483,7 @@ async function seedFestivals() {
 // Insert stage docs by resolving each festival name to its ObjectId.
 // Returns map:
 //   "<festivalId>::<stageName>" -> stage ObjectId
-/**
- * @param {Map<string, any>} festivalIdByName
- */
+/** @param {Map<string, any>} festivalIdByName */
 async function seedStages(festivalIdByName) {
   /** @type {Array<Record<string, any>>} */
   const stageDocuments = [];
@@ -531,7 +528,7 @@ async function seedArtists() {
  * @param {Map<string, any>} artistIdByName
  */
 async function seedPerformances(festivalIdByName, stageIdByFestivalAndName, artistIdByName) {
-  const performanceDocuments = PERFORMANCE_SEED.map((entry) => {
+  const performanceDocuments = EXPANDED_PERFORMANCE_SEED.map((entry) => {
     const festivalId = festivalIdByName.get(entry.festivalName);
     const stageId = stageIdByFestivalAndName.get(`${festivalId.toString()}::${entry.stageName}`);
     const artistId = artistIdByName.get(entry.artistName);
@@ -561,6 +558,7 @@ async function printSummary() {
     Artist.countDocuments(),
     Performance.countDocuments(),
   ]);
+  const totalDocuments = festivalCount + stageCount + artistCount + performanceCount;
 
   console.log('Seed completed successfully.');
   console.table({
@@ -568,6 +566,8 @@ async function printSummary() {
     stages: stageCount,
     artists: artistCount,
     performances: performanceCount,
+    totalDocuments,
+    meetsHundredDocTarget: totalDocuments >= 100,
   });
 }
 
