@@ -150,7 +150,7 @@
                   <div
                     class="timetable-event"
                     [class.is-saved]="savedIds.has(perf.id)"
-                    [class.has-conflict]="hasConflict(perf.id)"
+                    [class.has-conflict]="hasConflict(time, stage)"
                     [attr.aria-label]="
                       perf.artistName +
                       ' at ' +
@@ -159,11 +159,13 @@
                       perf.stageName +
                       (perf.genre ? ', ' + perf.genre : '') +
                       (savedIds.has(perf.id) ? ' — in your schedule' : '') +
-                      (hasConflict(perf.id) ? ' — schedule conflict' : '')
+                      (hasConflict(time, stage) ? ' — schedule conflict' : '')
                     "
                   >
-                    @if (hasConflict(perf.id)) {
-                      <div class="event-conflict-badge" aria-label="Schedule conflict">Conflict</div>
+                    @if (hasConflict(time, stage)) {
+                      <div class="event-conflict-badge" aria-label="Schedule conflict">
+                        Conflict
+                      </div>
                     }
 
                     <div class="event-name">{{ perf.artistName }}</div>

@@ -1,6 +1,7 @@
 const Festival = require('../models/festival');
 const Stage = require('../models/stage');
 const Performance = require('../models/performance');
+const AppError = require('../middleware/AppError');
 
 const SORT_FIELDS = new Set(['startDate', 'endDate', 'name', 'location', 'capacity']);
 const PATCHABLE_FIELDS = new Set([
@@ -45,7 +46,7 @@ function parseDateOrNull(value) {
 
 // GET /api/festivals
 // Optional: ?sortBy=startDate&order=asc&page=1&limit=10
-exports.getAllFestivals = async (req, res) => {
+exports.getAllFestivals = async (req, res, next) => {
   const { sortBy = 'startDate', order = 'asc', page, limit } = req.query;
 
   const sortField = SORT_FIELDS.has(sortBy) ? sortBy : 'startDate';
@@ -73,38 +74,34 @@ exports.getAllFestivals = async (req, res) => {
     const festivals = await Festival.find().sort({ [sortField]: sortOrder });
     res.json(festivals.map(mapFestival));
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // GET /api/festivals/:id
-exports.getFestivalById = async (req, res) => {
+exports.getFestivalById = async (req, res, next) => {
   try {
     const festival = await Festival.findById(req.params.id);
-    if (!festival) return res.status(404).json({ message: 'Festival not found.' });
+    if (!festival) return next(new AppError('Festival not found.', 404));
     res.json(mapFestival(festival));
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /api/festivals
-exports.createFestival = async (req, res) => {
+exports.createFestival = async (req, res, next) => {
   const { name, startDate, endDate, location, genre, capacity, description, imageUrl } = req.body;
 
   const parsedStartDate = parseDateOrNull(startDate);
   const parsedEndDate = parseDateOrNull(endDate);
 
-  if (!name || !parsedStartDate || !parsedEndDate || !location) {
-    return res
-      .status(400)
-      .json({ message: 'name, startDate, endDate, and location are required.' });
+  if (!parsedStartDate || !parsedEndDate) {
+    return next(new AppError('startDate and endDate must be valid dates.', 400));
   }
 
   if (parsedEndDate < parsedStartDate) {
-    return res
-      .status(400)
-      .json({ message: 'The end date must be on or after the start date.' });
+    return next(new AppError('The end date must be on or after the start date.', 400));
   }
 
   try {
@@ -121,24 +118,23 @@ exports.createFestival = async (req, res) => {
     const saved = await festival.save();
     res.status(201).json(mapFestival(saved));
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
 };
 
 // PUT /api/festivals/:id — full replacement
-exports.replaceFestival = async (req, res) => {
+exports.replaceFestival = async (req, res, next) => {
   const { name, startDate, endDate, location, genre, capacity, description, imageUrl } = req.body;
 
   const parsedStartDate = parseDateOrNull(startDate);
   const parsedEndDate = parseDateOrNull(endDate);
 
-  if (!name || !parsedStartDate || !parsedEndDate || !location) {
-    return res
-      .status(400)
-      .json({ message: 'name, startDate, endDate, and location are required.' });
+  if (!parsedStartDate || !parsedEndDate) {
+    return next(new AppError('startDate and endDate must be valid dates.', 400));
   }
+
   if (parsedEndDate < parsedStartDate) {
-    return res.status(400).json({ message: 'The end date must be on or after the start date.' });
+    return next(new AppError('The end date must be on or after the start date.', 400));
   }
 
   try {
@@ -158,18 +154,18 @@ exports.replaceFestival = async (req, res) => {
       replacement,
       { new: true, runValidators: true }
     );
-    if (!festival) return res.status(404).json({ message: 'Festival not found.' });
+    if (!festival) return next(new AppError('Festival not found.', 404));
     res.json(mapFestival(festival));
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
 };
 
 // PATCH /api/festivals/:id
-exports.updateFestival = async (req, res) => {
+exports.updateFestival = async (req, res, next) => {
   try {
     const festival = await Festival.findById(req.params.id);
-    if (!festival) return res.status(404).json({ message: 'Festival not found.' });
+    if (!festival) return next(new AppError('Festival not found.', 404));
 
     const updates = Object.entries(req.body).reduce((acc, [key, value]) => {
       if (PATCHABLE_FIELDS.has(key)) {
@@ -180,20 +176,20 @@ exports.updateFestival = async (req, res) => {
 
     if (updates.startDate) {
       const parsed = parseDateOrNull(updates.startDate);
-      if (!parsed) return res.status(400).json({ message: 'Invalid startDate.' });
+      if (!parsed) return next(new AppError('Invalid startDate.', 400));
       updates.startDate = parsed;
     }
 
     if (updates.endDate) {
       const parsed = parseDateOrNull(updates.endDate);
-      if (!parsed) return res.status(400).json({ message: 'Invalid endDate.' });
+      if (!parsed) return next(new AppError('Invalid endDate.', 400));
       updates.endDate = parsed;
     }
 
     const nextStartDate = updates.startDate ?? festival.startDate;
     const nextEndDate = updates.endDate ?? festival.endDate;
     if (nextEndDate < nextStartDate) {
-      return res.status(400).json({ message: 'The end date must be on or after the start date.' });
+      return next(new AppError('The end date must be on or after the start date.', 400));
     }
 
     const updatedFestival = await Festival.findByIdAndUpdate(
@@ -201,19 +197,19 @@ exports.updateFestival = async (req, res) => {
       { $set: updates },
       { new: true, runValidators: true }
     );
-    if (!updatedFestival) return res.status(404).json({ message: 'Festival not found.' });
+    if (!updatedFestival) return next(new AppError('Festival not found.', 404));
     res.json(mapFestival(updatedFestival));
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /api/festivals/:id
 // Cascade-deletes all stages and performances for the festival.
-exports.deleteFestival = async (req, res) => {
+exports.deleteFestival = async (req, res, next) => {
   try {
     const festival = await Festival.findByIdAndDelete(req.params.id);
-    if (!festival) return res.status(404).json({ message: 'Festival not found.' });
+    if (!festival) return next(new AppError('Festival not found.', 404));
 
     await Promise.all([
       Stage.deleteMany({ festival: festival._id }),
@@ -222,6 +218,6 @@ exports.deleteFestival = async (req, res) => {
 
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

@@ -9,9 +9,14 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:backend": "npm --prefix backend exec -- node --test tests/*.test.js",
+    "test:backend": "npm --prefix backend exec -- node --test tests",
     "seed": "node backend/scripts/seed.js",
-    "mongo:check": "node backend/scripts/check-mongo.js"
+    "seed:local": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.local'; require('./backend/scripts/seed');\"",
+    "seed:atlas": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.atlas'; require('./backend/scripts/seed');\"",
+    "seed:reset": "node backend/scripts/seed.js --reset --confirm WIPE",
+    "mongo:check": "node backend/scripts/check-mongo.js",
+    "mongo:check:local": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.local'; require('./backend/scripts/check-mongo');\"",
+    "mongo:check:atlas": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.atlas'; require('./backend/scripts/check-mongo');\""
   },
   "private": true,
   "packageManager": "npm@11.8.0",

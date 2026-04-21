@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Performance = require('../models/performance');
 const Stage = require('../models/stage');
 const Artist = require('../models/artist');
+const AppError = require('../middleware/AppError');
 
 const PERF_SORT_FIELDS = new Set(['date', 'startTime', 'endTime', 'artistName', 'stageName', 'genre']);
 
@@ -146,13 +147,13 @@ function sortPerformances(items, sortBy = 'date', order = 'asc') {
 
 // GET /api/performances?festivalId=<id>
 // Optional: &sortBy=date&order=asc&page=1&limit=20
-exports.getPerformancesByFestival = async (req, res) => {
+exports.getPerformancesByFestival = async (req, res, next) => {
   const { festivalId, sortBy = 'date', order = 'asc', page, limit } = req.query;
   if (!festivalId) {
-    return res.status(400).json({ message: 'festivalId query parameter is required.' });
+    return next(new AppError('festivalId query parameter is required.', 400));
   }
   if (!mongoose.isValidObjectId(festivalId)) {
-    return res.status(400).json({ message: 'festivalId must be a valid ObjectId.' });
+    return next(new AppError('festivalId must be a valid ObjectId.', 400));
   }
 
   try {
@@ -180,45 +181,39 @@ exports.getPerformancesByFestival = async (req, res) => {
 
     res.json(sorted);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // POST /api/performances
-exports.createPerformance = async (req, res) => {
+exports.createPerformance = async (req, res, next) => {
   const { festivalId, artistName, stageName, date, startTime, endTime, genre } = req.body;
 
   const startMinutes = toMinutes(startTime);
   const endMinutes = toMinutes(endTime);
 
-  if (!festivalId || !artistName || !stageName || !date) {
-    return res.status(400).json({ message: 'festivalId, artistName, stageName, and date are required.' });
-  }
-
   if (startMinutes === null || endMinutes === null) {
-    return res.status(400).json({
-      message: 'Start and end times must be valid 24-hour times (H:mm or HH:mm).',
-    });
+    return next(new AppError('Start and end times must be valid 24-hour times (H:mm or HH:mm).', 400));
   }
   if (startMinutes >= endMinutes) {
-    return res.status(400).json({ message: 'End time must be later than start time.' });
+    return next(new AppError('End time must be later than start time.', 400));
   }
 
   const startDateTime = buildUtcDate(date, startTime);
   const endDateTime = buildUtcDate(date, endTime);
   if (!startDateTime || !endDateTime) {
-    return res.status(400).json({ message: 'date must be in YYYY-MM-DD format.' });
+    return next(new AppError('date must be in YYYY-MM-DD format.', 400));
   }
 
   try {
     const stage = await resolveStage(festivalId, stageName);
     if (!stage) {
-      return res.status(400).json({ message: `Stage "${stageName}" was not found for this festival.` });
+      return next(new AppError(`Stage "${stageName}" was not found for this festival.`, 400));
     }
 
     const conflict = await isStageOccupied(festivalId, stage._id, startDateTime, endDateTime);
     if (conflict) {
-      return res.status(409).json({ message: `"${stageName}" is already booked during that time slot.` });
+      return next(new AppError(`"${stageName}" is already booked during that time slot.`, 409));
     }
 
     const artist = await resolveArtist(artistName, genre);
@@ -239,43 +234,37 @@ exports.createPerformance = async (req, res) => {
 
     res.status(201).json(mapPerformance(hydrated));
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
 };
 
 // PUT /api/performances/:id — full replacement (festival reference is immutable)
-exports.replacePerformance = async (req, res) => {
+exports.replacePerformance = async (req, res, next) => {
   const { artistName, stageName, date, startTime, endTime, genre } = req.body;
 
   const startMinutes = toMinutes(startTime);
   const endMinutes = toMinutes(endTime);
 
-  if (!artistName || !stageName || !date) {
-    return res.status(400).json({ message: 'artistName, stageName, and date are required.' });
-  }
-
   if (startMinutes === null || endMinutes === null) {
-    return res.status(400).json({
-      message: 'Start and end times must be valid 24-hour times (H:mm or HH:mm).',
-    });
+    return next(new AppError('Start and end times must be valid 24-hour times (H:mm or HH:mm).', 400));
   }
   if (startMinutes >= endMinutes) {
-    return res.status(400).json({ message: 'End time must be later than start time.' });
+    return next(new AppError('End time must be later than start time.', 400));
   }
 
   const startDateTime = buildUtcDate(date, startTime);
   const endDateTime = buildUtcDate(date, endTime);
   if (!startDateTime || !endDateTime) {
-    return res.status(400).json({ message: 'date must be in YYYY-MM-DD format.' });
+    return next(new AppError('date must be in YYYY-MM-DD format.', 400));
   }
 
   try {
     const existing = await Performance.findById(req.params.id);
-    if (!existing) return res.status(404).json({ message: 'Performance not found.' });
+    if (!existing) return next(new AppError('Performance not found.', 404));
 
     const stage = await resolveStage(existing.festival, stageName);
     if (!stage) {
-      return res.status(400).json({ message: `Stage "${stageName}" was not found for this festival.` });
+      return next(new AppError(`Stage "${stageName}" was not found for this festival.`, 400));
     }
 
     const conflict = await isStageOccupied(
@@ -286,7 +275,7 @@ exports.replacePerformance = async (req, res) => {
       req.params.id
     );
     if (conflict) {
-      return res.status(409).json({ message: `"${stageName}" is already booked during that time slot.` });
+      return next(new AppError(`"${stageName}" is already booked during that time slot.`, 409));
     }
 
     const artist = await resolveArtist(artistName, genre);
@@ -305,28 +294,28 @@ exports.replacePerformance = async (req, res) => {
 
     res.json(mapPerformance(hydrated));
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /api/performances/festival/:festivalId
 // Deletes ALL performances for a festival (cascade delete helper).
-exports.deletePerformancesByFestival = async (req, res) => {
+exports.deletePerformancesByFestival = async (req, res, next) => {
   try {
     await Performance.deleteMany({ festival: req.params.festivalId });
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };
 
 // DELETE /api/performances/:id
-exports.deletePerformance = async (req, res) => {
+exports.deletePerformance = async (req, res, next) => {
   try {
     const performance = await Performance.findByIdAndDelete(req.params.id);
-    if (!performance) return res.status(404).json({ message: 'Performance not found.' });
+    if (!performance) return next(new AppError('Performance not found.', 404));
     res.status(204).send();
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    next(err);
   }
 };

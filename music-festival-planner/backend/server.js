@@ -20,6 +20,11 @@ const festivalsRouter = require('./routes/festivals');
 const stagesRouter = require('./routes/stages');
 const performancesRouter = require('./routes/performances');
 
+const requestLogger = require('./middleware/requestLogger');
+const { apiLimiter } = require('./middleware/rateLimiter');
+const notFound = require('./middleware/notFound');
+const errorHandler = require('./middleware/errorHandler');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || '')
@@ -40,6 +45,7 @@ const corsOptions = {
 
 // ---- Middleware -------------------------------------------------------------
 
+app.use(requestLogger);
 app.use(cors(corsOptions));
 app.use(express.json());
 
@@ -75,13 +81,19 @@ app.get('/', (_req, res) => {
     `);
 });
 
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Rate-limit all API routes.
+// Apply authLimiter (from middleware/rateLimiter.js) to POST /api/auth/* when auth routes are added.
+app.use('/api', apiLimiter);
 app.use('/api/festivals', festivalsRouter);
 app.use('/api/stages', stagesRouter);
 app.use('/api/performances', performancesRouter);
 
-// ---- Health check ----------------------------------------------------------
+// ---- Error handling --------------------------------------------------------
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.use(notFound);
+app.use(errorHandler);
 
 // ---- Start -----------------------------------------------------------------
 
