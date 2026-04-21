@@ -22,7 +22,7 @@ const FESTIVAL_SEED = [
     startDate: new Date('2026-07-18T00:00:00.000Z'),
     endDate: new Date('2026-07-20T23:59:59.000Z'),
     description: 'Three days of electronic, indie, and dance acts by the lake.',
-    imageUrl: 'https://placehold.co/1200x600?text=North+Coast+Pulse',
+    imageUrl: 'https://assets.simpleviewinc.com/simpleview/image/upload/c_fill,f_jpg,h_512,q_65,w_1440/v1/clients/ftlauderdale/Tortuga_Sky_Shot_bea0bd81-94dc-4814-b513-9612e13fc417.jpg',
   },
   {
     name: 'Sunset Echo Weekend 2026',
@@ -30,7 +30,7 @@ const FESTIVAL_SEED = [
     startDate: new Date('2026-09-04T00:00:00.000Z'),
     endDate: new Date('2026-09-06T23:59:59.000Z'),
     description: 'A city-wide weekend festival focused on alt-pop and neo-soul.',
-    imageUrl: 'https://placehold.co/1200x600?text=Sunset+Echo+Weekend',
+    imageUrl: 'https://i0.wp.com/discotech.me/wp-content/uploads/2023/02/sunset-music-festival-tampa-florida.jpg?resize=845%2C321&ssl=1',
   },
 ];
 
@@ -459,7 +459,7 @@ function buildExpandedPerformanceSeed(baseSeed) {
   return expanded;
 }
 
-const EXPANDED_PERFORMANCE_SEED = buildExpandedPerformanceSeed(PERFORMANCE_SEED);
+const EXPANDED_PERFORMANCE_SEED = buildExpandedPerformanceSeed(BASE_PERFORMANCE_SEED);
 
 // Repeatable seeding means clearing old docs before inserting fresh data.
 // Delete order starts from child collections to avoid future FK-like constraints.

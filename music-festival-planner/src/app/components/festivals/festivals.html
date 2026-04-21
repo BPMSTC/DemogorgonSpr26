@@ -9,6 +9,28 @@
       @let festivalStages = stagesByFestivalId[festival.id] ?? [];
       @let stageLoadFailed = stageLoadFailedByFestivalId[festival.id] ?? false;
       <div class="card" [class.card-expanded]="expandedFestivalId === festival.id" role="listitem">
+        <div class="card-visual">
+          @if (hasCardImage(festival)) {
+            <img
+              class="card-visual-image"
+              [src]="festival.imageUrl"
+              [alt]="'Representative image for ' + festival.name + ' in ' + festival.location"
+              loading="lazy"
+              decoding="async"
+              (error)="onCardImageError(festival.id)"
+            />
+          } @else {
+            <div
+              class="card-visual-fallback"
+              role="img"
+              [attr.aria-label]="'No image available. Festival location: ' + festival.location"
+            >
+              <span class="card-visual-fallback-icon" aria-hidden="true">📍</span>
+              <span class="card-visual-fallback-text">{{ festival.location }}</span>
+            </div>
+          }
+        </div>
+
         <div class="card-header">
           <button
             type="button"

@@ -29,6 +29,7 @@ function mapFestival(festivalDoc) {
     startDate: toDateOnly(festivalDoc.startDate),
     endDate: toDateOnly(festivalDoc.endDate),
     location: festivalDoc.location,
+    imageUrl: festivalDoc.imageUrl || undefined,
     genre: festivalDoc.genre || undefined,
     capacity:
       typeof festivalDoc.capacity === 'number' && festivalDoc.capacity > 0

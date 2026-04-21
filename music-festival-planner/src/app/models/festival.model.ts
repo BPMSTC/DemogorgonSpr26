@@ -12,6 +12,8 @@ export interface Festival {
   endDate: string;
   /** City, venue, or region where the festival takes place. */
   location: string;
+  /** Optional image URL used for festival card visuals. */
+  imageUrl?: string;
   /** Primary music genre (e.g. "Rock", "Electronic"). Optional. */
   genre?: string;
   /** Maximum total attendee capacity across all stages. Optional. */
