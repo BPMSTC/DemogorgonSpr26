@@ -87,7 +87,12 @@ export class Festivals implements OnInit, OnDestroy {
   }
 
   hasCardImage(festival: Festival): boolean {
-    return !!festival.imageUrl?.trim() && !this.imageLoadFailedByFestivalId[festival.id];
+    return !!this.getCardImageUrl(festival) && !this.imageLoadFailedByFestivalId[festival.id];
+  }
+
+  getCardImageUrl(festival: Festival): string | null {
+    const trimmedImageUrl = festival.imageUrl?.trim();
+    return trimmedImageUrl ? trimmedImageUrl : null;
   }
 
   onCardImageError(festivalId: string): void {

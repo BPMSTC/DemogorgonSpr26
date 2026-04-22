@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Festivals } from './festivals';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
+import { Festival } from '../../models/festival.model';
 
 describe('Festivals', () => {
   let component: Festivals;
@@ -24,6 +25,37 @@ describe('Festivals', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('hasCardImage', () => {
+    const baseFestival: Festival = {
+      id: 'fest-1',
+      name: 'Demo Fest',
+      location: 'Austin',
+      startDate: '2026-05-10',
+      endDate: '2026-05-12',
+    };
+
+    it('returns false when imageUrl is missing, blank, or whitespace-only', () => {
+      expect(component.hasCardImage({ ...baseFestival })).toBe(false);
+      expect(component.hasCardImage({ ...baseFestival, imageUrl: '' })).toBe(false);
+      expect(component.hasCardImage({ ...baseFestival, imageUrl: '   ' })).toBe(false);
+    });
+
+    it('returns false after onCardImageError is invoked for a festival', () => {
+      const festivalWithImage = { ...baseFestival, imageUrl: 'https://example.com/fest.jpg' };
+      expect(component.hasCardImage(festivalWithImage)).toBe(true);
+
+      component.onCardImageError(baseFestival.id);
+
+      expect(component.hasCardImage(festivalWithImage)).toBe(false);
+    });
+
+    it('returns true when imageUrl exists and no load error is recorded', () => {
+      const festivalWithImage = { ...baseFestival, imageUrl: ' https://example.com/fest.jpg ' };
+      expect(component.hasCardImage(festivalWithImage)).toBe(true);
+      expect(component.getCardImageUrl(festivalWithImage)).toBe('https://example.com/fest.jpg');
+    });
   });
 
   describe('toggleFestivalCardOnKeyboard', () => {

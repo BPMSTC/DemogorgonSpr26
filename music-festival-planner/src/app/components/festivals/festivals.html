@@ -13,7 +13,7 @@
           @if (hasCardImage(festival)) {
             <img
               class="card-visual-image"
-              [src]="festival.imageUrl"
+              [src]="getCardImageUrl(festival) || ''"
               [alt]="'Representative image for ' + festival.name + ' in ' + festival.location"
               loading="lazy"
               decoding="async"
