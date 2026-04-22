@@ -79,6 +79,50 @@
   align-self: flex-start;
 }
 
+.card-visual {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.9rem;
+  border: 1px solid var(--border-subtle, rgba(0, 245, 255, 0.15));
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.14), rgba(18, 18, 28, 0.95));
+}
+
+.card-visual-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-visual-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.8rem;
+  text-align: center;
+  color: var(--text-primary, #f0f0f0);
+  background:
+    radial-gradient(circle at 25% 25%, rgba(0, 229, 255, 0.25), transparent 55%),
+    linear-gradient(145deg, rgba(0, 0, 0, 0.35), rgba(0, 229, 255, 0.08));
+}
+
+.card-visual-fallback-icon {
+  font-size: 1.4rem;
+}
+
+.card-visual-fallback-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.25;
+  max-width: 20ch;
+}
+
 .card:hover {
   border-color: var(--neon-cyan, #00e5ff);
   box-shadow: 0 0 12px rgba(0, 229, 255, 0.12);
@@ -224,6 +268,20 @@
   margin: 0.2rem 0;
   font-size: 0.9rem;
   color: var(--text-secondary, #a0a0b8);
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .card-visual {
+    margin-bottom: 0.75rem;
+  }
+
+  .card-visual-fallback-text {
+    font-size: 0.82rem;
+  }
 }
 
 /* ── Card actions (kept for backwards compat) ── */

@@ -27,6 +27,7 @@ export class Festivals implements OnInit, OnDestroy {
   /** Pre-fetched on init so the template doesn't call the service on every render. */
   stagesByFestivalId: Record<string, Stage[] | undefined> = {};
   stageLoadFailedByFestivalId: Record<string, boolean | undefined> = {};
+  imageLoadFailedByFestivalId: Record<string, boolean | undefined> = {};
 
   openKebabMenuFestivalId: string | null = null;
 
@@ -49,9 +50,11 @@ export class Festivals implements OnInit, OnDestroy {
           this.festivalsList = festivals;
           this.stagesByFestivalId = {};
           this.stageLoadFailedByFestivalId = {};
+          this.imageLoadFailedByFestivalId = {};
 
           festivals.forEach((festival) => {
             this.stageLoadFailedByFestivalId[festival.id] = false;
+            this.imageLoadFailedByFestivalId[festival.id] = false;
           });
 
           if (festivals.length === 0) return of([] as FestivalStageLookup[]);
@@ -78,8 +81,22 @@ export class Festivals implements OnInit, OnDestroy {
           this.festivalsList = [];
           this.stagesByFestivalId = {};
           this.stageLoadFailedByFestivalId = {};
+          this.imageLoadFailedByFestivalId = {};
         },
       });
+  }
+
+  hasCardImage(festival: Festival): boolean {
+    return !!this.getCardImageUrl(festival) && !this.imageLoadFailedByFestivalId[festival.id];
+  }
+
+  getCardImageUrl(festival: Festival): string | null {
+    const trimmedImageUrl = festival.imageUrl?.trim();
+    return trimmedImageUrl ? trimmedImageUrl : null;
+  }
+
+  onCardImageError(festivalId: string): void {
+    this.imageLoadFailedByFestivalId[festivalId] = true;
   }
 
   ngOnInit(): void {
