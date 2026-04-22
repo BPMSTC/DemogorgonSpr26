@@ -52,3 +52,5 @@ Thumbs.db
 .copilot-agent/
 .copilot/
 .copilot-agent/.copilot/
+
+credentials.json
