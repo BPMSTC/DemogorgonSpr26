@@ -380,7 +380,13 @@ export class MySchedule implements OnInit, OnDestroy {
   }
 
   private generateDeviceUserId(): string {
-    const randomPart = Math.random().toString(36).slice(2, 12);
+    const bytes = new Uint8Array(12);
+    globalThis.crypto.getRandomValues(bytes);
+    const randomPart = btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '')
+      .slice(0, 16);
     const timePart = Date.now().toString(36);
     return `mfp_${timePart}_${randomPart}`;
   }
