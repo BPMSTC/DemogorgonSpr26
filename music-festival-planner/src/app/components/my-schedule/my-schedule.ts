@@ -1,5 +1,5 @@
-import { Component, Injector, OnInit, OnDestroy, effect } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, Inject, Injector, OnInit, OnDestroy, effect } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ScheduleService } from '../../services/schedule.service';
 import { FestivalService } from '../../services/festival.service';
@@ -8,6 +8,9 @@ import {
   PersonalConflict,
 } from '../../services/personal-schedule.service';
 import { Performance } from '../../models/performance.model';
+import { CalendarService } from '../../services/calendar.service';
+import { LOCAL_STORAGE } from '../../services/schedule.service';
+import { environment } from '../../../environments/environment';
 
 // ---- Filter Sentinels ------------------------------------------------------
 
@@ -64,6 +67,10 @@ export class MySchedule implements OnInit, OnDestroy {
   personalDays: string[] = [];
   festivalNameById: Record<string, string> = {};
   removingId: string | null = null;
+  calendarExportInProgress = false;
+  calendarStatusType: 'success' | 'error' | 'info' | null = null;
+  calendarStatusMessage = '';
+  private deviceUserId = '';
 
   private savedSub?: Subscription;
 
@@ -72,13 +79,19 @@ export class MySchedule implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private scheduleService: ScheduleService,
     private injector: Injector,
     private festivalService: FestivalService,
     public personalSchedule: PersonalScheduleService,
+    private calendarService: CalendarService,
+    @Inject(LOCAL_STORAGE) private storage: Storage,
   ) {}
 
   ngOnInit(): void {
+    this.deviceUserId = this.getOrCreateDeviceUserId();
+    this.consumeCalendarCallbackParams();
+
     this.festivalId = this.route.snapshot.paramMap.get('id') ?? '';
     if (!this.festivalId) {
       this.activeView = 'personal';
@@ -216,6 +229,37 @@ export class MySchedule implements OnInit, OnDestroy {
     this.personalSchedule.clearAll();
   }
 
+  addSavedPerformancesToGoogleCalendar(): void {
+    if (this.savedPerformances.length === 0 || this.calendarExportInProgress) {
+      return;
+    }
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const performanceIds = [...new Set(this.savedPerformances.map((performance) => performance.id))];
+
+    if (performanceIds.length === 0) {
+      this.calendarStatusType = 'error';
+      this.calendarStatusMessage = 'No saved performances were selected for export.';
+      return;
+    }
+
+    this.calendarExportInProgress = true;
+    this.calendarStatusType = 'info';
+    this.calendarStatusMessage = 'Redirecting to Google for calendar authorization...';
+
+    try {
+      this.calendarService.beginGoogleCalendarExport({
+        performanceIds,
+        deviceUserId: this.deviceUserId,
+        timezone,
+      });
+    } catch {
+      this.calendarExportInProgress = false;
+      this.calendarStatusType = 'error';
+      this.calendarStatusMessage = 'Unable to start Google Calendar export.';
+    }
+  }
+
   savedForDay(date: string): Performance[] {
     const toMin = (t: string) => {
       const [h, m] = t.split(':').map(Number);
@@ -321,5 +365,75 @@ export class MySchedule implements OnInit, OnDestroy {
     const perf = this.performanceGrid[`${time}-${stage}`];
     if (!perf) return false;
     return this.conflicts.some((c) => c.stage === stage && c.ids.includes(perf.id));
+  }
+
+  private getOrCreateDeviceUserId(): string {
+    const storageKey = environment.calendarDeviceStorageKey;
+    const existing = this.storage.getItem(storageKey);
+    if (existing && /^[A-Za-z0-9_-]{8,128}$/.test(existing)) {
+      return existing;
+    }
+
+    const generated = this.generateDeviceUserId();
+    this.storage.setItem(storageKey, generated);
+    return generated;
+  }
+
+  private generateDeviceUserId(): string {
+    const bytes = new Uint8Array(12);
+    globalThis.crypto.getRandomValues(bytes);
+    const randomPart = btoa(String.fromCharCode(...bytes))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '')
+      .slice(0, 16);
+    const timePart = Date.now().toString(36);
+    return `mfp_${timePart}_${randomPart}`;
+  }
+
+  private consumeCalendarCallbackParams(): void {
+    const queryParamMap = this.route.snapshot?.queryParamMap;
+    if (!queryParamMap || typeof queryParamMap.get !== 'function') {
+      return;
+    }
+
+    const status = queryParamMap.get('calendarStatus');
+    if (!status) {
+      return;
+    }
+
+    if (status === 'success') {
+      const created = Number(queryParamMap.get('created') || '0');
+      const skipped = Number(queryParamMap.get('skipped') || '0');
+      const failed = Number(queryParamMap.get('failed') || '0');
+      const total = Number(queryParamMap.get('total') || '0');
+
+      this.calendarStatusType = failed > 0 ? 'info' : 'success';
+      this.calendarStatusMessage = `Google Calendar export complete: ${created}/${total} created, ${skipped} skipped, ${failed} failed.`;
+
+      const failureDetails = queryParamMap.get('failureDetails');
+      if (failureDetails) {
+        try {
+          const parsedFailures = JSON.parse(failureDetails) as Array<{ reason?: string }>;
+          if (Array.isArray(parsedFailures) && parsedFailures.length > 0) {
+            const firstReason = parsedFailures[0]?.reason || 'One or more items failed.';
+            this.calendarStatusMessage = `${this.calendarStatusMessage} ${firstReason}`;
+          }
+        } catch {
+          // Ignore malformed failure details and keep aggregate message.
+        }
+      }
+    } else {
+      this.calendarStatusType = 'error';
+      this.calendarStatusMessage =
+        queryParamMap.get('calendarMessage') ||
+        'Google Calendar export failed.';
+    }
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true,
+    });
   }
 }

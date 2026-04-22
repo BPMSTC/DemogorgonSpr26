@@ -19,6 +19,7 @@ const { connectToDatabase } = require('./config/database');
 const festivalsRouter = require('./routes/festivals');
 const stagesRouter = require('./routes/stages');
 const performancesRouter = require('./routes/performances');
+const calendarRouter = require('./routes/calendar');
 
 const requestLogger = require('./middleware/requestLogger');
 const { apiLimiter } = require('./middleware/rateLimiter');
@@ -89,6 +90,7 @@ app.use('/api', apiLimiter);
 app.use('/api/festivals', festivalsRouter);
 app.use('/api/stages', stagesRouter);
 app.use('/api/performances', performancesRouter);
+app.use('/api/calendar', calendarRouter);
 
 // ---- Error handling --------------------------------------------------------
 

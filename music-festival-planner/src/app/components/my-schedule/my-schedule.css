@@ -354,6 +354,35 @@
   margin-right: 0.2rem;
 }
 
+.personal-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.btn-export-calendar {
+  background: linear-gradient(135deg, #1a73e8, #34a853);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.45rem 0.95rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-export-calendar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(26, 115, 232, 0.35);
+}
+
+.btn-export-calendar:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 .btn-clear-all {
   background: none;
   border: 1px solid rgba(255, 45, 120, 0.35);
@@ -368,6 +397,36 @@
 .btn-clear-all:hover {
   background-color: rgba(255, 45, 120, 0.1);
   box-shadow: 0 0 8px rgba(255, 45, 120, 0.25);
+}
+
+.btn-clear-all:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.calendar-status {
+  border-radius: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 0.9rem;
+}
+
+.calendar-status--success {
+  background: rgba(52, 168, 83, 0.16);
+  border: 1px solid rgba(52, 168, 83, 0.45);
+  color: #7ff1a2;
+}
+
+.calendar-status--error {
+  background: rgba(211, 47, 47, 0.16);
+  border: 1px solid rgba(211, 47, 47, 0.45);
+  color: #ff9f9f;
+}
+
+.calendar-status--info {
+  background: rgba(26, 115, 232, 0.15);
+  border: 1px solid rgba(26, 115, 232, 0.4);
+  color: #9bc1ff;
 }
 
 /* ---- Personal Day Section --------------------------------- */

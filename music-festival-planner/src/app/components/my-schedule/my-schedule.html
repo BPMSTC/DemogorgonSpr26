@@ -273,14 +273,43 @@
         <span class="personal-count__num">{{ savedPerformances.length }}</span>
         performance{{ savedPerformances.length !== 1 ? 's' : '' }} saved
       </p>
-      <button
-        class="btn-clear-all"
-        (click)="clearPersonalSchedule()"
-        aria-label="Remove all performances from My Schedule"
-      >
-        Clear All
-      </button>
+      <div class="personal-actions">
+        <button
+          class="btn-export-calendar"
+          (click)="addSavedPerformancesToGoogleCalendar()"
+          [disabled]="calendarExportInProgress"
+          [attr.aria-busy]="calendarExportInProgress"
+          aria-label="Add saved performances to Google Calendar"
+        >
+          @if (calendarExportInProgress) {
+            Connecting...
+          } @else {
+            Add to Google Calendar
+          }
+        </button>
+        <button
+          class="btn-clear-all"
+          (click)="clearPersonalSchedule()"
+          aria-label="Remove all performances from My Schedule"
+          [disabled]="calendarExportInProgress"
+        >
+          Clear All
+        </button>
+      </div>
     </div>
+
+    @if (calendarStatusType && calendarStatusMessage) {
+      <div
+        class="calendar-status"
+        [class.calendar-status--success]="calendarStatusType === 'success'"
+        [class.calendar-status--error]="calendarStatusType === 'error'"
+        [class.calendar-status--info]="calendarStatusType === 'info'"
+        role="status"
+        aria-live="polite"
+      >
+        {{ calendarStatusMessage }}
+      </div>
+    }
 
     <!-- Itinerary: grouped by day, sorted by start time -->
     @for (day of personalDays; track day) {
