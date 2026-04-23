@@ -54,3 +54,9 @@ Thumbs.db
 .copilot-agent/.copilot/
 
 credentials.json
+
+# Local sprint reporting — instructor tooling (never commit)
+/local-sprint-reporting/
+/music-festival-planner/tools/
+/music-festival-planner/config/sprint-report.config.json
+/music-festival-planner/docs/SPRINT_ACTIVITY_REPORT.md
