@@ -16,7 +16,9 @@
     "seed:reset": "node backend/scripts/seed.js --reset --confirm WIPE",
     "mongo:check": "node backend/scripts/check-mongo.js",
     "mongo:check:local": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.local'; require('./backend/scripts/check-mongo');\"",
-    "mongo:check:atlas": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.atlas'; require('./backend/scripts/check-mongo');\""
+    "mongo:check:atlas": "node -e \"process.env.MONGODB_ENV_FILE='backend/.env.atlas'; require('./backend/scripts/check-mongo');\"",
+    "report:sprint": "node tools/sprint-activity-report.mjs",
+    "report:dashboard": "node tools/local-reporting-server.mjs"
   },
   "private": true,
   "packageManager": "npm@11.8.0",
