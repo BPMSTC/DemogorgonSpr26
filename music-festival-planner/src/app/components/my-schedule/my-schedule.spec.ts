@@ -4,9 +4,13 @@ import { CommonModule } from '@angular/common';
 import { MySchedule, ALL_STAGES } from './my-schedule';
 import { ScheduleService } from '../../services/schedule.service';
 import { FestivalService } from '../../services/festival.service';
-import { PersonalScheduleService } from '../../services/personal-schedule.service';
+import {
+  PersonalScheduleService,
+  PersonalConflict,
+} from '../../services/personal-schedule.service';
+import { CalendarService } from '../../services/calendar.service';
 import { Performance } from '../../models/performance.model';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 
 const MOCK_PERFORMANCES: Performance[] = [
   {
@@ -64,11 +68,22 @@ class MockFestivalService {
 }
 
 class MockPersonalScheduleService {
-  saved$ = of([]);
+  private readonly savedSubject = new BehaviorSubject<Performance[]>([]);
+  saved$ = this.savedSubject.asObservable();
+  private conflicts: PersonalConflict[] = [];
+
+  setSaved(saved: Performance[], conflicts: PersonalConflict[] = []): void {
+    this.conflicts = conflicts;
+    this.savedSubject.next(saved.map((p) => ({ ...p })));
+  }
 
   getPersonalConflicts() {
-    return [];
+    return this.conflicts;
   }
+}
+
+class MockCalendarService {
+  beginGoogleCalendarExport = vi.fn();
 }
 
 function makeTestBed(festivalId = '1') {
@@ -83,6 +98,7 @@ function makeTestBed(festivalId = '1') {
       { provide: ScheduleService, useClass: MockScheduleService },
       { provide: FestivalService, useClass: MockFestivalService },
       { provide: PersonalScheduleService, useClass: MockPersonalScheduleService },
+      { provide: CalendarService, useClass: MockCalendarService },
     ],
   }).compileComponents();
 }
@@ -90,11 +106,15 @@ function makeTestBed(festivalId = '1') {
 describe('MySchedule', () => {
   let component: MySchedule;
   let fixture: ComponentFixture<MySchedule>;
+  let personalSchedule: MockPersonalScheduleService;
+  let calendarService: MockCalendarService;
 
   beforeEach(async () => {
     await makeTestBed();
     fixture = TestBed.createComponent(MySchedule);
     component = fixture.componentInstance;
+    personalSchedule = TestBed.inject(PersonalScheduleService) as unknown as MockPersonalScheduleService;
+    calendarService = TestBed.inject(CalendarService) as unknown as MockCalendarService;
     fixture.detectChanges();
     await fixture.whenStable();
   });
@@ -182,6 +202,104 @@ describe('MySchedule', () => {
       component.selectDay('2026-08-01');
       component.selectStage('Forest Stage');
       expect(component.filteredPerformances.length).toBe(0);
+    });
+  });
+
+  describe('calendar export clash protection', () => {
+    it('marks hasScheduleClashes true when personal conflicts exist', () => {
+      const a: Performance = {
+        id: 'p1',
+        festivalId: '1',
+        artistName: 'Act A',
+        stageName: 'Main Stage',
+        date: '2026-08-01',
+        startTime: '18:00',
+        endTime: '19:00',
+      };
+      const b: Performance = {
+        id: 'p2',
+        festivalId: '1',
+        artistName: 'Act B',
+        stageName: 'Dance Tent',
+        date: '2026-08-01',
+        startTime: '18:30',
+        endTime: '19:30',
+      };
+
+      personalSchedule.setSaved([
+        a,
+        b,
+      ], [
+        { a, b, overlapWindow: '06:30 PM–07:00 PM' },
+      ]);
+
+      expect(component.hasScheduleClashes).toBe(true);
+    });
+
+    it('blocks Google Calendar export when clashes exist', () => {
+      const a: Performance = {
+        id: 'p1',
+        festivalId: '1',
+        artistName: 'Act A',
+        stageName: 'Main Stage',
+        date: '2026-08-01',
+        startTime: '18:00',
+        endTime: '19:00',
+      };
+      const b: Performance = {
+        id: 'p2',
+        festivalId: '1',
+        artistName: 'Act B',
+        stageName: 'Dance Tent',
+        date: '2026-08-01',
+        startTime: '18:30',
+        endTime: '19:30',
+      };
+
+      personalSchedule.setSaved([
+        a,
+        b,
+      ], [
+        { a, b, overlapWindow: '06:30 PM–07:00 PM' },
+      ]);
+
+      component.addSavedPerformancesToGoogleCalendar();
+
+      expect(calendarService.beginGoogleCalendarExport).not.toHaveBeenCalled();
+      expect(component.calendarStatusType).toBe('info');
+      expect(component.calendarStatusMessage).toBe('Resolve schedule clashes before downloading');
+    });
+
+    it('re-enables export after clashes are resolved', () => {
+      const a: Performance = {
+        id: 'p1',
+        festivalId: '1',
+        artistName: 'Act A',
+        stageName: 'Main Stage',
+        date: '2026-08-01',
+        startTime: '18:00',
+        endTime: '19:00',
+      };
+      const b: Performance = {
+        id: 'p2',
+        festivalId: '1',
+        artistName: 'Act B',
+        stageName: 'Dance Tent',
+        date: '2026-08-01',
+        startTime: '18:30',
+        endTime: '19:30',
+      };
+
+      personalSchedule.setSaved([
+        a,
+        b,
+      ], [
+        { a, b, overlapWindow: '06:30 PM–07:00 PM' },
+      ]);
+      expect(component.hasScheduleClashes).toBe(true);
+
+      personalSchedule.setSaved([a], []);
+      expect(component.hasScheduleClashes).toBe(false);
     });
   });
 });

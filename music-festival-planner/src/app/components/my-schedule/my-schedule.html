@@ -274,19 +274,33 @@
         performance{{ savedPerformances.length !== 1 ? 's' : '' }} saved
       </p>
       <div class="personal-actions">
-        <button
-          class="btn-export-calendar"
-          (click)="addSavedPerformancesToGoogleCalendar()"
-          [disabled]="calendarExportInProgress"
-          [attr.aria-busy]="calendarExportInProgress"
-          aria-label="Add saved performances to Google Calendar"
-        >
-          @if (calendarExportInProgress) {
-            Connecting...
-          } @else {
-            Add to Google Calendar
+        <div class="calendar-export-group">
+          <span
+            class="btn-export-calendar-wrap"
+            [attr.title]="hasScheduleClashes ? clashDisableReason: null"
+            [attr.aria-label]="hasScheduleClashes ? clashDisableReason: null"
+          >
+            <button
+              class="btn-export-calendar"
+              (click)="addSavedPerformancesToGoogleCalendar()"
+              [disabled]="calendarExportInProgress || hasScheduleClashes"
+              [attr.aria-busy]="calendarExportInProgress"
+              [attr.aria-describedby]="hasScheduleClashes ? 'calendar-clash-msg': null"
+              aria-label="Add saved performances to Google Calendar"
+            >
+              @if (calendarExportInProgress) {
+                Connecting...
+              } @else {
+                Add to Google Calendar
+              }
+            </button>
+          </span>
+          @if (hasScheduleClashes) {
+            <p id="calendar-clash-msg" class="calendar-clash-msg" role="status" aria-live="polite">
+              Resolve clashes before downloading
+            </p>
           }
-        </button>
+        </div>
         <button
           class="btn-clear-all"
           (click)="clearPersonalSchedule()"

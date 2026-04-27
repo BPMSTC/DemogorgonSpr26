@@ -356,8 +356,9 @@
 
 .personal-actions {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .btn-export-calendar {
@@ -383,6 +384,24 @@
   opacity: 0.65;
 }
 
+.btn-export-calendar-wrap {
+  display: inline-flex;
+}
+
+.calendar-export-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.calendar-clash-msg {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #ffb38a;
+}
+
 .btn-clear-all {
   background: none;
   border: 1px solid rgba(255, 45, 120, 0.35);
@@ -392,6 +411,7 @@
   font-size: 0.78rem;
   padding: 0.3rem 0.85rem;
   transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  align-self: flex-start;
 }
 
 .btn-clear-all:hover {
