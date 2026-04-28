@@ -74,52 +74,79 @@
 
     <!-- ---- Filter Bars ----------------------------------------------------- -->
     @if (festivalDays.length > 0) {
-      <div class="filter-row">
-        <div class="stage-filter" role="group" aria-label="Filter by stage">
-          <span class="stage-filter-label">Stage:</span>
-          <button
-            class="stage-filter-btn"
-            [class.stage-filter-active]="selectedStage === ALL_STAGES"
-            (click)="selectStage(ALL_STAGES)"
-            [attr.aria-pressed]="selectedStage === ALL_STAGES"
-          >
-            All Stages
-          </button>
-          @for (stage of allStagesForDay; track stage) {
-            <button
-              class="stage-filter-btn"
-              [class.stage-filter-active]="selectedStage === stage"
-              (click)="selectStage(stage)"
-              [attr.aria-pressed]="selectedStage === stage"
-            >
-              {{ stage }}
-            </button>
+      <div class="festival-filters">
+        <button
+          type="button"
+          class="mobile-filter-toggle"
+          (click)="toggleMobileFilters()"
+          [attr.aria-expanded]="mobileFiltersExpanded"
+          aria-controls="mobile-filter-panel"
+        >
+          <span class="mobile-filter-toggle-text">Filters</span>
+          @if (selectedStage !== ALL_STAGES || selectedGenre !== ALL_GENRES) {
+            <span class="mobile-filter-toggle-badge">Active</span>
           }
-        </div>
+          <span
+            class="mobile-filter-toggle-chevron"
+            [class.mobile-filter-toggle-chevron--open]="mobileFiltersExpanded"
+            aria-hidden="true"
+            >▾</span
+          >
+        </button>
 
-        @if (allGenresForDay.length > 0) {
-          <div class="stage-filter" role="group" aria-label="Filter by genre">
-            <span class="stage-filter-label">Genre:</span>
-            <button
-              class="stage-filter-btn"
-              [class.stage-filter-active]="selectedGenre === ALL_GENRES"
-              (click)="selectGenre(ALL_GENRES)"
-              [attr.aria-pressed]="selectedGenre === ALL_GENRES"
-            >
-              All
-            </button>
-            @for (genre of allGenresForDay; track genre) {
+        <div
+          id="mobile-filter-panel"
+          class="filter-row"
+          [class.filter-row-collapsed]="!mobileFiltersExpanded"
+        >
+          <div class="filter-row-inner">
+            <div class="stage-filter" role="group" aria-label="Filter by stage">
+              <span class="stage-filter-label">Stage:</span>
               <button
-                class="stage-filter-btn stage-filter-btn--genre"
-                [class.stage-filter-active]="selectedGenre === genre"
-                (click)="selectGenre(genre)"
-                [attr.aria-pressed]="selectedGenre === genre"
+                class="stage-filter-btn"
+                [class.stage-filter-active]="selectedStage === ALL_STAGES"
+                (click)="selectStage(ALL_STAGES)"
+                [attr.aria-pressed]="selectedStage === ALL_STAGES"
               >
-                {{ genre }}
+                All Stages
               </button>
+              @for (stage of allStagesForDay; track stage) {
+                <button
+                  class="stage-filter-btn"
+                  [class.stage-filter-active]="selectedStage === stage"
+                  (click)="selectStage(stage)"
+                  [attr.aria-pressed]="selectedStage === stage"
+                >
+                  {{ stage }}
+                </button>
+              }
+            </div>
+
+            @if (allGenresForDay.length > 0) {
+              <div class="stage-filter" role="group" aria-label="Filter by genre">
+                <span class="stage-filter-label">Genre:</span>
+                <button
+                  class="stage-filter-btn"
+                  [class.stage-filter-active]="selectedGenre === ALL_GENRES"
+                  (click)="selectGenre(ALL_GENRES)"
+                  [attr.aria-pressed]="selectedGenre === ALL_GENRES"
+                >
+                  All
+                </button>
+                @for (genre of allGenresForDay; track genre) {
+                  <button
+                    class="stage-filter-btn stage-filter-btn--genre"
+                    [class.stage-filter-active]="selectedGenre === genre"
+                    (click)="selectGenre(genre)"
+                    [attr.aria-pressed]="selectedGenre === genre"
+                  >
+                    {{ genre }}
+                  </button>
+                }
+              </div>
             }
           </div>
-        }
+        </div>
       </div>
     }
 

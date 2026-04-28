@@ -735,10 +735,72 @@
 
 /* ---- Filter Row ------------------------------------------- */
 .filter-row {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    grid-template-rows 0.28s ease,
+    opacity 0.2s ease,
+    margin-bottom 0.28s ease;
+}
+
+.festival-filters {
+  margin-bottom: 1.5rem;
+}
+
+.filter-row-inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    transform 0.28s ease,
+    opacity 0.2s ease;
+}
+
+.mobile-filter-toggle {
+  display: none;
+}
+
+.mobile-filter-toggle-text {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.mobile-filter-toggle-badge {
+  font-size: 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  padding: 0.05rem 0.45rem;
+}
+
+.mobile-filter-toggle-chevron {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.mobile-filter-toggle-chevron--open {
+  transform: rotate(180deg);
+  color: var(--neon-cyan);
+}
+
+.filter-row-collapsed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-bottom: 0;
+}
+
+.filter-row-collapsed .filter-row-inner {
+  opacity: 0;
+  transform: translateY(-0.5rem);
+  pointer-events: none;
 }
 
 .stage-filter {
@@ -746,6 +808,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
 }
 
 .stage-filter-label {
@@ -819,6 +882,31 @@
   .view-tab {
     font-size: 0.82rem;
     padding: 0.4rem 0.7rem 0.55rem;
+  }
+
+  .mobile-filter-toggle {
+    width: 30%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 0.5rem 0.9rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    margin-bottom: 0.7rem;
+  }
+
+  .mobile-filter-toggle:focus-visible {
+    outline: 2px solid var(--neon-cyan);
+    outline-offset: 2px;
+  }
+
+  .filter-row {
+    margin-bottom: 0;
   }
 }
 

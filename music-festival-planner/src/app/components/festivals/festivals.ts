@@ -123,6 +123,11 @@ export class Festivals implements OnInit, OnDestroy {
   toggleFestivalCard(festivalId: string, clickEvent: MouseEvent): void {
     const clickedElement = clickEvent.target as HTMLElement;
     if (clickedElement.closest('.kebab-menu')) return;
+
+    const interactiveAncestor = clickedElement.closest('a, button, input, select, textarea');
+    const isCardToggleButton = interactiveAncestor?.classList.contains('card-toggle-btn') ?? false;
+    if (interactiveAncestor && !isCardToggleButton) return;
+
     this.expandedFestivalId = this.expandedFestivalId === festivalId ? null : festivalId;
   }
 
