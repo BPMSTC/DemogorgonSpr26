@@ -61,6 +61,9 @@ export class MySchedule implements OnInit, OnDestroy {
 
   conflicts: ConflictInfo[] = [];
 
+  hasScheduleClashes = false;
+  readonly clashDisableReason = 'Resolve schedule clashes before downloading';
+
   savedPerformances: Performance[] = [];
   savedIds: Set<string> = new Set();
   personalConflicts: PersonalConflict[] = [];
@@ -139,6 +142,7 @@ export class MySchedule implements OnInit, OnDestroy {
       this.savedPerformances = saved;
       this.savedIds = new Set(saved.map((p) => p.id));
       this.personalConflicts = this.personalSchedule.getPersonalConflicts();
+      this.hasScheduleClashes = this.personalConflicts.length > 0;
       this.personalDays = [...new Set(saved.map((p) => p.date))].sort();
     });
   }
@@ -231,6 +235,12 @@ export class MySchedule implements OnInit, OnDestroy {
 
   addSavedPerformancesToGoogleCalendar(): void {
     if (this.savedPerformances.length === 0 || this.calendarExportInProgress) {
+      return;
+    }
+
+    if (this.hasScheduleClashes) {
+      this.calendarStatusType = 'info';
+      this.calendarStatusMessage = this.clashDisableReason;
       return;
     }
 
@@ -373,7 +383,6 @@ export class MySchedule implements OnInit, OnDestroy {
     if (existing && /^[A-Za-z0-9_-]{8,128}$/.test(existing)) {
       return existing;
     }
-
     const generated = this.generateDeviceUserId();
     this.storage.setItem(storageKey, generated);
     return generated;
