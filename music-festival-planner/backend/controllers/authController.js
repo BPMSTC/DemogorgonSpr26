@@ -2,18 +2,18 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const AppError = require('../middleware/AppError');
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is not configured.');
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new AppError('JWT_SECRET environment variable is not configured.', 500);
+  }
+  return secret;
 }
 
 function signToken(user) {
-  return jwt.sign(
-    { id: user._id.toString(), email: user.email, role: user.role },
-    JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-  );
+  return jwt.sign({ id: user._id.toString(), email: user.email, role: user.role }, getJwtSecret(), {
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  });
 }
 
 // POST /api/auth/register
