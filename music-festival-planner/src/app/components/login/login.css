@@ -1,0 +1,11 @@
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 4rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+}

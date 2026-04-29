@@ -8,9 +8,14 @@ import { StageListComponent } from './components/stage-list/stage-list';
 import { StageCreateComponent } from './components/stage-create/stage-create';
 import { PerformanceListComponent } from './components/performance-list/performance-list';
 import { PerformanceCreateComponent } from './components/performance-create/performance-create';
+import { LoginComponent } from './components/login/login';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard';
+import { adminGuard } from './guards/admin.guard';
 
 const routes: Routes = [
   { path: '', component: Home },
+  { path: 'login', component: LoginComponent },
+  { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
   { path: 'festivals', component: Festivals },
   { path: 'festivals/create', component: FestivalCreateComponent },
   { path: 'my-schedule', component: MySchedule },
