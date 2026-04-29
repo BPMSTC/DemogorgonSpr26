@@ -5,6 +5,7 @@ import { catchError, filter, switchMap } from 'rxjs/operators';
 import { FestivalService } from '../../services/festival.service';
 import { StageService } from '../../services/stage.service';
 import { PersonalScheduleService } from '../../services/personal-schedule.service';
+import { AuthService } from '../../services/auth.service';
 import { Festival } from '../../models/festival.model';
 import { Stage } from '../../models/stage.model';
 
@@ -19,8 +20,9 @@ type FestivalStageLookup = { id: string; stages: Stage[]; failed: boolean };
 export class Festivals implements OnInit, OnDestroy {
   festivalsList: Festival[] = [];
 
-  /** Stub: swap with a real auth service when authentication is added. */
-  isOrganizerUser = true;
+  get isOrganizerUser(): boolean {
+    return this.authService.isAdmin;
+  }
 
   expandedFestivalId: string | null = null;
 
@@ -38,6 +40,7 @@ export class Festivals implements OnInit, OnDestroy {
     private festivalService: FestivalService,
     private stageService: StageService,
     private personalScheduleService: PersonalScheduleService,
+    private authService: AuthService,
     private router: Router,
   ) {}
 

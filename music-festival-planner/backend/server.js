@@ -20,9 +20,10 @@ const festivalsRouter = require('./routes/festivals');
 const stagesRouter = require('./routes/stages');
 const performancesRouter = require('./routes/performances');
 const calendarRouter = require('./routes/calendar');
+const authRouter = require('./routes/auth');
 
 const requestLogger = require('./middleware/requestLogger');
-const { apiLimiter } = require('./middleware/rateLimiter');
+const { apiLimiter, authLimiter } = require('./middleware/rateLimiter');
 const notFound = require('./middleware/notFound');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -85,7 +86,7 @@ app.get('/', (_req, res) => {
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Rate-limit all API routes.
-// Apply authLimiter (from middleware/rateLimiter.js) to POST /api/auth/* when auth routes are added.
+app.use('/api/auth', authLimiter, authRouter);
 app.use('/api', apiLimiter);
 app.use('/api/festivals', festivalsRouter);
 app.use('/api/stages', stagesRouter);
