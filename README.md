@@ -48,3 +48,31 @@ No build step is required.
 - Keep project-specific changes within their respective folders.
 - Branch naming convention: `Dem-XX-short-description`
 - Commit format convention: `DEM-XX: Short message`
+
+
+## Reason for MIT License
+
+- Being the simplest and most flexible, We thought it right in this case to 
+  go with the MIT license due to the nature of this project being a platform for learning
+  in and out of class, having the most straight forward option with the least restricions
+  was the primary goal.
+
+## AI tools and generated code
+- AI tools we used this semester: 
+  - Copilot
+  - Claude
+
+- We do indeed plan to ship any and all AI-generated code in the final project
+
+- For AI attribution we begin assigning an AI provenance in the headar of every
+  new file that contains AI assisted or generated code.
+
+  such as the following example:
+
+ ---- AI Provenance ----------------------------------------------------------
+  AI-Assisted: true
+  AI-Tool: GitHub Copilot (Enterprise)
+  AI-Scope: function scaffolding, type annotations, initial docstring
+  Human-Review: brent.f (2026-04-18) — significant refactor, error handling,
+  test coverage additions. Reviewed for verbatim matches.
+ -----------------------------------------------------------------------------
