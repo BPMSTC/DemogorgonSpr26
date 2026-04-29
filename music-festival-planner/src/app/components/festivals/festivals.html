@@ -8,7 +8,14 @@
     @for (festival of festivalsList; track festival.id) {
       @let festivalStages = stagesByFestivalId[festival.id] ?? [];
       @let stageLoadFailed = stageLoadFailedByFestivalId[festival.id] ?? false;
-      <div class="card" [class.card-expanded]="expandedFestivalId === festival.id" role="listitem">
+      <div
+        class="card"
+        [class.card-expanded]="expandedFestivalId === festival.id"
+        role="listitem"
+        tabindex="0"
+        (click)="toggleFestivalCard(festival.id, $event)"
+        (keydown)="toggleFestivalCardOnKeyboard(festival.id, $event)"
+      >
         <div class="card-visual">
           @if (hasCardImage(festival)) {
             <img
@@ -42,7 +49,6 @@
                 ? 'Collapse details for '
                 : 'Expand details for ') + festival.name
             "
-            (click)="toggleFestivalCard(festival.id, $event)"
           >
             <span class="card-title-group">
               <h3>{{ festival.name }}</h3>

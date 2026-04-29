@@ -52,7 +52,7 @@
 }
 
 .hero-image {
-  width: 80%;
+  width: 90%;
   border-radius: var(--radius-card);
   box-shadow: var(--glow-cyan);
   margin-bottom: 1.5rem;

@@ -38,6 +38,7 @@ export type ActiveView = 'festival' | 'personal';
 })
 export class MySchedule implements OnInit, OnDestroy {
   activeView: ActiveView = 'festival';
+  mobileFiltersExpanded = false;
 
   festivalId: string = '';
   festivalName: string = '';
@@ -155,6 +156,10 @@ export class MySchedule implements OnInit, OnDestroy {
 
   setView(view: ActiveView): void {
     this.activeView = view;
+  }
+
+  toggleMobileFilters(): void {
+    this.mobileFiltersExpanded = !this.mobileFiltersExpanded;
   }
 
   // ---- User Interaction Handlers (Festival Schedule) ---------------------
