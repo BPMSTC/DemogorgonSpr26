@@ -86,8 +86,18 @@ app.get('/', (_req, res) => {
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Rate-limit all API routes.
-app.use('/api/auth', authLimiter, authRouter);
 app.use('/api', apiLimiter);
+app.use(
+  '/api/auth',
+  (req, res, next) => {
+    if (req.method === 'GET' && req.path === '/me') {
+      return next();
+    }
+
+    return authLimiter(req, res, next);
+  },
+  authRouter,
+);
 app.use('/api/festivals', festivalsRouter);
 app.use('/api/stages', stagesRouter);
 app.use('/api/performances', performancesRouter);
