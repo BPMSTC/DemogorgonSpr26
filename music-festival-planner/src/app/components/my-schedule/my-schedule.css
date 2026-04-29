@@ -181,15 +181,21 @@
   background-color: var(--bg-dark);
   border-bottom: 1px solid var(--border-subtle);
   border-right: 1px solid var(--border-subtle);
+  left: 0;
+  position: sticky;
+  z-index: 3;
 }
 
 .timetable-time {
   background-color: var(--bg-dark);
-  color: var(--text-muted);
+  color: var(--text-primary);
   font-size: 0.75rem;
   text-align: right;
   padding: 4px 8px 0 0;
   border-right: 1px solid var(--border-subtle);
+  left: 0;
+  position: sticky;
+  z-index: 2;
   white-space: nowrap;
 }
 
@@ -243,7 +249,7 @@
 
 .timetable-event .event-time {
   font-size: 0.72rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .timetable-event .event-genre {
@@ -279,6 +285,7 @@
   bottom: 4px;
   left: 6px;
   right: 6px;
+  min-height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -453,13 +460,13 @@
 
 .personal-day-date {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .personal-day-count {
   margin-left: auto;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-primary);
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
   border-radius: 999px;
@@ -717,7 +724,7 @@
   border-radius: var(--radius-card);
   padding: 0.6rem 1rem;
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   transition: border-color 0.15s ease;
 }
@@ -803,6 +810,21 @@
   pointer-events: none;
 }
 
+@media (min-width: 768px) {
+
+  .filter-row-collapsed {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-row-collapsed .filter-row-inner {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
 .stage-filter {
   display: flex;
   flex-wrap: wrap;
@@ -825,7 +847,7 @@
   border-radius: 999px;
   padding: 0.3rem 0.85rem;
   font-size: 0.82rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
 }
@@ -854,16 +876,38 @@
   }
 
   .timetable {
-    font-size: 0.75rem;
+    display: grid;
+    overflow-x: auto;
+    width: 100%;
+    grid-template-columns: 47px repeat(
+      var(--stage-count),
+      calc((100% - 47px) / 2)
+    )
+  }
+
+  .timetable-row {
+    display: contents;
   }
 
   .timetable-stage-label {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.25rem;
+    font-size: 0.75rem;
+    padding: 0.7rem 0.45rem;
+  }
+
+  .timetable-time {
+    padding: 0.7rem 0.4rem 0 0;
+  }
+
+  .timetable-slot {
+    min-height: 58px;
+  }
+
+  .timetable-event {
+    padding: 0.65rem 0.55rem 2.15rem;
   }
 
   .timetable-event .event-name {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
 
   .schedule-summary {
@@ -895,7 +939,7 @@
     border: 1px solid var(--border-subtle);
     border-radius: 999px;
     padding: 0.5rem 0.9rem;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     cursor: pointer;
     margin-bottom: 0.7rem;
   }
@@ -912,24 +956,38 @@
 
 @media (max-width: 480px) {
   .timetable {
-    grid-template-columns: 48px repeat(var(--stage-count, 1), 1fr);
-    font-size: 0.7rem;
+    display: grid;
+    overflow-x: auto;
+    width: 100%;
+    grid-template-columns: 55px repeat(
+      var(--stage-count),
+      calc((100% - 55px) / 2)
+    );
+    font-size: 0.72rem;
+    gap: 1px;
   }
 
   .timetable-time {
-    font-size: 0.65rem;
-    padding: 4px 4px 0 0;
+    font-size: 0.68rem;
+    padding: 0.45rem 0.35rem 0 0;
+  }
+
+  .timetable-stage-label {
+    font-size: 0.78rem;
+    padding: 0.55rem 0.35rem;
+  }
+
+  .timetable-slot {
+    min-height: 58px;
   }
 
   .timetable-event {
-    padding: 4px 5px 28px;
+    padding: 0.5rem 0.45rem 1.95rem;
   }
 
-  .timetable-event .event-stage,
-  .timetable-event .event-time,
-  .timetable-event .event-genre {
+  /* .timetable-event .event-stage{
     display: none;
-  }
+  } */
 
   .stage-filter-btn {
     font-size: 0.75rem;
