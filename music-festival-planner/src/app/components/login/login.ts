@@ -13,6 +13,7 @@ export class LoginComponent implements OnInit {
   form!: FormGroup;
   errorMessage = '';
   isLoading = false;
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,

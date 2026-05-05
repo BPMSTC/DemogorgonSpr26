@@ -25,15 +25,25 @@
 
         <div class="mb-4">
           <label for="password" class="form-label">Password</label>
-          <input
-            id="password"
-            type="password"
-            class="form-control"
-            [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
-            formControlName="password"
-            autocomplete="current-password"
-          />
-          <div class="invalid-feedback">
+          <div class="password-field">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          <div class="invalid-feedback" [class.d-block]="form.get('password')?.invalid && form.get('password')?.touched">
             Password must be at least 8 characters.
           </div>
         </div>
