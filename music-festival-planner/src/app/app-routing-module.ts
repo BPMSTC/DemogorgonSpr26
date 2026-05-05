@@ -17,13 +17,13 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
   { path: 'festivals', component: Festivals },
-  { path: 'festivals/create', component: FestivalCreateComponent },
+  { path: 'festivals/create', component: FestivalCreateComponent, canActivate: [adminGuard] },
   { path: 'my-schedule', component: MySchedule },
   { path: 'festivals/:id/schedule', component: MySchedule },
-  { path: 'festivals/:id/stages', component: StageListComponent },
-  { path: 'festivals/:id/stages/new', component: StageCreateComponent },
-  { path: 'festivals/:id/performances', component: PerformanceListComponent },
-  { path: 'festivals/:id/performances/new', component: PerformanceCreateComponent },
+  { path: 'festivals/:id/stages', component: StageListComponent, canActivate: [adminGuard] },
+  { path: 'festivals/:id/stages/new', component: StageCreateComponent, canActivate: [adminGuard] },
+  { path: 'festivals/:id/performances', component: PerformanceListComponent, canActivate: [adminGuard] },
+  { path: 'festivals/:id/performances/new', component: PerformanceCreateComponent, canActivate: [adminGuard] },
   { path: '**', redirectTo: '' },
 ];
 
