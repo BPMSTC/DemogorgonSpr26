@@ -53,6 +53,62 @@
   outline-offset: 2px;
 }
 
+/* ── Skeleton loading cards ── */
+.card-skeleton {
+  pointer-events: none;
+}
+
+.skeleton-visual {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  margin-bottom: 0.9rem;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-title {
+  height: 1.2rem;
+  width: 60%;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-meta {
+  height: 0.85rem;
+  width: 80%;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-meta.short {
+  width: 50%;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Card Grid — flex so cards don't stretch each other's height */
 .card-grid {
   display: flex;

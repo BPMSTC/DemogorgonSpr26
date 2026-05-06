@@ -4,173 +4,187 @@
     <button class="btn-primary" routerLink="/festivals/create">+ Add New Festival</button>
   </nav>
 
+  @if (isLoading) {
   <div class="card-grid" role="list" aria-labelledby="festivals-heading">
-    @for (festival of festivalsList; track festival.id) {
-      @let festivalStages = stagesByFestivalId[festival.id] ?? [];
-      @let stageLoadFailed = stageLoadFailedByFestivalId[festival.id] ?? false;
-      <div
-        class="card"
-        [class.card-expanded]="expandedFestivalId === festival.id"
-        role="listitem"
-        tabindex="0"
-        (click)="toggleFestivalCard(festival.id, $event)"
-        (keydown)="toggleFestivalCardOnKeyboard(festival.id, $event)"
-      >
-        <div class="card-visual">
-          @if (hasCardImage(festival)) {
-            <img
-              class="card-visual-image"
-              [src]="getCardImageUrl(festival) || ''"
-              [alt]="'Representative image for ' + festival.name + ' in ' + festival.location"
-              loading="lazy"
-              decoding="async"
-              (error)="onCardImageError(festival.id)"
-            />
-          } @else {
-            <div
-              class="card-visual-fallback"
-              role="img"
-              [attr.aria-label]="'No image available. Festival location: ' + festival.location"
-            >
-              <span class="card-visual-fallback-icon" aria-hidden="true">📍</span>
-              <span class="card-visual-fallback-text">{{ festival.location }}</span>
-            </div>
-          }
-        </div>
-
-        <div class="card-header">
-          <button
-            type="button"
-            class="card-toggle-btn"
-            [attr.aria-expanded]="expandedFestivalId === festival.id"
-            [attr.aria-controls]="'festival-panel-' + festival.id"
-            [attr.aria-label]="
-              (expandedFestivalId === festival.id
-                ? 'Collapse details for '
-                : 'Expand details for ') + festival.name
-            "
-          >
-            <span class="card-title-group">
-              <h3>{{ festival.name }}</h3>
-              <span class="stage-count-badge">
-                {{ festivalStages.length }}
-                {{ festivalStages.length === 1 ? 'stage' : 'stages' }}
-              </span>
-            </span>
-            <span
-              class="chevron"
-              [class.chevron-open]="expandedFestivalId === festival.id"
-              aria-hidden="true"
-              >▸</span
-            >
-          </button>
-
-          <div class="card-header-right">
-            <a
-              class="view-schedule-btn"
-              [routerLink]="['/festivals', festival.id, 'schedule']"
-              (click)="$event.stopPropagation()"
-            >
-              View Schedule
-            </a>
-
-            @if (isOrganizerUser) {
-              <div class="kebab-menu">
-                <button
-                  class="kebab-btn"
-                  (click)="toggleKebabMenu(festival.id, $event)"
-                  [attr.aria-expanded]="isKebabMenuOpen(festival.id)"
-                  aria-label="Festival options"
-                >
-                  ⋮
-                </button>
-
-                @if (openKebabMenuFestivalId === festival.id) {
-                  <div class="kebab-dropdown">
-                    <a
-                      class="kebab-item"
-                      [routerLink]="['/festivals', festival.id, 'performances', 'new']"
-                      (click)="$event.stopPropagation()"
-                    >
-                      + Add Performance
-                    </a>
-                    <a
-                      class="kebab-item"
-                      [routerLink]="['/festivals', festival.id, 'performances']"
-                      (click)="$event.stopPropagation()"
-                    >
-                      Manage Performances
-                    </a>
-                    <a
-                      class="kebab-item"
-                      [routerLink]="['/festivals', festival.id, 'stages', 'new']"
-                      (click)="$event.stopPropagation()"
-                    >
-                      + Add Stage
-                    </a>
-                    <a
-                      class="kebab-item"
-                      [routerLink]="['/festivals', festival.id, 'stages']"
-                      (click)="$event.stopPropagation()"
-                    >
-                      Manage Stages
-                    </a>
-                    <button
-                      type="button"
-                      class="kebab-item kebab-item-danger"
-                      (click)="deleteFestivalWithCascade(festival.id, $event)"
-                    >
-                      Delete Festival
-                    </button>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        </div>
-
-        <p class="card-meta"><strong>Location:</strong> {{ festival.location }}</p>
-        <p class="card-meta">
-          <strong>Dates:</strong> {{ festival.startDate }} - {{ festival.endDate }}
-        </p>
-
-        @if (expandedFestivalId === festival.id) {
-          <div class="stage-panel" [id]="'festival-panel-' + festival.id">
-            @if (stageLoadFailed) {
-              <p class="no-stages">Could not load stages right now. Please try again.</p>
-            } @else if (festivalStages.length === 0) {
-              <p class="no-stages">No stages yet.</p>
-            } @else {
-              <div class="stage-rows">
-                @for (stage of festivalStages; track stage.id) {
-                  <div class="stage-row">
-                    <div class="stage-row-left">
-                      <span class="stage-row-name">{{ stage.name }}</span>
-                      <span class="stage-row-env">
-                        {{ stage.environment === 'indoor' ? '🏠' : '🌳' }}
-                      </span>
-                    </div>
-                    <div class="stage-row-right">
-                      <span class="stage-row-cap">{{ stage.capacity | number }} cap</span>
-                      <span class="badge badge-sm" [ngClass]="getStatusBadgeClass(stage.status)">
-                        {{ stage.status }}
-                      </span>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-        }
+    @for (skeleton of [1,2,3]; track skeleton) {
+      <div class="card card-skeleton">
+        <div class="skeleton-visual"></div>
+        <div class="skeleton-title"></div>
+        <div class="skeleton-meta"></div>
+        <div class="skeleton-meta short"></div>
       </div>
     }
   </div>
+  }
+  @else {
+    <div class="card-grid" role="list" aria-labelledby="festivals-heading">
+      @for (festival of festivalsList; track festival.id) {
+        @let festivalStages = stagesByFestivalId[festival.id] ?? [];
+        @let stageLoadFailed = stageLoadFailedByFestivalId[festival.id] ?? false;
+        <div
+          class="card"
+          [class.card-expanded]="expandedFestivalId === festival.id"
+          role="listitem"
+          tabindex="0"
+          (click)="toggleFestivalCard(festival.id, $event)"
+          (keydown)="toggleFestivalCardOnKeyboard(festival.id, $event)"
+        >
+          <div class="card-visual">
+            @if (hasCardImage(festival)) {
+              <img
+                class="card-visual-image"
+                [src]="getCardImageUrl(festival) || ''"
+                [alt]="'Representative image for ' + festival.name + ' in ' + festival.location"
+                loading="lazy"
+                decoding="async"
+                (error)="onCardImageError(festival.id)"
+              />
+            } @else {
+              <div
+                class="card-visual-fallback"
+                role="img"
+                [attr.aria-label]="'No image available. Festival location: ' + festival.location"
+              >
+                <span class="card-visual-fallback-icon" aria-hidden="true">📍</span>
+                <span class="card-visual-fallback-text">{{ festival.location }}</span>
+              </div>
+            }
+          </div>
 
-  @if (festivalsList.length === 0) {
-    <div class="empty-state">
-      <h2>No festivals yet</h2>
-      <p>Add your first festival to start building schedules, stages, and performances.</p>
-      <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
+          <div class="card-header">
+            <button
+              type="button"
+              class="card-toggle-btn"
+              [attr.aria-expanded]="expandedFestivalId === festival.id"
+              [attr.aria-controls]="'festival-panel-' + festival.id"
+              [attr.aria-label]="
+                (expandedFestivalId === festival.id
+                  ? 'Collapse details for '
+                  : 'Expand details for ') + festival.name
+              "
+            >
+              <span class="card-title-group">
+                <h3>{{ festival.name }}</h3>
+                <span class="stage-count-badge">
+                  {{ festivalStages.length }}
+                  {{ festivalStages.length === 1 ? 'stage' : 'stages' }}
+                </span>
+              </span>
+              <span
+                class="chevron"
+                [class.chevron-open]="expandedFestivalId === festival.id"
+                aria-hidden="true"
+                >▸</span
+              >
+            </button>
+
+            <div class="card-header-right">
+              <a
+                class="view-schedule-btn"
+                [routerLink]="['/festivals', festival.id, 'schedule']"
+                (click)="$event.stopPropagation()"
+              >
+                View Schedule
+              </a>
+
+              @if (isOrganizerUser) {
+                <div class="kebab-menu">
+                  <button
+                    class="kebab-btn"
+                    (click)="toggleKebabMenu(festival.id, $event)"
+                    [attr.aria-expanded]="isKebabMenuOpen(festival.id)"
+                    aria-label="Festival options"
+                  >
+                    ⋮
+                  </button>
+
+                  @if (openKebabMenuFestivalId === festival.id) {
+                    <div class="kebab-dropdown">
+                      <a
+                        class="kebab-item"
+                        [routerLink]="['/festivals', festival.id, 'performances', 'new']"
+                        (click)="$event.stopPropagation()"
+                      >
+                        + Add Performance
+                      </a>
+                      <a
+                        class="kebab-item"
+                        [routerLink]="['/festivals', festival.id, 'performances']"
+                        (click)="$event.stopPropagation()"
+                      >
+                        Manage Performances
+                      </a>
+                      <a
+                        class="kebab-item"
+                        [routerLink]="['/festivals', festival.id, 'stages', 'new']"
+                        (click)="$event.stopPropagation()"
+                      >
+                        + Add Stage
+                      </a>
+                      <a
+                        class="kebab-item"
+                        [routerLink]="['/festivals', festival.id, 'stages']"
+                        (click)="$event.stopPropagation()"
+                      >
+                        Manage Stages
+                      </a>
+                      <button
+                        type="button"
+                        class="kebab-item kebab-item-danger"
+                        (click)="deleteFestivalWithCascade(festival.id, $event)"
+                      >
+                        Delete Festival
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <p class="card-meta"><strong>Location:</strong> {{ festival.location }}</p>
+          <p class="card-meta">
+            <strong>Dates:</strong> {{ festival.startDate }} - {{ festival.endDate }}
+          </p>
+
+          @if (expandedFestivalId === festival.id) {
+            <div class="stage-panel" [id]="'festival-panel-' + festival.id">
+              @if (stageLoadFailed) {
+                <p class="no-stages">Could not load stages right now. Please try again.</p>
+              } @else if (festivalStages.length === 0) {
+                <p class="no-stages">No stages yet.</p>
+              } @else {
+                <div class="stage-rows">
+                  @for (stage of festivalStages; track stage.id) {
+                    <div class="stage-row">
+                      <div class="stage-row-left">
+                        <span class="stage-row-name">{{ stage.name }}</span>
+                        <span class="stage-row-env">
+                          {{ stage.environment === 'indoor' ? '🏠' : '🌳' }}
+                        </span>
+                      </div>
+                      <div class="stage-row-right">
+                        <span class="stage-row-cap">{{ stage.capacity | number }} cap</span>
+                        <span class="badge badge-sm" [ngClass]="getStatusBadgeClass(stage.status)">
+                          {{ stage.status }}
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
+
+    @if (festivalsList.length === 0) {
+      <div class="empty-state">
+        <h2>No festivals yet</h2>
+        <p>Add your first festival to start building schedules, stages, and performances.</p>
+        <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
+      </div>
+    }
   }
 </div>

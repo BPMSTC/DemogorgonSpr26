@@ -1,4 +1,4 @@
-import { Component, Inject, Injector, OnInit, OnDestroy, effect } from '@angular/core';
+import { Component, Inject, Injector, OnInit, OnDestroy, effect, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ScheduleService } from '../../services/schedule.service';
@@ -80,7 +80,7 @@ export class MySchedule implements OnInit, OnDestroy {
 
   readonly ALL_STAGES_CONST = ALL_STAGES;
   readonly ALL_GENRES_CONST = ALL_GENRES;
-
+  
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -90,6 +90,7 @@ export class MySchedule implements OnInit, OnDestroy {
     public personalSchedule: PersonalScheduleService,
     private calendarService: CalendarService,
     @Inject(LOCAL_STORAGE) private storage: Storage,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -114,10 +115,12 @@ export class MySchedule implements OnInit, OnDestroy {
         this.festivalName = this.festivalId
           ? (festivals.find((f) => f.id === this.festivalId)?.name ?? '')
           : '';
+        this.cdr.detectChanges();
       },
       error: () => {
         this.festivalNameById = {};
         this.festivalName = '';
+        this.cdr.detectChanges();
       },
     });
 
@@ -134,6 +137,7 @@ export class MySchedule implements OnInit, OnDestroy {
         () => {
           this.allPerformances = this.scheduleService.getPerformancesByFestival(this.festivalId);
           this.syncViewStateFromStore();
+          this.cdr.detectChanges(); // ensure UI updates after signal-triggered changes
         },
         { injector: this.injector },
       );

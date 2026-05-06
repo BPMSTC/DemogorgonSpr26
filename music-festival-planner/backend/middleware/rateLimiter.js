@@ -13,7 +13,7 @@ const apiLimiter = rateLimit({
 // Apply to POST /api/auth/* when auth routes are added.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 500,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
