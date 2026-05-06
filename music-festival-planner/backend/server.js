@@ -12,16 +12,12 @@
  * The server listens on the PORT env variable (default 3000).
  */
 
-const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 const express = require('express');
 const cors = require('cors');
 
-const envPath = fs.existsSync(path.join(__dirname, '.env.local'))
-  ? path.join(__dirname, '.env.local')
-  : path.join(__dirname, '.env');
-dotenv.config({ path: envPath });
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const { connectToDatabase } = require('./config/database');
 const festivalsRouter = require('./routes/festivals');
