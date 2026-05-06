@@ -1,7 +1,9 @@
 <div class="festivals-container" (click)="closeAllKebabMenus()">
   <nav class="page-nav">
     <h1 id="festivals-heading">Music Festivals</h1>
-    <button class="btn-primary" routerLink="/festivals/create">+ Add New Festival</button>
+    @if (isOrganizerUser) {
+      <button class="btn-primary" routerLink="/festivals/create">+ Add New Festival</button>
+    }
   </nav>
 
   <div class="card-grid" role="list" aria-labelledby="festivals-heading">
@@ -168,9 +170,14 @@
 
   @if (festivalsList.length === 0) {
     <div class="empty-state">
-      <h2>No festivals yet</h2>
-      <p>Add your first festival to start building schedules, stages, and performances.</p>
-      <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
+      @if (isOrganizerUser) {
+        <h2>No festivals yet</h2>
+        <p>Add your first festival to start building schedules, stages, and performances.</p>
+        <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
+      } @else {
+        <h2>No festivals yet</h2>
+        <p>Check back soon — festivals will be listed here once they are added.</p>
+      }
     </div>
   }
 </div>

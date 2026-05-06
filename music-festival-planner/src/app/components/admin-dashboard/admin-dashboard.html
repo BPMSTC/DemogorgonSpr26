@@ -1,0 +1,42 @@
+<div class="admin-dashboard">
+  <div class="d-flex align-items-center mb-4">
+    <h1 class="mb-0 me-3">Admin Dashboard</h1>
+    <span class="badge bg-danger">Admin</span>
+  </div>
+
+  <p class="text-muted mb-4">
+    Logged in as <strong>{{ authService.currentUser?.email }}</strong>
+  </p>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Festival Management</h5>
+          <p class="card-text text-muted">Create, edit, and delete festivals.</p>
+          <a routerLink="/festivals/create" class="btn btn-primary">Create Festival</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Browse Festivals</h5>
+          <p class="card-text text-muted">View all festivals and manage stages and performances.</p>
+          <a routerLink="/festivals" class="btn btn-outline-primary">View Festivals</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Schedule Overview</h5>
+          <p class="card-text text-muted">Review the full festival schedule.</p>
+          <a routerLink="/my-schedule" class="btn btn-outline-primary">View Schedule</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
