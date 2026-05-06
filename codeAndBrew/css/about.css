@@ -325,6 +325,13 @@
     }
 }
 
+@media (max-width: 576px) {
+    .col-lg-2-4 {
+        flex: 0 0 100%;
+        padding: 0.5rem;
+    }
+}
+
 .team-card {
     background-color: var(--off-white);
     border: 2px solid var(--gray-light);
@@ -467,51 +474,81 @@
     .hero-image-container {
         height: 400px;
     }
-    
+
     .hero-slogan {
         font-size: 2.5rem;
     }
-    
+
     .hero-subtitle {
         font-size: var(--font-size-lg);
     }
-    
+
     .hero-content-wrapper {
         padding: var(--spacing-lg);
     }
-    
+
     .section-title {
         font-size: var(--font-size-xl);
     }
-    
+
     .mission-statement .lead {
         font-size: var(--font-size-lg);
     }
-    
+
     .stat-number {
         font-size: 2rem;
     }
-    
+
     .cta-content h2 {
         font-size: var(--font-size-2xl);
     }
-    
+
     .cta-content p {
         font-size: var(--font-size-lg);
     }
-    
+
     .cta-buttons {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .cta-buttons .btn {
         width: 100%;
     }
-    
+
     .footer-link {
         display: block;
         margin-left: 0;
         margin-bottom: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-image-container {
+        height: 320px;
+    }
+
+    .hero-slogan {
+        font-size: 2rem;
+    }
+
+    .hero-content-wrapper {
+        padding: var(--spacing-md);
+    }
+
+    .story-card {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .mission-card {
+        padding: var(--spacing-lg);
+    }
+
+    .impact-card {
+        padding: var(--spacing-md);
+    }
+
+    .team-card {
+        padding: var(--spacing-lg);
     }
 }

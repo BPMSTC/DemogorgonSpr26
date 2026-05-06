@@ -376,7 +376,7 @@
     }
     
     .welcome-hero h1 {
-        font-size: 25px;
+        font-size: 1.75rem;
         margin-top: var(--spacing-md);
     }
     

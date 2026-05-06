@@ -184,7 +184,29 @@
     width: 100%;
   }
 
-  .home-actions{
-     grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  .home-actions {
+    grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  }
+
+  .home-hero {
+    padding: 2.5rem 1rem 2rem;
+  }
+
+  .home-intro {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-hero {
+    padding: 2rem 1rem 1.5rem;
+  }
+
+  .home-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-date-badge {
+    padding: 0.6rem 1rem;
   }
 }

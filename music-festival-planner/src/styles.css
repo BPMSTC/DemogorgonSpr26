@@ -49,6 +49,7 @@ body {
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 /* Subtle scanline texture for poster feel */
@@ -136,6 +137,7 @@ label {
   font-size: 1rem;
   letter-spacing: 0.06em;
   padding: 0.55rem 1.5rem;
+  min-height: 44px;
   cursor: pointer;
   transition: filter 0.15s ease, box-shadow 0.15s ease;
 }
@@ -159,6 +161,7 @@ label {
   font-size: 1rem;
   letter-spacing: 0.06em;
   padding: 0.55rem 1.5rem;
+  min-height: 44px;
   cursor: pointer;
   transition: background 0.15s ease, box-shadow 0.15s ease;
 }
