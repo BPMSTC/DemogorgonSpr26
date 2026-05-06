@@ -990,6 +990,16 @@ object {
 	}
 }
 
+@media (max-width: 480px) {
+	.stats {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.team-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 /* ============================================================
    Menu / Products Section
    ============================================================ */

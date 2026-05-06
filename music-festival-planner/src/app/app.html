@@ -4,7 +4,7 @@
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
+    <ul class="navbar-nav me-auto">
       <li class="nav-item">
         <a class="nav-link" routerLink="/">Home</a>
       </li>
@@ -13,6 +13,20 @@
       </li>
       <li class="nav-item">
         <a class="nav-link" routerLink="/my-schedule">My Schedule</a>
+      </li>
+      <li class="nav-item" *ngIf="authService.isAdmin">
+        <a class="nav-link" routerLink="/admin">
+          <span class="badge bg-danger me-1">Admin</span>Dashboard
+        </a>
+      </li>
+    </ul>
+
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item" *ngIf="authService.isLoggedIn">
+        <span class="nav-link text-muted">{{ authService.currentUser?.email }}</span>
+      </li>
+<li class="nav-item" *ngIf="authService.isLoggedIn">
+        <button class="btn btn-link nav-link" (click)="logout()">Sign Out</button>
       </li>
     </ul>
   </div>

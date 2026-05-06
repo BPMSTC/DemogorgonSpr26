@@ -1,0 +1,9 @@
+.admin-dashboard {
+  padding-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding-top: 1rem;
+  }
+}

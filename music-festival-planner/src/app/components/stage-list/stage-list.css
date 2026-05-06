@@ -72,3 +72,20 @@
   padding: 3rem 1rem;
   color: var(--text-muted, #888);
 }
+
+@media (max-width: 768px) {
+  .list-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .list-header .btn-neon {
+    width: 100%;
+    text-align: center;
+  }
+
+  .stage-meta {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

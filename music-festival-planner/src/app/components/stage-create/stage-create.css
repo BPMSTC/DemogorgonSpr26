@@ -53,3 +53,14 @@ textarea {
   color: var(--text-muted, #888);
   font-weight: normal;
 }
+
+@media (max-width: 480px) {
+  .radio-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .radio-label {
+    min-height: 44px;
+  }
+}

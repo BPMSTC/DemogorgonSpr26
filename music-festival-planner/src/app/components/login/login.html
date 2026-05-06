@@ -1,0 +1,62 @@
+<div class="login-wrapper">
+  <div class="login-card card shadow-sm">
+    <div class="card-body p-4">
+      <h2 class="card-title text-center mb-4">Sign In</h2>
+
+      <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address</label>
+          <input
+            id="email"
+            type="email"
+            class="form-control"
+            [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+            formControlName="email"
+            autocomplete="email"
+          />
+          <div class="invalid-feedback">
+            Please enter a valid email address.
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label for="password" class="form-label">Password</label>
+          <div class="password-field">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="form-control"
+              [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="showPassword = !showPassword"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              {{ showPassword ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          <div class="invalid-feedback" [class.d-block]="form.get('password')?.invalid && form.get('password')?.touched">
+            Password must be at least 8 characters.
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary w-100"
+          [disabled]="form.invalid || isLoading"
+        >
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          {{ isLoading ? 'Signing in…' : 'Sign In' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
