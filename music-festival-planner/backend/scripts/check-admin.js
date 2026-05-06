@@ -1,11 +1,7 @@
 const { connectToDatabase, disconnectFromDatabase } = require('../config/database');
 const User = require('../models/user');
 
-const { getMongoUri } = require('../config/database');
-
 async function run() {
-  const uri = getMongoUri();
-  console.log('Connecting to:', uri.slice(0, 40) + '...');
   await connectToDatabase();
 
   const email = process.env.ADMIN_EMAIL || 'your@email.com';
