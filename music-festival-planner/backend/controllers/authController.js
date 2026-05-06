@@ -37,7 +37,15 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
+    console.log('[DEBUG login] email received:', JSON.stringify(email));
+    console.log('[DEBUG login] password received:', JSON.stringify(password));
     const user = await User.findOne({ email }).select('+password');
+    console.log('[DEBUG login] user found:', user ? user.email : 'null');
+    if (user) {
+      const match = await user.comparePassword(password);
+      console.log('[DEBUG login] password match:', match);
+      console.log('[DEBUG login] stored hash:', user.password);
+    }
     if (!user || !(await user.comparePassword(password))) {
       return next(new AppError('Invalid email or password.', 401));
     }
