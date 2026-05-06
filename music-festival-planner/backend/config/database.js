@@ -6,10 +6,8 @@ const mongoose = require('mongoose');
 
 // Safe fallback if no env file value is found.
 const DEFAULT_MONGODB_URI = 'mongodb://127.0.0.1:27017/music_festival_planner';
-// Preferred backend env files (first one found wins). The primary default is .env.
 const DEFAULT_ENV_FILES = [
   path.resolve(__dirname, '../.env'),
-  path.resolve(__dirname, '../.env.local'),
 ];
 const DEFAULT_DNS_FALLBACK_SERVERS = ['1.1.1.1', '8.8.8.8'];
 
