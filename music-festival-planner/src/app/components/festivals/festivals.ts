@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError, filter, switchMap } from 'rxjs/operators';
@@ -35,6 +35,7 @@ export class Festivals implements OnInit, OnDestroy {
 
   private routerEventsSubscription?: Subscription;
   private loadDataSubscription?: Subscription;
+  isLoading = true;
 
   constructor(
     private festivalService: FestivalService,
@@ -42,9 +43,11 @@ export class Festivals implements OnInit, OnDestroy {
     private personalScheduleService: PersonalScheduleService,
     private authService: AuthService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   private loadData(): void {
+    this.isLoading = true;
     this.loadDataSubscription?.unsubscribe();
     this.loadDataSubscription = this.festivalService
       .load()
@@ -79,12 +82,16 @@ export class Festivals implements OnInit, OnDestroy {
             this.stagesByFestivalId[r.id] = r.stages;
             this.stageLoadFailedByFestivalId[r.id] = r.failed;
           });
+          this.isLoading = false;
+          this.cdr.detectChanges(); // ensure UI updates after async loads complete
         },
         error: () => {
           this.festivalsList = [];
           this.stagesByFestivalId = {};
           this.stageLoadFailedByFestivalId = {};
           this.imageLoadFailedByFestivalId = {};
+          this.isLoading = false;
+          this.cdr.detectChanges(); // ensure UI updates after async loads complete even on failure
         },
       });
   }
