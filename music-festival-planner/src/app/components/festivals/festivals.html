@@ -1,22 +1,23 @@
 <div class="festivals-container" (click)="closeAllKebabMenus()">
   <nav class="page-nav">
     <h1 id="festivals-heading">Music Festivals</h1>
-    <button class="btn-primary" routerLink="/festivals/create">+ Add New Festival</button>
+    @if (isOrganizerUser) {
+      <button class="btn-primary" routerLink="/festivals/create">+ Add New Festival</button>
+    }
   </nav>
 
   @if (isLoading) {
-  <div class="card-grid" role="list" aria-labelledby="festivals-heading">
-    @for (skeleton of [1,2,3]; track skeleton) {
-      <div class="card card-skeleton">
-        <div class="skeleton-visual"></div>
-        <div class="skeleton-title"></div>
-        <div class="skeleton-meta"></div>
-        <div class="skeleton-meta short"></div>
-      </div>
-    }
-  </div>
-  }
-  @else {
+    <div class="card-grid" role="list" aria-labelledby="festivals-heading">
+      @for (skeleton of [1,2,3]; track skeleton) {
+        <div class="card card-skeleton">
+          <div class="skeleton-visual"></div>
+          <div class="skeleton-title"></div>
+          <div class="skeleton-meta"></div>
+          <div class="skeleton-meta short"></div>
+        </div>
+      }
+    </div>
+  } @else {
     <div class="card-grid" role="list" aria-labelledby="festivals-heading">
       @for (festival of festivalsList; track festival.id) {
         @let festivalStages = stagesByFestivalId[festival.id] ?? [];
@@ -181,9 +182,14 @@
 
     @if (festivalsList.length === 0) {
       <div class="empty-state">
-        <h2>No festivals yet</h2>
-        <p>Add your first festival to start building schedules, stages, and performances.</p>
-        <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
+        @if (isOrganizerUser) {
+          <h2>No festivals yet</h2>
+          <p>Add your first festival to start building schedules, stages, and performances.</p>
+          <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
+        } @else {
+          <h2>No festivals yet</h2>
+          <p>Check back soon — festivals will be listed here once they are added.</p>
+        }
       </div>
     }
   }
