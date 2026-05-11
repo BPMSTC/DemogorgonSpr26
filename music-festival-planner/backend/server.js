@@ -91,17 +91,7 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 // Rate-limit all API routes.
 app.use('/api', apiLimiter);
-app.use(
-  '/api/auth',
-  (req, res, next) => {
-    if (req.method === 'GET' && req.path === '/me') {
-      return next();
-    }
-
-    return authLimiter(req, res, next);
-  },
-  authRouter,
-);
+app.use('/api/auth', authLimiter, authRouter);
 app.use('/api/festivals', festivalsRouter);
 app.use('/api/stages', stagesRouter);
 app.use('/api/performances', performancesRouter);
@@ -114,13 +104,16 @@ app.use(errorHandler);
 
 // ---- Start -----------------------------------------------------------------
 
-connectToDatabase()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Music Festival Planner API listening on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Failed to start API server:', err.message);
-    process.exit(1);
-  });
+// Start listening immediately so port 3000 is always held by this process.
+// The database connection is established in parallel; routes that require
+// the DB will return a Mongoose error until the connection is ready rather
+// than a misleading 404 that can arise when the port is unoccupied.
+const httpServer = app.listen(PORT, () => {
+  console.log(`Music Festival Planner API listening on http://localhost:${PORT}`);
+});
+
+connectToDatabase().catch((err) => {
+  console.error('Failed to connect to database:', err.message);
+  httpServer.close();
+  process.exit(1);
+});
