@@ -66,8 +66,23 @@
 /* Mobile toggler */
 .navbar-toggler {
   border-color: var(--neon-cyan);
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .navbar-toggler-icon {
   filter: invert(1) sepia(1) saturate(5) hue-rotate(155deg);
+}
+
+@media (max-width: 991px) {
+  .navbar {
+    padding: 0.5rem 1rem;
+  }
+
+  .nav-link {
+    min-height: 44px;
+    display: flex !important;
+    align-items: center;
+    padding: 0.5rem 1rem !important;
+  }
 }
