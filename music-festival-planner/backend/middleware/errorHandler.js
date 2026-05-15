@@ -1,6 +1,6 @@
 // Central place that catches every error thrown anywhere in the app and sends a tidy response.
 function errorHandler(err, req, res, next) {
-  // Mongoose schema validation error
+  // Mongoose schema validation error — one or more document fields failed their rules.
   if (err.name === 'ValidationError') {
     // Collect each broken field into a simple list of field/message pairs.
     const errors = Object.values(err.errors).map((e) => ({
@@ -11,16 +11,16 @@ function errorHandler(err, req, res, next) {
     return res.status(400).json({ status: 400, message: 'Validation failed', errors });
   }
 
-  // Mongoose CastError — bad ObjectId format
+  // Mongoose CastError — the caller passed a value that could not be converted to the expected database type.
   if (err.name === 'CastError') {
-    // The caller passed a value that cannot be converted to the expected database type.
+    // Return a descriptive message that names the field and the bad value.
     return res.status(400).json({
       status: 400,
       message: `Invalid value for '${err.path}': ${err.value}`,
     });
   }
 
-  // MongoDB duplicate key
+  // MongoDB duplicate key — a document with the same unique-field value already exists.
   if (err.code === 11000) {
     // Figure out which field caused the clash so the message is helpful.
     const field = Object.keys(err.keyPattern || {})[0] || 'field';
@@ -31,9 +31,9 @@ function errorHandler(err, req, res, next) {
     });
   }
 
-  // Operational error created with AppError (known status)
+  // Operational error created with AppError — it already carries the right HTTP status.
   if (err.status) {
-    // The error was intentionally raised with a specific HTTP status, so echo it back.
+    // Echo the status and message that were set when the error was raised.
     return res.status(err.status).json({
       status: err.status,
       message: err.message,
@@ -42,7 +42,7 @@ function errorHandler(err, req, res, next) {
     });
   }
 
-  // Unexpected error — log details, hide internals in production
+  // Unexpected error — log the full details for the developers to investigate.
   console.error('[Unhandled Error]', err);
   // In production, hide the raw error message so internal details are not leaked.
   return res.status(500).json({

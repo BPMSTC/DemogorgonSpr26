@@ -86,9 +86,11 @@
    * @returns {string} HTML-escaped string
    */
   function escapeHtml(str) {
+    // Return an empty string rather than crashing on null or undefined input.
     if (str == null) {
       return "";
     }
+    // Replace every HTML-special character with its safe entity equivalent.
     return String(str)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -105,14 +107,17 @@
    * @returns {string} HTML string for the slide element
    */
   function buildSlideHtml(item, index, total) {
+    // Sanitize every field before embedding it in HTML.
     var name = escapeHtml(item.name);
     var description = escapeHtml(item.description);
     var price = escapeHtml(item.price);
     var category = escapeHtml(item.category);
     var emoji = escapeHtml(item.emoji);
     var visualClass = escapeHtml(item.visualClass);
+    // Convert the zero-based index to a human-friendly slide number.
     var slideNumber = index + 1;
 
+    // Assemble and return the full slide markup as a string.
     return (
       "<div " +
         "class=\"carousel-slide\" " +
@@ -144,8 +149,11 @@
    * @returns {string} HTML string for the dot button
    */
   function buildDotHtml(index, isActive) {
+    // Add the active CSS class only for the dot that matches the current slide.
     var activeClass = isActive ? " active" : "";
+    // Tell screen readers whether this dot's slide is the one being shown.
     var ariaSelected = isActive ? "true" : "false";
+    // Return the fully constructed dot button markup.
     return (
       "<button " +
         "class=\"carousel-dot" + activeClass + "\" " +
@@ -178,22 +186,28 @@
    *   Nothing (void). All side-effects are DOM mutations and event listeners.
    */
   function initCarousel() {
+    // Stop here if the carousel element does not exist on this page.
     var $carousel = $("#featuredCarousel");
     if ($carousel.length === 0) {
       return;
     }
 
+    // Grab the inner containers we will populate with generated markup.
     var $track = $carousel.find(".carousel-track");
     var $dotsContainer = $carousel.find(".carousel-dots");
     var $btnPrev = $carousel.find(".carousel-btn--prev");
     var $btnNext = $carousel.find(".carousel-btn--next");
 
+    // Record how many slides exist and set the starting position to the first.
     var totalSlides = CAROUSEL_ITEMS.length;
     var currentIndex = 0;
+    // Keep a reference to the interval so it can be cleared later.
     var autoPlayTimer = null;
+    // Track whether the user is hovering or focusing so we can pause the timer.
     var isPaused = false;
 
     // Build slides
+    // Concatenate all slide HTML into one string before injecting it.
     var slidesHtml = "";
     for (var i = 0; i < totalSlides; i++) {
       slidesHtml += buildSlideHtml(CAROUSEL_ITEMS[i], i, totalSlides);
@@ -201,6 +215,7 @@
     $track.html(slidesHtml);
 
     // Build dots
+    // Generate one dot per slide, marking the first one as active.
     var dotsHtml = "";
     for (var d = 0; d < totalSlides; d++) {
       dotsHtml += buildDotHtml(d, d === 0);
@@ -213,25 +228,26 @@
      * @param {number} index - Target slide index (0-based)
      */
     function goToSlide(index) {
-      // Wrap around
+      // Wrap around so navigation loops from last slide back to first and vice versa.
       if (index < 0) {
         index = totalSlides - 1;
       } else if (index >= totalSlides) {
         index = 0;
       }
 
+      // Save the new position so other functions know which slide is active.
       currentIndex = index;
 
-      // Translate the track
+      // Shift the track left by one full slide width for each step past the first.
       $track.css("transform", "translateX(-" + (currentIndex * 100) + "%)");
 
-      // Update ARIA on the carousel region
+      // Tell screen readers which slide is now in view.
       $carousel.attr(
         "aria-label",
         "Featured menu items - slide " + (currentIndex + 1) + " of " + totalSlides
       );
 
-      // Update dots
+      // Update dots — only the dot for the current slide should be highlighted.
       $dotsContainer.find(".carousel-dot").each(function (i) {
         var isActive = i === currentIndex;
         $(this)
@@ -244,6 +260,7 @@
      * Advance to the next slide.
      */
     function nextSlide() {
+      // Move forward by one position (wraps automatically inside goToSlide).
       goToSlide(currentIndex + 1);
     }
 
@@ -251,6 +268,7 @@
      * Go back to the previous slide.
      */
     function prevSlide() {
+      // Move backward by one position (wraps automatically inside goToSlide).
       goToSlide(currentIndex - 1);
     }
 
@@ -258,9 +276,11 @@
      * Start the auto-play interval if not already running.
      */
     function startAutoPlay() {
+      // Do nothing if the timer is already active to avoid duplicate intervals.
       if (autoPlayTimer) {
         return;
       }
+      // Advance the slide on each tick unless the user has paused interaction.
       autoPlayTimer = setInterval(function () {
         if (!isPaused) {
           nextSlide();
@@ -272,22 +292,25 @@
      * Stop the auto-play interval.
      */
     function stopAutoPlay() {
+      // Only attempt to clear the timer if one is actually running.
       if (autoPlayTimer) {
         clearInterval(autoPlayTimer);
+        // Null the reference so startAutoPlay knows it is safe to create a new one.
         autoPlayTimer = null;
       }
     }
 
-    // Prev / Next button clicks
+    // Wire up the previous button to step back one slide on click.
     $btnPrev.on("click", function () {
       prevSlide();
     });
 
+    // Wire up the next button to step forward one slide on click.
     $btnNext.on("click", function () {
       nextSlide();
     });
 
-    // Dot clicks
+    // Dot clicks — jump directly to whichever slide the clicked dot represents.
     $dotsContainer.on("click", ".carousel-dot", function () {
       var targetIndex = parseInt($(this).data("dot-index"), 10);
       goToSlide(targetIndex);
@@ -295,9 +318,11 @@
 
     // Keyboard navigation: Left/Right arrows when carousel or its children have focus
     $carousel.on("keydown", function (event) {
+      // Let the left arrow key move to the previous slide.
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         prevSlide();
+      // Let the right arrow key move to the next slide.
       } else if (event.key === "ArrowRight") {
         event.preventDefault();
         nextSlide();
@@ -309,11 +334,12 @@
       isPaused = true;
     });
 
+    // Resume auto-play once the user moves away or removes keyboard focus.
     $carousel.on("mouseleave focusout", function () {
       isPaused = false;
     });
 
-    // Set initial position and start auto-play
+    // Place the carousel on the first slide and kick off the auto-advance timer.
     goToSlide(0);
     startAutoPlay();
   }
