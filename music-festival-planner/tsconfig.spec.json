@@ -4,14 +4,14 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
-    "rootDir": "./src",
+    "rootDir": "./js",
     "outDir": "./out-tsc/spec",
     "types": [
       "vitest/globals"
     ]
   },
   "include": [
-    "src/**/*.d.ts",
-    "src/**/*.ts"
+    "js/**/*.d.ts",
+    "js/**/*.ts"
   ]
 }

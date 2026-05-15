@@ -21,22 +21,23 @@
         }
       },
       "root": "",
-      "sourceRoot": "src",
+      "sourceRoot": "js",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/music-festival-planner",
-            "browser": "src/main.ts",
+            "index": "pages/index.html",
+            "browser": "js/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "images"
               }
             ],
-            "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "src/styles.css"],
+            "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "css/styles.css"],
             "scripts": [
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
             ]
@@ -45,8 +46,8 @@
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "js/environments/environment.ts",
+                  "with": "js/environments/environment.prod.ts"
                 }
               ],
               "budgets": [

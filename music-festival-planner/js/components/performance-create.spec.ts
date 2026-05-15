@@ -1,0 +1,429 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+
+import { PerformanceCreateComponent } from './performance-create';
+import { ScheduleService } from '../services/schedule.service';
+import { StageService } from '../services/stage.service';
+import { FestivalService } from '../services/festival.service';
+import { Performance } from '../models/performance.model';
+import { Stage } from '../models/stage.model';
+import { Festival } from '../models/festival.model';
+import { Observable, of, throwError } from 'rxjs';
+
+const MOCK_FESTIVAL: Festival = {
+  id: '1',
+  name: 'Neon Horizon Festival',
+  startDate: '2026-08-01',
+  endDate: '2026-08-03',
+  location: 'Riverside Park, Austin TX',
+};
+
+const MOCK_STAGES: Stage[] = [
+  {
+    id: '1',
+    festivalId: '1',
+    name: 'Main Stage',
+    capacity: 5000,
+    environment: 'outdoor',
+    status: 'active',
+  },
+  {
+    id: '2',
+    festivalId: '1',
+    name: 'Dance Tent',
+    capacity: 800,
+    environment: 'indoor',
+    status: 'active',
+  },
+];
+
+class MockScheduleService {
+  createPerformance(data: Omit<Performance, 'id'>): Observable<Performance> {
+    return of({ id: '99', ...data });
+  }
+
+  loadByFestival(_festivalId: string): Observable<Performance[]> {
+    return of([]);
+  }
+}
+
+class MockStageService {
+  loadByFestival(festivalId: string): Observable<Stage[]> {
+    return of(this.getStagesByFestival(festivalId));
+  }
+
+  getStagesByFestival(festivalId: string): Stage[] {
+    return festivalId === '1' ? MOCK_STAGES.map((s) => ({ ...s })) : [];
+  }
+}
+
+class MockFestivalService {
+  loadById(id: string): Observable<Festival> {
+    if (id === '1') {
+      return of({ ...MOCK_FESTIVAL });
+    }
+    return throwError(() => new Error('Festival not found'));
+  }
+}
+
+function makeTestBed(festivalId = '1') {
+  return TestBed.configureTestingModule({
+    declarations: [PerformanceCreateComponent],
+    imports: [CommonModule, ReactiveFormsModule, RouterModule.forRoot([])],
+    providers: [
+      {
+        provide: ActivatedRoute,
+        useValue: { snapshot: { paramMap: { get: () => festivalId } } },
+      },
+      { provide: ScheduleService, useClass: MockScheduleService },
+      { provide: StageService, useClass: MockStageService },
+      { provide: FestivalService, useClass: MockFestivalService },
+    ],
+  }).compileComponents();
+}
+
+describe('PerformanceCreateComponent', () => {
+  let component: PerformanceCreateComponent;
+  let fixture: ComponentFixture<PerformanceCreateComponent>;
+  let scheduleService: ScheduleService;
+  let router: Router;
+
+  beforeEach(async () => {
+    await makeTestBed();
+    fixture = TestBed.createComponent(PerformanceCreateComponent);
+    component = fixture.componentInstance;
+    scheduleService = TestBed.inject(ScheduleService);
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should set festivalId and load festival and stages on init', () => {
+    expect(component.festivalId).toBe('1');
+    expect(component.currentFestival).toEqual(MOCK_FESTIVAL);
+    expect(component.availableStages.length).toBe(2);
+  });
+
+  it('should initialise the form with empty fields', () => {
+    expect(component.performanceForm).toBeTruthy();
+    expect(component.fields['artistName'].value).toBe('');
+    expect(component.fields['stageName'].value).toBe('');
+    expect(component.fields['date'].value).toBe('');
+    expect(component.fields['startTime'].value).toBe('');
+    expect(component.fields['endTime'].value).toBe('');
+  });
+
+  it('should be invalid when the form is empty', () => {
+    expect(component.performanceForm.invalid).toBe(true);
+  });
+
+  it('should be valid when all required fields are filled correctly', () => {
+    component.performanceForm.setValue({
+      artistName: 'Test Artist',
+      stageName: 'Main Stage',
+      genre: '',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '15:30',
+    });
+    expect(component.performanceForm.valid).toBe(true);
+  });
+
+  it('should fail validation when artistName is whitespace only', () => {
+    component.performanceForm.setValue({
+      artistName: '   ',
+      stageName: 'Main Stage',
+      genre: '',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '15:30',
+    });
+    expect(component.fields['artistName'].errors?.['whitespaceOnly']).toBeTruthy();
+  });
+
+  it('should reject artist names longer than 100 characters', () => {
+    component.fields['artistName'].setValue('A'.repeat(101));
+    expect(component.fields['artistName'].errors?.['maxlength']).toBeTruthy();
+  });
+
+  it('should fail cross-field validation when endTime is before startTime', () => {
+    component.performanceForm.setValue({
+      artistName: 'Test Artist',
+      stageName: 'Main Stage',
+      genre: '',
+      date: '2026-09-15',
+      startTime: '16:00',
+      endTime: '15:00',
+    });
+    expect(component.performanceForm.errors?.['endNotAfterStart']).toBeTruthy();
+  });
+
+  it('should fail cross-field validation when endTime equals startTime', () => {
+    component.performanceForm.setValue({
+      artistName: 'Test Artist',
+      stageName: 'Main Stage',
+      genre: '',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '14:00',
+    });
+    expect(component.performanceForm.errors?.['endNotAfterStart']).toBeTruthy();
+  });
+
+  it('should not submit when the form is invalid', () => {
+    const scheduleService = TestBed.inject(ScheduleService);
+    const createSpy = vi.spyOn(scheduleService, 'createPerformance');
+
+    component.onSubmit();
+
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
+  it('should call scheduleService.createPerformance with correct data on valid submit', () => {
+    const scheduleService = TestBed.inject(ScheduleService);
+    const createSpy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      of({
+        id: '99',
+        festivalId: '1',
+        artistName: 'Test Artist',
+        stageName: 'Main Stage',
+        genre: 'Rock',
+        date: '2026-09-15',
+        startTime: '14:00',
+        endTime: '15:30',
+      }),
+    );
+
+    component.performanceForm.setValue({
+      artistName: 'Test Artist',
+      stageName: 'Main Stage',
+      genre: 'Rock',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '15:30',
+    });
+
+    component.onSubmit();
+
+    expect(createSpy).toHaveBeenCalledWith({
+      festivalId: '1',
+      artistName: 'Test Artist',
+      stageName: 'Main Stage',
+      genre: 'Rock',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '15:30',
+    });
+  });
+
+  it('should trim whitespace from artistName before submitting', () => {
+    const scheduleService = TestBed.inject(ScheduleService);
+    const createSpy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      of({
+        id: '99',
+        festivalId: '1',
+        artistName: 'Test Artist',
+        stageName: 'Main Stage',
+        genre: 'Rock',
+        date: '2026-09-15',
+        startTime: '14:00',
+        endTime: '15:30',
+      }),
+    );
+
+    component.performanceForm.setValue({
+      artistName: '  Test Artist  ',
+      stageName: 'Main Stage',
+      genre: 'Rock',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '15:30',
+    });
+
+    component.onSubmit();
+
+    expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({ artistName: 'Test Artist' }));
+  });
+
+  it('should set serverError when createPerformance throws a conflict error', () => {
+    const scheduleService = TestBed.inject(ScheduleService);
+    vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      throwError(() => new Error('"Main Stage" is already booked during that time slot.')),
+    );
+
+    component.performanceForm.setValue({
+      artistName: 'Test Artist',
+      stageName: 'Main Stage',
+      genre: '',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '15:30',
+    });
+
+    component.onSubmit();
+
+    expect(component.serviceErrorMessage).toContain('already booked');
+  });
+
+  it('should navigate to the performances list on successful submit', () => {
+    const scheduleService = TestBed.inject(ScheduleService);
+    vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+      of({
+        id: '99',
+        festivalId: '1',
+        artistName: 'Test Artist',
+        stageName: 'Main Stage',
+        genre: '',
+        date: '2026-09-15',
+        startTime: '14:00',
+        endTime: '15:30',
+      }),
+    );
+    const navigateSpy = vi.mocked(router.navigate);
+
+    component.performanceForm.setValue({
+      artistName: 'Test Artist',
+      stageName: 'Main Stage',
+      genre: '',
+      date: '2026-09-15',
+      startTime: '14:00',
+      endTime: '15:30',
+    });
+
+    component.onSubmit();
+
+    expect(navigateSpy).toHaveBeenCalledWith(['/festivals', '1', 'performances']);
+  });
+});
+
+describe('PerformanceCreateComponent — no stages', () => {
+  let component: PerformanceCreateComponent;
+  let fixture: ComponentFixture<PerformanceCreateComponent>;
+  let scheduleService: ScheduleService;
+  let router: Router;
+
+  beforeEach(async () => {
+    await makeTestBed('999');
+    fixture = TestBed.createComponent(PerformanceCreateComponent);
+    component = fixture.componentInstance;
+    scheduleService = TestBed.inject(ScheduleService);
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+  });
+
+  it('should show an empty stages list for a festival with no stages', () => {
+    expect(component.availableStages.length).toBe(0);
+  });
+
+  it('should set festival to undefined for an unknown festival id', () => {
+    expect(component.currentFestival).toBeUndefined();
+  });
+
+  describe('noWhitespaceOnly validator', () => {
+    it('is invalid when artistName is only whitespace', () => {
+      component.fields['artistName'].setValue('   ');
+      expect(component.fields['artistName'].errors?.['whitespaceOnly']).toBeTruthy();
+    });
+
+    it('does not show whitespaceOnly error for empty string (required handles it)', () => {
+      component.fields['artistName'].setValue('');
+      expect(component.fields['artistName'].errors?.['whitespaceOnly']).toBeFalsy();
+      expect(component.fields['artistName'].errors?.['required']).toBeTruthy();
+    });
+
+    it('is valid when artistName has non-whitespace content', () => {
+      component.fields['artistName'].setValue('The Band');
+      expect(component.fields['artistName'].errors).toBeNull();
+    });
+  });
+
+  describe('endAfterStart cross-field validator', () => {
+    function fillValidForm() {
+      component.fields['artistName'].setValue('Test Artist');
+      component.fields['stageName'].setValue('Main Stage');
+      component.fields['date'].setValue('2026-08-01');
+      component.fields['startTime'].setValue('18:00');
+      component.fields['endTime'].setValue('19:00');
+    }
+
+    it('is invalid when end time is before start time', () => {
+      fillValidForm();
+      component.fields['endTime'].setValue('17:00');
+      expect(component.performanceForm.errors?.['endNotAfterStart']).toBeTruthy();
+    });
+
+    it('is invalid when end time equals start time', () => {
+      fillValidForm();
+      component.fields['endTime'].setValue('18:00');
+      expect(component.performanceForm.errors?.['endNotAfterStart']).toBeTruthy();
+    });
+
+    it('is valid when end time is after start time', () => {
+      fillValidForm();
+      expect(component.performanceForm.errors).toBeNull();
+    });
+  });
+
+  describe('onSubmit', () => {
+    function fillValidForm() {
+      component.fields['artistName'].setValue('Test Artist');
+      component.fields['stageName'].setValue('Main Stage');
+      component.fields['date'].setValue('2026-08-02');
+      component.fields['startTime'].setValue('10:00');
+      component.fields['endTime'].setValue('11:00');
+    }
+
+    it('does not call createPerformance when form is invalid', () => {
+      const spy = vi.spyOn(scheduleService, 'createPerformance');
+      component.onSubmit();
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('sets serverError when ScheduleService.createPerformance throws', () => {
+      fillValidForm();
+      vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+        throwError(() => new Error('Stage is already booked.')),
+      );
+      component.onSubmit();
+      expect(component.serviceErrorMessage).toBe('Stage is already booked.');
+    });
+
+    it('sets a generic serverError message when a non-Error is thrown', () => {
+      fillValidForm();
+      vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+        throwError(() => 'unknown error'),
+      );
+      component.onSubmit();
+      expect(component.serviceErrorMessage).toBe('An unexpected error occurred.');
+    });
+
+    it('calls createPerformance with trimmed artistName on valid submit', () => {
+      fillValidForm();
+      component.fields['artistName'].setValue('  Test Artist  ');
+      const spy = vi.spyOn(scheduleService, 'createPerformance').mockReturnValue(
+        of({
+          id: '99',
+          festivalId: '1',
+          artistName: 'Test Artist',
+          stageName: 'Main Stage',
+          date: '2026-08-02',
+          startTime: '10:00',
+          endTime: '11:00',
+        }),
+      );
+      vi.spyOn(router, 'navigate').mockResolvedValue(true);
+      component.onSubmit();
+      expect(spy).toHaveBeenCalledWith(expect.objectContaining({ artistName: 'Test Artist' }));
+    });
+  });
+});
