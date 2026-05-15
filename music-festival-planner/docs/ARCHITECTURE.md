@@ -38,7 +38,6 @@ Music Festival Planner is a full-stack web application consisting of an **Angula
 music-festival-planner/
 ├── backend/                        # Node.js/Express REST API
 │   ├── server.js                   # Entry point — middleware, routes, DB connect
-│   ├── db.js                       # Mongoose connection helper
 │   ├── package.json
 │   ├── .env.example                # Template: MONGODB_URI, PORT (copy → .env)
 │   ├── .gitignore                  # Excludes node_modules/ and .env
@@ -54,44 +53,70 @@ music-festival-planner/
 │       ├── festivals.js
 │       ├── stages.js
 │       └── performances.js
-├── public/
-│   └── favicon.ico
-├── src/
-│   ├── environments/
-│   │   ├── environment.ts          # Dev config (apiUrl: http://localhost:3000)
-│   │   └── environment.prod.ts     # Prod config (apiUrl: your deployed API)
-│   ├── index.html                  # Shell HTML — mounts <app-root>
-│   ├── main.ts                     # Bootstrap entry point
+├── css/                            # All frontend stylesheets (one per component + global)
 │   ├── styles.css                  # Global styles (Bootstrap via angular.json)
-│   └── app/
-│       ├── app-module.ts           # Root NgModule — declares & imports everything
-│       ├── app-routing-module.ts   # Route definitions
-│       ├── app.ts                  # Root component (App)
-│       ├── app.html                # Navbar + <router-outlet>
-│       ├── app.css
-│       ├── app.spec.ts
-│       ├── components/
-│       │   ├── home/               # Landing page
-│       │   ├── festivals/          # Festival listing (expandable cards)
-│       │   ├── festival-create/    # Create festival form
-│       │   ├── my-schedule/        # Timetable view
-│       │   ├── stage-list/         # Stage management list
-│       │   ├── stage-create/       # Add stage form
-│       │   ├── performance-list/   # Performance listing
-│       │   └── performance-create/ # Add performance form
-│       ├── models/
-│       │   ├── festival.model.ts       # Festival interface
-│       │   ├── stage.model.ts          # Stage interface + StageStatus/StageEnvironment types
-│       │   ├── performance.model.ts    # Performance interface
-│       │   └── index.ts                # Barrel re-export
-│       └── services/
-│           ├── festival.service.ts         # HTTP CRUD for festivals
-│           ├── festival.service.spec.ts
-│           ├── stage.service.ts            # HTTP CRUD for stages
-│           ├── stage.service.spec.ts
-│           ├── schedule.service.ts         # HTTP CRUD for performances + conflict detection
-│           ├── schedule.service.spec.ts
-│           └── personal-schedule.service.ts # localStorage — attendee bookmarks only
+│   ├── app.css
+│   ├── home.css
+│   ├── festivals.css
+│   ├── festival-create.css
+│   ├── my-schedule.css
+│   ├── stage-list.css
+│   ├── stage-create.css
+│   ├── performance-list.css
+│   └── performance-create.css
+├── images/                         # Static assets served by Angular build
+│   ├── favicon.ico
+│   ├── festival-logo.svg
+│   ├── neon-festival-2023.jpg
+│   ├── Lollapalooza-2022.jpg
+│   └── 404.html
+├── pages/                          # All HTML templates (one per component + shell)
+│   ├── index.html                  # Shell HTML — mounts <app-root>
+│   ├── app.html                    # Navbar + <router-outlet>
+│   ├── home.html
+│   ├── festivals.html
+│   ├── festival-create.html
+│   ├── my-schedule.html
+│   ├── stage-list.html
+│   ├── stage-create.html
+│   ├── performance-list.html
+│   └── performance-create.html
+├── js/                             # All TypeScript source files
+│   ├── main.ts                     # Bootstrap entry point
+│   ├── app.ts                      # Root component (App)
+│   ├── app-module.ts               # Root NgModule — declares & imports everything
+│   ├── app-routing-module.ts       # Route definitions
+│   ├── app.spec.ts
+│   ├── components/                 # Component logic (flat — one .ts file per view)
+│   │   ├── home.ts                 # Landing page
+│   │   ├── festivals.ts            # Festival listing (expandable cards)
+│   │   ├── festival-create.ts      # Create festival form
+│   │   ├── my-schedule.ts          # Timetable view
+│   │   ├── stage-list.ts           # Stage management list
+│   │   ├── stage-create.ts         # Add stage form
+│   │   ├── performance-list.ts     # Performance listing
+│   │   └── performance-create.ts   # Add performance form
+│   ├── models/
+│   │   ├── festival.model.ts       # Festival interface
+│   │   ├── stage.model.ts          # Stage interface + StageStatus/StageEnvironment types
+│   │   ├── performance.model.ts    # Performance interface
+│   │   └── index.ts                # Barrel re-export
+│   ├── services/
+│   │   ├── festival.service.ts         # HTTP CRUD for festivals
+│   │   ├── festival.service.spec.ts
+│   │   ├── stage.service.ts            # HTTP CRUD for stages
+│   │   ├── stage.service.spec.ts
+│   │   ├── schedule.service.ts         # HTTP CRUD for performances + conflict detection
+│   │   ├── schedule.service.spec.ts
+│   │   └── personal-schedule.service.ts # localStorage — attendee bookmarks only
+│   ├── guards/
+│   │   ├── admin.guard.ts
+│   │   └── auth.guard.ts
+│   ├── interceptors/
+│   │   └── auth.interceptor.ts
+│   └── environments/
+│       ├── environment.ts          # Dev config (apiUrl: http://localhost:3000)
+│       └── environment.prod.ts     # Prod config (apiUrl: your deployed API)
 ├── angular.json                # Angular CLI config (build, serve, test)
 ├── package.json
 ├── tsconfig.json
@@ -143,7 +168,7 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/app.ts` |
+| **File** | `js/app.ts` |
 | **Selector** | `app-root` |
 | **Template** | `app.html` |
 | **Standalone** | `false` (NgModule-based) |
@@ -168,9 +193,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/home/home.ts` |
+| **File** | `js/components/home.ts` |
 | **Selector** | `app-home` |
-| **Template** | `components/home/home.html` |
+| **Template** | `pages/home.html` |
 | **Route** | `/` (default) |
 | **Standalone** | `false` |
 
@@ -184,9 +209,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/festivals/festivals.ts` |
+| **File** | `js/components/festivals.ts` |
 | **Selector** | `app-festivals` |
-| **Template** | `components/festivals/festivals.html` |
+| **Template** | `pages/festivals.html` |
 | **Route** | `/festivals` |
 | **Standalone** | `false` |
 
@@ -221,9 +246,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/festival-create/festival-create.ts` |
+| **File** | `js/components/festival-create.ts` |
 | **Selector** | `app-festival-create` |
-| **Template** | `components/festival-create/festival-create.html` |
+| **Template** | `pages/festival-create.html` |
 | **Route** | `/festivals/create` |
 | **Standalone** | `false` |
 
@@ -256,9 +281,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/my-schedule/my-schedule.ts` |
+| **File** | `js/components/my-schedule.ts` |
 | **Selector** | `app-my-schedule` |
-| **Template** | `components/my-schedule/my-schedule.html` |
+| **Template** | `pages/my-schedule.html` |
 | **Routes** | `/my-schedule` (standalone, defaults to festival ID "1") and `/festivals/:id/schedule` |
 | **Standalone** | `false` |
 
@@ -299,9 +324,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/stage-list/stage-list.ts` |
+| **File** | `js/components/stage-list.ts` |
 | **Selector** | `app-stage-list` |
-| **Template** | `components/stage-list/stage-list.html` |
+| **Template** | `pages/stage-list.html` |
 | **Route** | `/festivals/:id/stages` |
 | **Standalone** | `false` |
 
@@ -335,9 +360,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/stage-create/stage-create.ts` |
+| **File** | `js/components/stage-create.ts` |
 | **Selector** | `app-stage-create` |
-| **Template** | `components/stage-create/stage-create.html` |
+| **Template** | `pages/stage-create.html` |
 | **Route** | `/festivals/:id/stages/new` |
 | **Standalone** | `false` |
 
@@ -381,9 +406,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/performance-list/performance-list.ts` |
+| **File** | `js/components/performance-list.ts` |
 | **Selector** | `app-performance-list` |
-| **Template** | `components/performance-list/performance-list.html` |
+| **Template** | `pages/performance-list.html` |
 | **Route** | `/festivals/:id/performances` |
 | **Standalone** | `false` |
 
@@ -419,9 +444,9 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/components/performance-create/performance-create.ts` |
+| **File** | `js/components/performance-create.ts` |
 | **Selector** | `app-performance-create` |
-| **Template** | `components/performance-create/performance-create.html` |
+| **Template** | `pages/performance-create.html` |
 | **Route** | `/festivals/:id/performances/new` |
 | **Standalone** | `false` |
 
@@ -461,7 +486,7 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/app-module.ts` |
+| **File** | `js/app-module.ts` |
 | **Type** | NgModule (not a rendered component) |
 
 **Purpose:** The Angular root module that wires the whole application together.
@@ -519,11 +544,11 @@ Component onSubmit() / confirmAndDelete()
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/services/festival.service.ts` |
+| **File** | `js/services/festival.service.ts` |
 | **Scope** | `providedIn: 'root'` (app-wide singleton) |
 | **Transport** | `HttpClient` → `GET/POST/PATCH/DELETE /api/festivals` |
 | **Cache** | `private cache: Festival[]` — populated by `load()` |
-| **Test file** | `src/app/services/festival.service.spec.ts` |
+| **Test file** | `js/services/festival.service.spec.ts` |
 
 **Public API:**
 
@@ -542,11 +567,11 @@ Component onSubmit() / confirmAndDelete()
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/services/stage.service.ts` |
+| **File** | `js/services/stage.service.ts` |
 | **Scope** | `providedIn: 'root'` (app-wide singleton) |
 | **Transport** | `HttpClient` → `GET/POST/DELETE /api/stages` |
 | **Cache** | `private cache: Stage[]` — stores stages across all loaded festivals |
-| **Test file** | `src/app/services/stage.service.spec.ts` |
+| **Test file** | `js/services/stage.service.spec.ts` |
 
 **Public API:**
 
@@ -565,11 +590,11 @@ Component onSubmit() / confirmAndDelete()
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/services/schedule.service.ts` |
+| **File** | `js/services/schedule.service.ts` |
 | **Scope** | `providedIn: 'root'` (app-wide singleton) |
 | **Transport** | `HttpClient` → `GET/POST/DELETE /api/performances` |
 | **State** | Angular `Signal<Performance[]>` — reactive; components use `effect()` to auto-update |
-| **Test file** | `src/app/services/schedule.service.spec.ts` |
+| **Test file** | `js/services/schedule.service.spec.ts` |
 
 **Reactive state:** The service holds a private `performancesState` Signal. Components that use `effect()` referencing `getPerformancesByFestival()` automatically re-render whenever the signal changes (after a load, create, or delete).
 
@@ -592,7 +617,7 @@ Component onSubmit() / confirmAndDelete()
 
 | Property | Value |
 |---|---|
-| **File** | `src/app/services/personal-schedule.service.ts` |
+| **File** | `js/services/personal-schedule.service.ts` |
 | **Scope** | `providedIn: 'root'` (app-wide singleton) |
 | **Storage** | `localStorage` (key: `mfp_personal_schedule`) |
 
@@ -708,7 +733,7 @@ This ensures the JSON shape matches the Angular TypeScript interfaces exactly (`
 
 ### 7.1 `Festival`
 
-**File:** `src/app/models/festival.model.ts`
+**File:** `js/models/festival.model.ts`
 
 ```typescript
 export interface Festival {
@@ -726,7 +751,7 @@ export interface Festival {
 
 ### 7.2 `Stage`
 
-**File:** `src/app/models/stage.model.ts`
+**File:** `js/models/stage.model.ts`
 
 ```typescript
 export type StageStatus      = 'active' | 'inactive' | 'under-repair';
@@ -747,7 +772,7 @@ export interface Stage {
 
 ### 7.3 `Performance`
 
-**File:** `src/app/models/performance.model.ts`
+**File:** `js/models/performance.model.ts`
 
 ```typescript
 export interface Performance {
@@ -768,7 +793,7 @@ export interface Performance {
 
 ### 8.1 Current Routes
 
-**File:** `src/app/app-routing-module.ts`
+**File:** `js/app-routing-module.ts`
 
 | Path | Component | Description |
 |---|---|---|
@@ -829,7 +854,7 @@ index.html
                   ]
 ```
 
-All nine components are **NgModule-declared** (non-standalone). New components generated with `ng generate component` are automatically placed in `src/app/components/<name>/` and must be manually added to `AppModule.declarations`.
+All nine components are **NgModule-declared** (non-standalone). New components generated with `ng generate component` are placed in `js/components/<name>/` by default; move the generated `.html` to `pages/` and `.css` to `css/`, then update the `@Component` decorator paths accordingly. Add the new class to `AppModule.declarations` manually.
 
 ---
 
@@ -980,7 +1005,7 @@ Start with the ticket ID: `DEM-62: Add FestivalService with CRUD operations`
 ```bash
 ng generate component components/<component-name>
 ```
-Then add the new class to `AppModule.declarations` in `src/app/app-module.ts`.
+Then: move the generated `.html` from `js/components/<name>/` to `pages/`, move the `.css` to `css/`, update the `@Component` `templateUrl` and `styleUrl` to point to the new locations, and add the class to `AppModule.declarations` in `js/app-module.ts`.
 
 ### Generating New Services
 ```bash
@@ -1019,4 +1044,4 @@ npm run build      # output in dist/music-festival-planner/
 - **TypeScript** — strict mode, no implicit `any`
 - **Prettier** — config in `.prettierrc`, run `npx prettier --write .` before committing
 - **Component selectors** — prefix `app-` (enforced by `angular.json` schematic prefix)
-- All component files live in `src/app/components/<name>/` with four files: `.ts`, `.html`, `.css`, `.spec.ts`
+- Component logic lives in `js/components/<name>.ts`, templates in `pages/<name>.html`, styles in `css/<name>.css`, tests in `js/components/<name>.spec.ts`

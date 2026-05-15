@@ -35,8 +35,8 @@ This repository contains two independent sub-projects:
 
 ### Architecture
 
-- **NgModule-based** (non-standalone). `AppModule` in `src/app/app-module.ts` declares all components.
-- New components go in `src/app/components/<name>/` with four files: `.ts`, `.html`, `.css`, `.spec.ts`.
+- **NgModule-based** (non-standalone). `AppModule` in `js/app-module.ts` declares all components.
+- New component logic goes in `js/components/<name>.ts`, its HTML template in `pages/<name>.html`, its styles in `css/<name>.css`, and its tests in `js/components/<name>.spec.ts`.
 - New components must be added manually to `AppModule.declarations`.
 - Use Angular's **built-in template control flow** syntax (`@if`, `@for`, `@switch`) — not `*ngIf`/`*ngFor` directives.
 - Component selectors use the `app-` prefix (e.g., `app-festivals`).
@@ -46,9 +46,9 @@ This repository contains two independent sub-projects:
 
 | Service | File | Responsibility |
 |---|---|---|
-| `FestivalService` | `src/app/services/festival.service.ts` | CRUD for `Festival` objects |
-| `StageService` | `src/app/services/stage.service.ts` | In-memory stages (seeded with `festivalId: "1"`) |
-| `ScheduleService` | `src/app/services/schedule.service.ts` | In-memory performances; validates times via `HH:MM` regex |
+| `FestivalService` | `js/services/festival.service.ts` | CRUD for `Festival` objects |
+| `StageService` | `js/services/stage.service.ts` | HTTP CRUD for stages |
+| `ScheduleService` | `js/services/schedule.service.ts` | HTTP CRUD for performances; validates times via `HH:MM` regex |
 
 ### Testing
 

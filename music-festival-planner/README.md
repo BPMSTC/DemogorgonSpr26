@@ -156,7 +156,7 @@ This project satisfies submission expectations using the festival domain (not we
   - `npm run seed` (script: `backend/scripts/seed.js`)
   - Clears and reseeds deterministically in dependency order.
 - Test cases demonstrating functionality (project-based):
-  - Angular unit tests under `src/app/**/*.spec.ts`
+  - Angular unit tests under `js/**/*.spec.ts`
   - Run with: `npm test -- --watch=false`
   - Backend model/integration/edge tests under `backend/tests/*.test.js`
   - Run with: `npm run test:backend`
@@ -225,28 +225,42 @@ This project satisfies submission expectations using the festival domain (not we
 ## Project Structure (summary)
 
 ```
-src/app/
+css/                            # All component and global stylesheets
+│   ├── styles.css              # Global styles
+│   ├── app.css                 # Root shell styles
+│   └── *.css                   # One CSS file per component
+
+pages/                          # All HTML templates
+│   ├── index.html              # Shell HTML — mounts <app-root>
+│   ├── app.html                # Navbar + <router-outlet>
+│   └── *.html                  # One HTML file per component
+
+js/                             # All TypeScript source files
+├── main.ts                     # Bootstrap entry point
+├── app.ts                      # Root component (App)
 ├── app-module.ts               # Root NgModule
 ├── app-routing-module.ts       # Route definitions
-├── app.ts / app.html           # Root shell + navbar
-├── components/
-│   ├── home/                   # Landing page  (/)
-│   ├── festivals/              # Festival listing  (/festivals)
-│   ├── festival-create/        # Create festival form  (/festivals/create)
-│   ├── my-schedule/            # Timetable view  (/my-schedule, /festivals/:id/schedule)
-│   ├── stage-list/             # Stage management  (/festivals/:id/stages)
-│   ├── stage-create/           # Add stage form  (/festivals/:id/stages/new)
-│   ├── performance-list/       # Performance list  (/festivals/:id/performances)
-│   └── performance-create/     # Add performance form  (/festivals/:id/performances/new)
+├── components/                 # Component logic files
+│   ├── home.ts                 # Landing page  (/)
+│   ├── festivals.ts            # Festival listing  (/festivals)
+│   ├── festival-create.ts      # Create festival form  (/festivals/create)
+│   ├── my-schedule.ts          # Timetable view  (/my-schedule, /festivals/:id/schedule)
+│   ├── stage-list.ts           # Stage management  (/festivals/:id/stages)
+│   ├── stage-create.ts         # Add stage form  (/festivals/:id/stages/new)
+│   ├── performance-list.ts     # Performance list  (/festivals/:id/performances)
+│   └── performance-create.ts   # Add performance form  (/festivals/:id/performances/new)
 ├── models/
 │   ├── festival.model.ts       # Festival interface
 │   ├── stage.model.ts          # Stage interface + StageStatus/StageEnvironment types
 │   ├── performance.model.ts    # Performance interface
 │   └── index.ts                # Barrel re-export
 └── services/
-    ├── festival.service.ts     # In-memory CRUD for festivals
-    ├── stage.service.ts        # In-memory CRUD for stages (demo data pre-seeded)
-    └── schedule.service.ts     # localStorage-backed CRUD for performances + conflict detection
+    ├── festival.service.ts     # HTTP CRUD for festivals
+    ├── stage.service.ts        # HTTP CRUD for stages
+    └── schedule.service.ts     # HTTP CRUD for performances + conflict detection
+
+images/                         # Static assets (favicon, images)
+backend/                        # Node.js/Express REST API
 ```
 
 See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for full details including component inputs/outputs, service API, data flow diagrams, and planned routes.
@@ -256,7 +270,7 @@ See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for full details including compone
 ## Generating Code
 
 ```bash
-# New component (add to AppModule.declarations afterward)
+# New component — generates in js/components/<name>/; move .html to pages/ and .css to css/ manually
 ng generate component components/<name>
 
 # New service (providedIn: 'root' by default)

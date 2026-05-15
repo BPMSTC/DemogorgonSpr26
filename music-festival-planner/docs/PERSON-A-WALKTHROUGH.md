@@ -4,7 +4,7 @@ This walkthrough covers:
 1. `angular.json` syntax/build verification
 2. Hash routing in Angular
 3. wildcard route fallback
-4. `public/404.html` fallback
+4. `images/404.html` fallback
 5. persistence in `FestivalService` and `StageService`
 6. stage cleanup API
 7. festival cascade deletion
@@ -16,7 +16,7 @@ This walkthrough covers:
 - ✅ Step 1 complete — `angular.json` syntax fixed and build parses.
 - ✅ Step 2 complete — `HashLocationStrategy` added in `app-module.ts`.
 - ✅ Step 3 complete — wildcard route added in `app-routing-module.ts`.
-- ✅ Step 4 complete — `public/404.html` created.
+- ✅ Step 4 complete — `images/404.html` created.
 - ✅ Step 5 complete — persistence is implemented in both `FestivalService` and `StageService`.
 - ✅ Step 6 complete — `clearStagesByFestival(...)` is implemented in `StageService`.
 - ✅ Step 7 complete — cascade delete orchestration is implemented in `festivals.ts`.
@@ -41,7 +41,8 @@ Use this in `build.options`:
 ```json
 "options": {
   "outputPath": "dist/music-festival-planner",
-  "browser": "src/main.ts",
+  "index": "pages/index.html",
+  "browser": "js/main.ts",
   "tsConfig": "tsconfig.app.json",
 ```
 
@@ -56,7 +57,7 @@ Use this in `build.options`:
 
 **Status:** ✅ Complete
 
-**File:** `src/app/app-module.ts`
+**File:** `js/app-module.ts`
 **Lines to edit:** import area (`1–3`) and providers (`19`)
 
 ### Add import
@@ -81,7 +82,7 @@ providers: [
 
 **Status:** ✅ Complete
 
-**File:** `src/app/app-routing-module.ts`
+**File:** `js/app-routing-module.ts`
 **Add after current last route (around line 41, before `];`)**
 
 ```ts
@@ -102,11 +103,11 @@ Resulting tail of routes:
 
 ---
 
-## Step 4 — Add `public/404.html`
+## Step 4 — Add `images/404.html`
 
 **Status:** ✅ Complete
 
-**Create file:** `music-festival-planner/public/404.html`
+**Create file:** `music-festival-planner/images/404.html`
 
 ```html
 <!doctype html>
@@ -131,7 +132,7 @@ Resulting tail of routes:
 
 **Status:** ✅ Complete
 
-**File:** `src/app/services/festival.service.ts`
+**File:** `js/services/festival.service.ts`
 **Current key lines:** store (`12`), create/update/delete (`40`, `59`, `82`)
 
 ### Replace imports
@@ -211,7 +212,7 @@ private saveToStorage(): void {
 
 **Status:** ✅ Complete
 
-**File:** `src/app/services/stage.service.ts`
+**File:** `js/services/stage.service.ts`
 **Current key lines:** `nextStageId` at `52`, methods at `81`, `111`, `132`
 
 ### Replace imports
@@ -304,7 +305,7 @@ clearStagesByFestival(festivalId: string): number {
 
 **Status:** ✅ Complete
 
-**File:** `src/app/components/festivals/festivals.ts`
+**File:** `js/components/festivals.ts`
 
 ### Add imports
 ```ts
@@ -368,7 +369,7 @@ this.refreshFestivalStageCache();
 
 **Status:** ✅ Complete
 
-**File:** `src/app/components/festivals/festivals.html`
+**File:** `pages/festivals.html`
 **Location:** inside kebab dropdown (near lines `69–95`)
 
 Add:
@@ -391,7 +392,7 @@ Add:
 
 **Status:** ✅ Complete
 
-**File:** `src/app/components/festivals/festivals.ts`
+**File:** `js/components/festivals.ts`
 
 ### Update imports
 ```ts

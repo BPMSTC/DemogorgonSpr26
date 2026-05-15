@@ -5,7 +5,7 @@ This is a **simple** recording-friendly walkthrough for Person B.
 ## Current completion status (as of 2026-03-31)
 
 - ✅ Build baseline is good (`npm run build` passes).
-- ✅ Hero image path is valid (`public/neon-festival-2023.jpg` exists and `home.html` references it).
+- ✅ Hero image path is valid (`images/neon-festival-2023.jpg` exists and `home.html` references it).
 - ✅ Delete Festival action already appears in `festivals.html`.
 - ✅ Festivals data/cascade foundation is in place (component compiles; delete orchestration exists).
 - ✅ Inline style still exists in `my-schedule.html` (needs CSS class move).
@@ -31,7 +31,7 @@ Ship the UI/UX polish items and finish with a clean smoke test.
 
 ## Step 1 — Fix `festivals.ts` compile/cleanup first (if needed)
 
-**File:** `src/app/components/festivals/festivals.ts`
+**File:** `js/components/festivals.ts`
 
 **Status:** ✅ Complete (no current compile errors)
 
@@ -56,8 +56,8 @@ festivalsList: Festival[] = [];
 ## Step 2 — Move inline styles out of My Schedule template
 
 **Files:**
-- `src/app/components/my-schedule/my-schedule.html`
-- `src/app/components/my-schedule/my-schedule.css`
+- `pages/my-schedule.html`
+- `css/my-schedule.css`
 
 **Status:** ✅ Complete (no current compile errors)
 
@@ -73,8 +73,8 @@ festivalsList: Festival[] = [];
 ## Step 3 — Improve chevron icon in Festivals card header
 
 **Files:**
-- `src/app/components/festivals/festivals.html`
-- `src/app/components/festivals/festivals.css`
+- `pages/festivals.html`
+- `css/festivals.css`
 
 **Status:** ✅ Complete (no current compile errors)
 
@@ -90,9 +90,9 @@ festivalsList: Festival[] = [];
 ## Step 4 — Improve Festival Create form feedback
 
 **Files:**
-- `src/app/components/festival-create/festival-create.html`
-- `src/app/components/festival-create/festival-create.ts`
-- `src/app/components/festival-create/festival-create.css`
+- `pages/festival-create.html`
+- `js/components/festival-create.ts`
+- `css/festival-create.css`
 
 **Status:** ✅ Complete (no current compile errors)
 
@@ -109,13 +109,13 @@ festivalsList: Festival[] = [];
 ## Step 5 — Verify hero image path
 
 **Files:**
-- `public/neon-festival-2023.jpg`
-- `src/app/components/home/home.html`
+- `images/neon-festival-2023.jpg`
+- `pages/home.html`
 
 **Status:** ✅ Complete
 
 ### Do this
-- Confirm image exists in `public/`.
+- Confirm image exists in `images/`.
 - Confirm template path matches deployed behavior.
 
 ### Say this
