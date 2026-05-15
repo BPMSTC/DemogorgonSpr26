@@ -1,6 +1,7 @@
 const { connectToDatabase, disconnectFromDatabase } = require('../config/database');
 const { Festival, Stage, Artist, Performance } = require('../models');
 
+// CLI flags and environment variable names used to control reset behaviour.
 const RESET_FLAG = '--reset';
 const CONFIRM_FLAG = '--confirm';
 const RESET_CONFIRM_TOKEN = 'WIPE';
@@ -34,6 +35,7 @@ const FESTIVAL_SEED = [
   },
 ];
 
+// Build a quick lookup of each festival's date range so we can verify shifted performances fit inside the window.
 const FESTIVAL_WINDOW_BY_NAME = new Map(
   FESTIVAL_SEED.map((festival) => [
     festival.name,
@@ -411,6 +413,7 @@ const BASE_PERFORMANCE_SEED = [
  * @property {string} end
  */
 
+// Move a datetime forward by a whole number of days so the same slot can appear on different festival days.
 /** @param {string} isoDateTime @param {number} daysToAdd */
 function shiftIsoDateTimeByDays(isoDateTime, daysToAdd) {
   const shifted = new Date(isoDateTime);
@@ -418,6 +421,7 @@ function shiftIsoDateTimeByDays(isoDateTime, daysToAdd) {
   return shifted.toISOString();
 }
 
+// Check that a shifted performance slot still falls inside the festival's scheduled dates.
 /**
  * @param {string} festivalName
  * @param {string} shiftedStartIso
@@ -425,29 +429,36 @@ function shiftIsoDateTimeByDays(isoDateTime, daysToAdd) {
  */
 function isWithinFestivalWindow(festivalName, shiftedStartIso, shiftedEndIso) {
   const window = FESTIVAL_WINDOW_BY_NAME.get(festivalName);
+  // If the festival is not in our lookup we cannot validate, so treat as out-of-window.
   if (!window) return false;
 
   const shiftedStart = new Date(shiftedStartIso);
   const shiftedEnd = new Date(shiftedEndIso);
 
+  // Both the start and end must fall inside the festival's declared date range.
   return shiftedStart >= window.startDate && shiftedEnd <= window.endDate;
 }
 
+// Expand each base performance entry across multiple days to fill the whole festival schedule.
 /** @param {PerformanceSeedEntry[]} baseSeed */
 function buildExpandedPerformanceSeed(baseSeed) {
+  // Try shifting each entry by 0, 1, and 2 days to cover a 3-day festival.
   const dayShifts = [0, 1, 2];
   /** @type {PerformanceSeedEntry[]} */
   const expanded = [];
 
   baseSeed.forEach((entry) => {
     dayShifts.forEach((dayShift) => {
+      // Calculate what the start and end would be on this shifted day.
       const shiftedStart = shiftIsoDateTimeByDays(entry.start, dayShift);
       const shiftedEnd = shiftIsoDateTimeByDays(entry.end, dayShift);
 
+      // Skip this shifted slot if it would fall outside the festival window.
       if (!isWithinFestivalWindow(entry.festivalName, shiftedStart, shiftedEnd)) {
         return;
       }
 
+      // Add the shifted copy to the output list with updated timestamps.
       expanded.push({
         ...entry,
         start: shiftedStart,
@@ -459,6 +470,7 @@ function buildExpandedPerformanceSeed(baseSeed) {
   return expanded;
 }
 
+// Build the full performance list by expanding the base seed across all festival days.
 const EXPANDED_PERFORMANCE_SEED = buildExpandedPerformanceSeed(BASE_PERFORMANCE_SEED);
 
 // Repeatable seeding means clearing old docs before inserting fresh data.
@@ -477,6 +489,7 @@ async function resetCollections() {
 // This map is later used to connect stages/performances.
 async function seedFestivals() {
   const festivals = await Festival.insertMany(FESTIVAL_SEED, { ordered: true });
+  // Map each festival's name to its newly assigned database ID for downstream lookups.
   return new Map(festivals.map((festival) => [festival.name, festival._id]));
 }
 
@@ -517,6 +530,7 @@ async function seedStages(festivalIdByName) {
 //   artist name -> artist ObjectId
 async function seedArtists() {
   const artists = await Artist.insertMany(ARTIST_SEED, { ordered: true });
+  // Map each artist's name to their new database ID for performance linking.
   return new Map(artists.map((artist) => [artist.name, artist._id]));
 }
 
@@ -529,6 +543,7 @@ async function seedArtists() {
  */
 async function seedPerformances(festivalIdByName, stageIdByFestivalAndName, artistIdByName) {
   const performanceDocuments = EXPANDED_PERFORMANCE_SEED.map((entry) => {
+    // Resolve each human-readable name to its database ObjectId.
     const festivalId = festivalIdByName.get(entry.festivalName);
     const stageId = stageIdByFestivalAndName.get(`${festivalId.toString()}::${entry.stageName}`);
     const artistId = artistIdByName.get(entry.artistName);
@@ -538,6 +553,7 @@ async function seedPerformances(festivalIdByName, stageIdByFestivalAndName, arti
       throw new Error(`Could not map IDs for performance seed entry: ${JSON.stringify(entry)}`);
     }
 
+    // Build the final document shape expected by the Performance model.
     return {
       festival: festivalId,
       stage: stageId,
@@ -558,6 +574,7 @@ async function printSummary() {
     Artist.countDocuments(),
     Performance.countDocuments(),
   ]);
+  // Sum up all inserted documents to check we meet the minimum target.
   const totalDocuments = festivalCount + stageCount + artistCount + performanceCount;
 
   console.log('Seed completed successfully.');
@@ -571,6 +588,7 @@ async function printSummary() {
   });
 }
 
+// Fetch current document counts from all seed-managed collections.
 async function getCollectionCounts() {
   const [festivalCount, stageCount, artistCount, performanceCount] = await Promise.all([
     Festival.countDocuments(),
@@ -587,23 +605,28 @@ async function getCollectionCounts() {
   };
 }
 
+// Determine whether the user has requested a destructive reset via CLI flag or env variable.
 function shouldResetData() {
   const hasResetFlag = process.argv.includes(RESET_FLAG);
   const forceResetFromEnv = process.env[FORCE_RESET_ENV] === 'true';
   return hasResetFlag || forceResetFromEnv;
 }
 
+// Pull the confirmation token value that was passed after the --confirm flag.
 function getCliConfirmValue() {
   const confirmFlagIndex = process.argv.indexOf(CONFIRM_FLAG);
+  // Return empty string when the flag was not provided at all.
   if (confirmFlagIndex === -1) {
     return '';
   }
   return process.argv[confirmFlagIndex + 1] || '';
 }
 
+// Check whether the user has supplied the required confirmation token via CLI or environment.
 function hasValidResetConfirmation() {
   const cliConfirm = getCliConfirmValue();
   const envConfirm = process.env[RESET_CONFIRM_ENV] || '';
+  // Accept the token from either source so both interactive and CI workflows are supported.
   return cliConfirm === RESET_CONFIRM_TOKEN || envConfirm === RESET_CONFIRM_TOKEN;
 }
 
@@ -613,12 +636,15 @@ function hasValidResetConfirmation() {
  */
 async function ensureSafeSeedMode(canReset) {
   const counts = await getCollectionCounts();
+  // Any non-zero count means data already exists that could be overwritten.
   const hasExistingData = Object.values(counts).some((count) => count > 0);
 
+  // Allow the seed to proceed when there is no existing data or the user opted into a reset.
   if (!hasExistingData || canReset) {
     return { counts, hasExistingData };
   }
 
+  // Block the seed and print guidance so the user knows how to opt in intentionally.
   console.error('Seed aborted to protect existing data.');
   console.table(counts);
   console.error(
@@ -634,14 +660,17 @@ async function ensureSafeSeedMode(canReset) {
  * @param {boolean} canReset
  */
 function ensureResetConfirmed(canReset) {
+  // Nothing to confirm when reset mode was not requested.
   if (!canReset) {
     return true;
   }
 
+  // Allow the reset to proceed when the correct confirmation token is present.
   if (hasValidResetConfirmation()) {
     return true;
   }
 
+  // Print instructions so the user knows exactly what they need to add.
   console.error('Seed reset aborted: confirmation token missing.');
   console.error(
     `When using ${RESET_FLAG}, also pass ${CONFIRM_FLAG} ${RESET_CONFIRM_TOKEN} to confirm destructive reset.`,
@@ -659,11 +688,13 @@ async function runSeed() {
     // Open DB connection once for the full seed transaction-like flow.
     await connectToDatabase();
 
+    // Check whether a destructive reset was requested and confirmed before doing anything else.
     const allowReset = shouldResetData();
     if (!ensureResetConfirmed(allowReset)) {
       return;
     }
 
+    // Verify it is safe to proceed given the current state of the database.
     const safetyCheck = await ensureSafeSeedMode(allowReset);
     if (!safetyCheck) {
       return;
@@ -674,11 +705,12 @@ async function runSeed() {
       await resetCollections();
     }
 
-    // Insert in dependency order.
+    // Insert in dependency order so references are always valid.
     const festivalIdByName = await seedFestivals();
     const stageIdByFestivalAndName = await seedStages(festivalIdByName);
     const artistIdByName = await seedArtists();
 
+    // Performances come last because they reference all three collections above.
     await seedPerformances(festivalIdByName, stageIdByFestivalAndName, artistIdByName);
 
     await printSummary();
