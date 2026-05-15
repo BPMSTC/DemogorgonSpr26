@@ -17,7 +17,9 @@ import { LoginComponent } from './components/login/login';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard';
 import { authInterceptor } from './interceptors/auth.interceptor';
 
+// The root Angular module — declares every component and wires up global providers.
 @NgModule({
+  // Register every component so Angular's template compiler can resolve their selectors.
   declarations: [
     App,
     Home,
@@ -31,12 +33,17 @@ import { authInterceptor } from './interceptors/auth.interceptor';
     LoginComponent,
     AdminDashboardComponent,
   ],
+  // Pull in the browser platform, routing, and reactive forms support.
   imports: [BrowserModule, AppRoutingModule, ReactiveFormsModule],
   providers: [
+    // Register a global error listener so unhandled errors are captured by the browser.
     provideBrowserGlobalErrorListeners(),
+    // Set up the HTTP client using the Fetch API and attach the JWT auth interceptor.
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    // Use hash-based URLs (e.g. /#/festivals) so the app works without server-side routing config.
     { provide: LocationStrategy, useClass: HashLocationStrategy },
   ],
+  // Tell Angular which component to render first when the page loads.
   bootstrap: [App],
 })
 export class AppModule {}
