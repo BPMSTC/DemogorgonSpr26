@@ -18,9 +18,7 @@
             formControlName="email"
             autocomplete="email"
           />
-          <div class="invalid-feedback">
-            Please enter a valid email address.
-          </div>
+          <div class="invalid-feedback">Please enter a valid email address.</div>
         </div>
 
         <div class="mb-4">
@@ -43,17 +41,21 @@
               {{ showPassword ? '🙈' : '👁️' }}
             </button>
           </div>
-          <div class="invalid-feedback" [class.d-block]="form.get('password')?.invalid && form.get('password')?.touched">
+          <div
+            class="invalid-feedback"
+            [class.d-block]="form.get('password')?.invalid && form.get('password')?.touched"
+          >
             Password must be at least 8 characters.
           </div>
         </div>
 
-        <button
-          type="submit"
-          class="btn btn-primary w-100"
-          [disabled]="form.invalid || isLoading"
-        >
-          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <button type="submit" class="btn btn-primary w-100" [disabled]="form.invalid || isLoading">
+          <span
+            *ngIf="isLoading"
+            class="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
           {{ isLoading ? 'Signing in…' : 'Sign In' }}
         </button>
       </form>

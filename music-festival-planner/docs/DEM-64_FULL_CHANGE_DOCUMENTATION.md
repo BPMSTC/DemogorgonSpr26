@@ -242,12 +242,14 @@
 ## Command/Process Changes That Produced File Changes
 
 1. Coverage enablement
+
 - Command: `npm install -D @vitest/coverage-v8`
 - Resulting files:
   - `music-festival-planner/package.json`
   - `music-festival-planner/package-lock.json`
 
 2. Security remediation attempt (partial)
+
 - Command: `npm audit fix` (did not fully resolve all advisories)
 - Resulting files:
   - Additional updates in `music-festival-planner/package-lock.json`

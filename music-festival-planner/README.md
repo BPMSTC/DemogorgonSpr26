@@ -10,7 +10,7 @@ This project lives inside the `DemogorgonSpr26` repository. All project document
 
 ## Quick Start
 
-The app now requires a running backend API connected to MongoDB.  Start the
+The app now requires a running backend API connected to MongoDB. Start the
 backend first, then the Angular dev server.
 
 ### 1. Start the backend
@@ -180,22 +180,22 @@ This project satisfies submission expectations using the festival domain (not we
 
 ### Frontend
 
-| Tool | Version | Purpose |
-|---|---|---|
-| Angular | 21.2.x | Framework |
-| TypeScript | ~5.9.x | Language |
-| Bootstrap | 5.3.x | UI / layout |
-| Vitest | 4.x | Unit testing |
-| Angular CLI | 21.2.x | Scaffolding & build |
+| Tool        | Version | Purpose             |
+| ----------- | ------- | ------------------- |
+| Angular     | 21.2.x  | Framework           |
+| TypeScript  | ~5.9.x  | Language            |
+| Bootstrap   | 5.3.x   | UI / layout         |
+| Vitest      | 4.x     | Unit testing        |
+| Angular CLI | 21.2.x  | Scaffolding & build |
 
 ### Backend
 
-| Tool | Version | Purpose |
-|---|---|---|
-| Node.js | ≥18 | Runtime |
-| Express | 4.x | HTTP server |
-| Mongoose | 8.x | MongoDB ODM |
-| dotenv | 16.x | Environment config |
+| Tool     | Version | Purpose            |
+| -------- | ------- | ------------------ |
+| Node.js  | ≥18     | Runtime            |
+| Express  | 4.x     | HTTP server        |
+| Mongoose | 8.x     | MongoDB ODM        |
+| dotenv   | 16.x    | Environment config |
 
 ---
 

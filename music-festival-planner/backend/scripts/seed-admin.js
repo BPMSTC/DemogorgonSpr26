@@ -17,7 +17,9 @@ async function run() {
   // Both values must be present — bail early with a clear message if either is missing.
   if (!email || !password) {
     console.error('Error: ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required.');
-    console.error('Example: ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=secret node scripts/seed-admin.js');
+    console.error(
+      'Example: ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD=secret node scripts/seed-admin.js',
+    );
     process.exitCode = 1;
     return;
   }

@@ -1,13 +1,10 @@
 const Joi = require('joi');
 
 // Reusable rule for MongoDB ObjectId strings — must be exactly 24 hex characters.
-const objectIdField = Joi.string()
-  .hex()
-  .length(24)
-  .messages({
-    'string.hex': '{{#label}} must be a valid ObjectId',
-    'string.length': '{{#label}} must be a valid ObjectId',
-  });
+const objectIdField = Joi.string().hex().length(24).messages({
+  'string.hex': '{{#label}} must be a valid ObjectId',
+  'string.length': '{{#label}} must be a valid ObjectId',
+});
 
 // Matches a calendar date with no time component (e.g. "2026-07-18").
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;

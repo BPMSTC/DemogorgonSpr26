@@ -1,5 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { FestivalService } from '../services/festival.service';
 import { Festival } from '../models/festival.model';
@@ -13,7 +19,7 @@ import { Festival } from '../models/festival.model';
 function validateEndDateOnOrAfterStartDate(formGroup: AbstractControl): ValidationErrors | null {
   // Read both date values from the form at the same time.
   const startDateValue = formGroup.get('startDate')?.value;
-  const endDateValue   = formGroup.get('endDate')?.value;
+  const endDateValue = formGroup.get('endDate')?.value;
 
   // If the end date comes before the start date, signal a validation failure.
   if (startDateValue && endDateValue && endDateValue < startDateValue) {
@@ -45,22 +51,22 @@ export class FestivalCreateComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private festivalService: FestivalService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
     // Build the festival form with required fields and attach the cross-field date validator.
     this.festivalForm = this.formBuilder.group(
       {
-        name:      ['', Validators.required],
+        name: ['', Validators.required],
         startDate: ['', Validators.required],
-        endDate:   ['', Validators.required],
-        location:  ['', Validators.required],
+        endDate: ['', Validators.required],
+        location: ['', Validators.required],
       },
       {
         // Apply the date-order check to the whole form group so it can see both date fields.
         validators: validateEndDateOnOrAfterStartDate,
-      }
+      },
     );
   }
 
@@ -71,7 +77,7 @@ export class FestivalCreateComponent implements OnInit {
 
   onSubmit(): void {
     // Remember that the user tried to submit so validation messages become visible.
-    this.hasAttemptedSubmit  = true;
+    this.hasAttemptedSubmit = true;
     // Clear any previous backend error before trying again.
     this.serviceErrorMessage = '';
 

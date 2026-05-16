@@ -63,7 +63,7 @@ const festivalSchema = new Schema(
     collection: 'festivals',
     // Adds createdAt/updatedAt automatically.
     timestamps: true,
-  }
+  },
 );
 
 // Prevent duplicate festival records for the same name and start date.

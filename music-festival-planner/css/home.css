@@ -29,7 +29,10 @@
   z-index: 0;
 }
 
-.home-hero * { position: relative; z-index: 1; }
+.home-hero * {
+  position: relative;
+  z-index: 1;
+}
 
 .home-hero h1 {
   font-size: clamp(2.5rem, 8vw, 5rem);
@@ -134,7 +137,10 @@
   padding: 1.5rem;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   text-decoration: none;
   display: block;
   color: inherit;
@@ -165,7 +171,6 @@
   margin: 0;
 }
 
-
 /* ---- Featured festivals section -------------------------- */
 .home-section-title {
   font-family: var(--font-display);
@@ -177,7 +182,6 @@
   padding-left: 0.75rem;
   margin-bottom: 1.25rem;
 }
-
 
 @media (max-width: 768px) {
   .hero-image {

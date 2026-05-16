@@ -47,7 +47,7 @@ export class AuthService {
       // Save the token and user data that came back from the server.
       tap((res) => this.storeSession(res)),
       // Pass any error through a friendly message formatter.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -57,7 +57,7 @@ export class AuthService {
       // Save the session details returned after registration.
       tap((res) => this.storeSession(res)),
       // Pass any error through a friendly message formatter.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 

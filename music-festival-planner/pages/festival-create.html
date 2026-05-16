@@ -13,7 +13,6 @@
   }
 
   <form [formGroup]="festivalForm" (ngSubmit)="onSubmit()">
-
     <!-- Festival Name -->
     <div class="form-group">
       <label for="name">Festival Name <span aria-hidden="true">*</span></label>
@@ -22,7 +21,8 @@
         id="name"
         formControlName="name"
         [attr.aria-invalid]="hasAttemptedSubmit && fields['name'].errors ? true : null"
-        aria-required="true">
+        aria-required="true"
+      />
       @if (hasAttemptedSubmit || fields['name'].touched) {
         <div class="error-messages">
           @if (fields['name'].errors?.['required']) {
@@ -36,7 +36,7 @@
     <div class="form-group row">
       <div class="half-width">
         <label for="startDate">Start Date <span aria-hidden="true">*</span></label>
-        <input type="date" id="startDate" formControlName="startDate" aria-required="true">
+        <input type="date" id="startDate" formControlName="startDate" aria-required="true" />
         @if (hasAttemptedSubmit || fields['startDate'].touched) {
           <div class="error-messages">
             @if (fields['startDate'].errors?.['required']) {
@@ -48,7 +48,7 @@
 
       <div class="half-width">
         <label for="endDate">End Date <span aria-hidden="true">*</span></label>
-        <input type="date" id="endDate" formControlName="endDate" aria-required="true">
+        <input type="date" id="endDate" formControlName="endDate" aria-required="true" />
         @if (hasAttemptedSubmit || fields['endDate'].touched) {
           <div class="error-messages">
             @if (fields['endDate'].errors?.['required']) {
@@ -72,7 +72,7 @@
     <!-- Location -->
     <div class="form-group">
       <label for="location">Location <span aria-hidden="true">*</span></label>
-      <input type="text" id="location" formControlName="location" aria-required="true">
+      <input type="text" id="location" formControlName="location" aria-required="true" />
       @if (hasAttemptedSubmit || fields['location'].touched) {
         <div class="error-messages">
           @if (fields['location'].errors?.['required']) {
@@ -92,7 +92,8 @@
           type="submit"
           class="btn-submit"
           [disabled]="festivalForm.invalid"
-          [attr.aria-describedby]="festivalForm.invalid ? 'submit-disabled-tip' : null">
+          [attr.aria-describedby]="festivalForm.invalid ? 'submit-disabled-tip' : null"
+        >
           Save Festival
         </button>
         @if (festivalForm.invalid) {
@@ -102,6 +103,5 @@
         }
       </div>
     </div>
-
   </form>
 </div>

@@ -5,7 +5,14 @@ const Artist = require('../models/artist');
 const AppError = require('../middleware/AppError');
 
 // List the fields that are allowed as sort keys so callers can't sort by arbitrary database fields.
-const PERF_SORT_FIELDS = new Set(['date', 'startTime', 'endTime', 'artistName', 'stageName', 'genre']);
+const PERF_SORT_FIELDS = new Set([
+  'date',
+  'startTime',
+  'endTime',
+  'artistName',
+  'stageName',
+  'genre',
+]);
 
 // Escape any special regex characters in a string so it's safe to use inside a RegExp pattern.
 function escapeRegex(value) {
@@ -14,7 +21,9 @@ function escapeRegex(value) {
 
 // Trim and collapse any extra internal whitespace in a name so comparisons are consistent.
 function normalizeName(value) {
-  return String(value || '').trim().replace(/\s+/g, ' ');
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ');
 }
 
 // Convert a "HH:MM" time string into a total number of minutes since midnight.
@@ -270,7 +279,9 @@ exports.createPerformance = async (req, res, next) => {
 
   // Reject the request if either time string couldn't be parsed.
   if (startMinutes === null || endMinutes === null) {
-    return next(new AppError('Start and end times must be valid 24-hour times (H:mm or HH:mm).', 400));
+    return next(
+      new AppError('Start and end times must be valid 24-hour times (H:mm or HH:mm).', 400),
+    );
   }
   // Reject the request if the performance would end before or at the same time it starts.
   if (startMinutes >= endMinutes) {
@@ -341,7 +352,9 @@ exports.replacePerformance = async (req, res, next) => {
 
   // Reject the request if either time string is invalid.
   if (startMinutes === null || endMinutes === null) {
-    return next(new AppError('Start and end times must be valid 24-hour times (H:mm or HH:mm).', 400));
+    return next(
+      new AppError('Start and end times must be valid 24-hour times (H:mm or HH:mm).', 400),
+    );
   }
   // Reject the request if the time slot has zero or negative duration.
   if (startMinutes >= endMinutes) {
@@ -376,7 +389,7 @@ exports.replacePerformance = async (req, res, next) => {
       stage._id,
       startDateTime,
       endDateTime,
-      req.params.id
+      req.params.id,
     );
     // Reject if another performance already occupies this stage during the requested slot.
     if (conflict) {

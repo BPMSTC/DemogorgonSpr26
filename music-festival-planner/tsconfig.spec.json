@@ -6,12 +6,7 @@
     "forceConsistentCasingInFileNames": true,
     "rootDir": "./js",
     "outDir": "./out-tsc/spec",
-    "types": [
-      "vitest/globals"
-    ]
+    "types": ["vitest/globals"]
   },
-  "include": [
-    "js/**/*.d.ts",
-    "js/**/*.ts"
-  ]
+  "include": ["js/**/*.d.ts", "js/**/*.ts"]
 }

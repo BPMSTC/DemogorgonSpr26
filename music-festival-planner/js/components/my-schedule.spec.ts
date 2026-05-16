@@ -4,10 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MySchedule, ALL_STAGES } from './my-schedule';
 import { ScheduleService } from '../services/schedule.service';
 import { FestivalService } from '../services/festival.service';
-import {
-  PersonalScheduleService,
-  PersonalConflict,
-} from '../services/personal-schedule.service';
+import { PersonalScheduleService, PersonalConflict } from '../services/personal-schedule.service';
 import { CalendarService } from '../services/calendar.service';
 import { Performance } from '../models/performance.model';
 import { BehaviorSubject, Observable, of } from 'rxjs';
@@ -113,7 +110,9 @@ describe('MySchedule', () => {
     await makeTestBed();
     fixture = TestBed.createComponent(MySchedule);
     component = fixture.componentInstance;
-    personalSchedule = TestBed.inject(PersonalScheduleService) as unknown as MockPersonalScheduleService;
+    personalSchedule = TestBed.inject(
+      PersonalScheduleService,
+    ) as unknown as MockPersonalScheduleService;
     calendarService = TestBed.inject(CalendarService) as unknown as MockCalendarService;
     fixture.detectChanges();
     await fixture.whenStable();
@@ -226,12 +225,7 @@ describe('MySchedule', () => {
         endTime: '19:30',
       };
 
-      personalSchedule.setSaved([
-        a,
-        b,
-      ], [
-        { a, b, overlapWindow: '06:30 PM–07:00 PM' },
-      ]);
+      personalSchedule.setSaved([a, b], [{ a, b, overlapWindow: '06:30 PM–07:00 PM' }]);
 
       expect(component.hasScheduleClashes).toBe(true);
     });
@@ -256,12 +250,7 @@ describe('MySchedule', () => {
         endTime: '19:30',
       };
 
-      personalSchedule.setSaved([
-        a,
-        b,
-      ], [
-        { a, b, overlapWindow: '06:30 PM–07:00 PM' },
-      ]);
+      personalSchedule.setSaved([a, b], [{ a, b, overlapWindow: '06:30 PM–07:00 PM' }]);
 
       component.addSavedPerformancesToGoogleCalendar();
 
@@ -290,12 +279,7 @@ describe('MySchedule', () => {
         endTime: '19:30',
       };
 
-      personalSchedule.setSaved([
-        a,
-        b,
-      ], [
-        { a, b, overlapWindow: '06:30 PM–07:00 PM' },
-      ]);
+      personalSchedule.setSaved([a, b], [{ a, b, overlapWindow: '06:30 PM–07:00 PM' }]);
       expect(component.hasScheduleClashes).toBe(true);
 
       personalSchedule.setSaved([a], []);

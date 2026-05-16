@@ -57,7 +57,9 @@
   letter-spacing: 0.04em;
   padding: 0.5rem 1rem 0.65rem;
   margin-bottom: -1px; /* sit on top of the border-bottom */
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
   position: relative;
 }
 
@@ -114,13 +116,27 @@
 }
 
 @keyframes conflict-pulse {
-  0%, 100% { box-shadow: var(--glow-magenta); }
-  50%       { box-shadow: 0 0 18px rgba(255, 45, 120, 0.8), 0 0 40px rgba(255, 45, 120, 0.3); }
+  0%,
+  100% {
+    box-shadow: var(--glow-magenta);
+  }
+  50% {
+    box-shadow:
+      0 0 18px rgba(255, 45, 120, 0.8),
+      0 0 40px rgba(255, 45, 120, 0.3);
+  }
 }
 
 @keyframes personal-conflict-pulse {
-  0%, 100% { box-shadow: 0 0 12px rgba(255, 140, 0, 0.25); }
-  50%       { box-shadow: 0 0 20px rgba(255, 140, 0, 0.6), 0 0 40px rgba(255, 140, 0, 0.2); }
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(255, 140, 0, 0.25);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(255, 140, 0, 0.6),
+      0 0 40px rgba(255, 140, 0, 0.2);
+  }
 }
 
 .conflict-alert .conflict-icon {
@@ -213,7 +229,9 @@
   padding: 6px 8px;
   padding-bottom: 30px; /* room for the Add button */
   cursor: default;
-  transition: filter 0.2s ease, transform 0.15s ease;
+  transition:
+    filter 0.2s ease,
+    transform 0.15s ease;
   overflow: hidden;
   position: relative;
 }
@@ -299,8 +317,11 @@
   font-family: var(--font-display, inherit);
   letter-spacing: 0.05em;
   padding: 2px 4px;
-  transition: background-color 0.15s ease, border-color 0.15s ease,
-              color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -378,7 +399,10 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   padding: 0.45rem 0.95rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .btn-export-calendar:hover:not(:disabled) {
@@ -417,7 +441,9 @@
   cursor: pointer;
   font-size: 0.78rem;
   padding: 0.3rem 0.85rem;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
   align-self: flex-start;
 }
 
@@ -510,7 +536,9 @@
   border-radius: var(--radius-card, 8px);
   overflow: hidden;
   position: relative;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .personal-card:hover {
@@ -640,7 +668,9 @@
   font-size: 0.85rem;
   padding: 0 0.85rem;
   flex-shrink: 0;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .btn-remove-perf:hover {
@@ -686,7 +716,9 @@
   font-family: var(--font-display, inherit);
   letter-spacing: 0.04em;
   padding: 0.45rem 1.25rem;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .btn-go-festival:hover {
@@ -716,7 +748,9 @@
   color: var(--neon-cyan);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.15s ease, text-shadow 0.15s ease;
+  transition:
+    color 0.15s ease,
+    text-shadow 0.15s ease;
 }
 
 .schedule-empty a:hover {
@@ -810,7 +844,9 @@
   color: var(--text-muted);
   font-size: 0.95rem;
   line-height: 1;
-  transition: transform 0.15s ease, color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
 }
 
 .mobile-filter-toggle-chevron--open {
@@ -831,7 +867,6 @@
 }
 
 @media (min-width: 768px) {
-
   .filter-row-collapsed {
     grid-template-rows: 1fr;
     opacity: 1;
@@ -869,7 +904,10 @@
   font-size: 0.82rem;
   color: var(--text-primary);
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .stage-filter-btn:hover {
@@ -899,10 +937,7 @@
     display: grid;
     overflow-x: auto;
     width: 100%;
-    grid-template-columns: 47px repeat(
-      var(--stage-count),
-      calc((100% - 47px) / 2)
-    )
+    grid-template-columns: 47px repeat(var(--stage-count), calc((100% - 47px) / 2));
   }
 
   .timetable-row {
@@ -979,10 +1014,7 @@
     display: grid;
     overflow-x: auto;
     width: 100%;
-    grid-template-columns: 55px repeat(
-      var(--stage-count),
-      calc((100% - 55px) / 2)
-    );
+    grid-template-columns: 55px repeat(var(--stage-count), calc((100% - 55px) / 2));
     font-size: 0.72rem;
     gap: 1px;
   }

@@ -50,7 +50,7 @@ const updateFestivalSchema = Joi.object({
   capacity: festivalFields.capacity,
   description: festivalFields.description,
   imageUrl: festivalFields.imageUrl,
-// Require at least one field so callers cannot send a no-op PATCH request.
+  // Require at least one field so callers cannot send a no-op PATCH request.
 }).min(1);
 
 // Export both schemas so festival route handlers can pick the right one per HTTP method.

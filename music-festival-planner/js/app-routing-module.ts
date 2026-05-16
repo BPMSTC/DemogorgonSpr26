@@ -33,9 +33,17 @@ const routes: Routes = [
   // Form for adding a new stage to a festival — admin only.
   { path: 'festivals/:id/stages/new', component: StageCreateComponent, canActivate: [adminGuard] },
   // Performance list for a specific festival — admin only.
-  { path: 'festivals/:id/performances', component: PerformanceListComponent, canActivate: [adminGuard] },
+  {
+    path: 'festivals/:id/performances',
+    component: PerformanceListComponent,
+    canActivate: [adminGuard],
+  },
   // Form for adding a new performance to a festival — admin only.
-  { path: 'festivals/:id/performances/new', component: PerformanceCreateComponent, canActivate: [adminGuard] },
+  {
+    path: 'festivals/:id/performances/new',
+    component: PerformanceCreateComponent,
+    canActivate: [adminGuard],
+  },
   // Catch-all wildcard — redirect unknown URLs back to the home page.
   { path: '**', redirectTo: '' },
 ];

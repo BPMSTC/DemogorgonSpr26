@@ -8,7 +8,7 @@
 
   @if (isLoading) {
     <div class="card-grid" role="list" aria-labelledby="festivals-heading">
-      @for (skeleton of [1,2,3]; track skeleton) {
+      @for (skeleton of [1, 2, 3]; track skeleton) {
         <div class="card card-skeleton">
           <div class="skeleton-visual"></div>
           <div class="skeleton-title"></div>
@@ -185,7 +185,9 @@
         @if (isOrganizerUser) {
           <h2>No festivals yet</h2>
           <p>Add your first festival to start building schedules, stages, and performances.</p>
-          <button class="btn-primary" routerLink="/festivals/create">Create your first festival</button>
+          <button class="btn-primary" routerLink="/festivals/create">
+            Create your first festival
+          </button>
         } @else {
           <h2>No festivals yet</h2>
           <p>Check back soon — festivals will be listed here once they are added.</p>

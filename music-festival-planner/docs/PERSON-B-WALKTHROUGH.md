@@ -25,6 +25,7 @@ This is a **simple** recording-friendly walkthrough for Person B.
 ---
 
 ## Goal
+
 Ship the UI/UX polish items and finish with a clean smoke test.
 
 ---
@@ -36,6 +37,7 @@ Ship the UI/UX polish items and finish with a clean smoke test.
 **Status:** ✅ Complete (no current compile errors)
 
 ### Do this
+
 - Ensure required imports are present:
   - `FestivalService`, `StageService`, `ScheduleService`
   - `Festival`, `Stage`
@@ -49,6 +51,7 @@ festivalsList: Festival[] = [];
 ```
 
 ### Say this
+
 > "I’m starting by cleaning up the festivals component so the rest of the UI work runs on a stable base."
 
 ---
@@ -56,16 +59,19 @@ festivalsList: Festival[] = [];
 ## Step 2 — Move inline styles out of My Schedule template
 
 **Files:**
+
 - `pages/my-schedule.html`
 - `css/my-schedule.css`
 
 **Status:** ✅ Complete (no current compile errors)
 
 ### Do this
+
 - In HTML, replace inline-styled back button with a class (example: `btn-back`).
 - In CSS, add styling for `.btn-back` and focus state.
 
 ### Say this
+
 > "I’m removing inline styles to keep templates clean and maintainable, and moving all presentation into CSS."
 
 ---
@@ -73,16 +79,19 @@ festivalsList: Festival[] = [];
 ## Step 3 — Improve chevron icon in Festivals card header
 
 **Files:**
+
 - `pages/festivals.html`
 - `css/festivals.css`
 
 **Status:** ✅ Complete (no current compile errors)
 
 ### Do this
+
 - Replace plain `>` chevron with a better symbol like `▸`.
 - Keep existing rotate/open behavior with `.chevron-open`.
 
 ### Say this
+
 > "This is a small UX polish: using a proper caret icon makes expansion state more intuitive."
 
 ---
@@ -90,6 +99,7 @@ festivalsList: Festival[] = [];
 ## Step 4 — Improve Festival Create form feedback
 
 **Files:**
+
 - `pages/festival-create.html`
 - `js/components/festival-create.ts`
 - `css/festival-create.css`
@@ -97,11 +107,13 @@ festivalsList: Festival[] = [];
 **Status:** ✅ Complete (no current compile errors)
 
 ### Do this
+
 - Add clearer disabled-submit feedback (hint text or title/tooltip).
 - Show date-range cross-field error earlier (not only after submit).
 - Keep Angular 21 built-in template control flow (`@if`, `@for`) style.
 
 ### Say this
+
 > "I’m making validation more user-friendly so people know exactly why submit is blocked and can fix issues faster."
 
 ---
@@ -109,16 +121,19 @@ festivalsList: Festival[] = [];
 ## Step 5 — Verify hero image path
 
 **Files:**
+
 - `images/neon-festival-2023.jpg`
 - `pages/home.html`
 
 **Status:** ✅ Complete
 
 ### Do this
+
 - Confirm image exists in `images/`.
 - Confirm template path matches deployed behavior.
 
 ### Say this
+
 > "Quick asset sanity check: confirm the hero image path resolves in production-style serving."
 
 ---
@@ -130,10 +145,12 @@ festivalsList: Festival[] = [];
 **Status:** ✅ Complete (no current compile errors)
 
 ### Do this (optional)
+
 - Check if Bootstrap/jQuery are truly needed.
 - Remove only if unused by templates/scripts.
 
 ### Say this
+
 > "I’m checking for dead bundle weight, but only removing dependencies if they’re genuinely unused."
 
 ---
@@ -143,6 +160,7 @@ festivalsList: Festival[] = [];
 **Status:** ✅ Complete (no current compile errors)
 
 ### Commands
+
 ```bash
 cd music-festival-planner
 npm run build
@@ -150,6 +168,7 @@ npm start
 ```
 
 ### Verify
+
 1. `/#/festivals` loads
 2. `/#/my-schedule` loads on hard refresh
 3. Invalid route redirects safely
@@ -157,6 +176,7 @@ npm start
 5. Chevron and back button styling updates are visible
 
 ### Say this
+
 > "Build passes, routes work, UI polish is visible, and validation feedback is clearer end-to-end."
 
 ---

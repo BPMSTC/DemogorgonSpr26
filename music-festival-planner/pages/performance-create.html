@@ -5,7 +5,6 @@
      ============================================================ -->
 
 <div class="create-container">
-
   <!-- Back link: returns to the performance list without saving -->
   <button type="button" class="back-link" (click)="onCancel()">← Back to Performances</button>
 
@@ -13,7 +12,9 @@
 
   <!-- Show which festival this performance is being added to -->
   @if (currentFestival) {
-    <p class="festival-context">for <strong>{{ currentFestival.name }}</strong></p>
+    <p class="festival-context">
+      for <strong>{{ currentFestival.name }}</strong>
+    </p>
   }
 
   <!-- Service-level error banner: shown when ScheduleService throws (e.g. double-booking) -->
@@ -37,8 +38,8 @@
     [formGroup]="performanceForm"
     (ngSubmit)="onSubmit()"
     novalidate
-    aria-label="Add performance form">
-
+    aria-label="Add performance form"
+  >
     <!-- Artist Name: random placeholder rotates on each page load -->
     <div class="form-group">
       <label for="artistName">Artist Name <span aria-hidden="true">*</span></label>
@@ -48,18 +49,30 @@
         formControlName="artistName"
         [placeholder]="artistNamePlaceholder"
         aria-required="true"
-        [attr.aria-invalid]="(hasAttemptedSubmit || fields['artistName'].touched) && fields['artistName'].errors ? true : null"
-        aria-describedby="artistName-errors">
+        [attr.aria-invalid]="
+          (hasAttemptedSubmit || fields['artistName'].touched) && fields['artistName'].errors
+            ? true
+            : null
+        "
+        aria-describedby="artistName-errors"
+      />
 
       <!-- Show errors only after the user has touched this field or tried to submit -->
       <div
         id="artistName-errors"
         aria-live="polite"
         *ngIf="hasAttemptedSubmit || fields['artistName'].touched"
-        class="error-messages">
-        <small *ngIf="fields['artistName'].errors?.['required']"       class="error-text">Artist name is required.</small>
-        <small *ngIf="fields['artistName'].errors?.['whitespaceOnly']" class="error-text">Artist name cannot be blank.</small>
-        <small *ngIf="fields['artistName'].errors?.['maxlength']"      class="error-text">Artist name cannot exceed 100 characters.</small>
+        class="error-messages"
+      >
+        <small *ngIf="fields['artistName'].errors?.['required']" class="error-text"
+          >Artist name is required.</small
+        >
+        <small *ngIf="fields['artistName'].errors?.['whitespaceOnly']" class="error-text"
+          >Artist name cannot be blank.</small
+        >
+        <small *ngIf="fields['artistName'].errors?.['maxlength']" class="error-text"
+          >Artist name cannot exceed 100 characters.</small
+        >
       </div>
     </div>
 
@@ -70,8 +83,13 @@
         id="stageName"
         formControlName="stageName"
         aria-required="true"
-        [attr.aria-invalid]="(hasAttemptedSubmit || fields['stageName'].touched) && fields['stageName'].errors ? true : null"
-        aria-describedby="stageName-errors">
+        [attr.aria-invalid]="
+          (hasAttemptedSubmit || fields['stageName'].touched) && fields['stageName'].errors
+            ? true
+            : null
+        "
+        aria-describedby="stageName-errors"
+      >
         <option value="" disabled>— Select a stage —</option>
         <!-- Render one option per available stage -->
         @for (stage of availableStages; track stage.id) {
@@ -82,16 +100,17 @@
         id="stageName-errors"
         aria-live="polite"
         *ngIf="hasAttemptedSubmit || fields['stageName'].touched"
-        class="error-messages">
-        <small *ngIf="fields['stageName'].errors?.['required']" class="error-text">Stage is required.</small>
+        class="error-messages"
+      >
+        <small *ngIf="fields['stageName'].errors?.['required']" class="error-text"
+          >Stage is required.</small
+        >
       </div>
     </div>
 
     <!-- Genre: optional field for category filtering on the schedule view -->
     <div class="form-group">
-      <label for="genre">
-        Genre <span class="optional-label">(optional)</span>
-      </label>
+      <label for="genre"> Genre <span class="optional-label">(optional)</span> </label>
       <select id="genre" formControlName="genre" aria-label="Music genre, optional">
         <option value="">— Select genre —</option>
         <!-- One option per genre in the AVAILABLE_GENRES constant -->
@@ -109,20 +128,25 @@
         id="date"
         formControlName="date"
         aria-required="true"
-        [attr.aria-invalid]="(hasAttemptedSubmit || fields['date'].touched) && fields['date'].errors ? true : null"
-        aria-describedby="date-errors">
+        [attr.aria-invalid]="
+          (hasAttemptedSubmit || fields['date'].touched) && fields['date'].errors ? true : null
+        "
+        aria-describedby="date-errors"
+      />
       <div
         id="date-errors"
         aria-live="polite"
         *ngIf="hasAttemptedSubmit || fields['date'].touched"
-        class="error-messages">
-        <small *ngIf="fields['date'].errors?.['required']" class="error-text">Date is required.</small>
+        class="error-messages"
+      >
+        <small *ngIf="fields['date'].errors?.['required']" class="error-text"
+          >Date is required.</small
+        >
       </div>
     </div>
 
     <!-- Start Time + End Time: displayed side-by-side on wider screens -->
     <div class="time-row">
-
       <div class="form-group">
         <label for="startTime">Start Time <span aria-hidden="true">*</span></label>
         <input
@@ -130,14 +154,22 @@
           id="startTime"
           formControlName="startTime"
           aria-required="true"
-          [attr.aria-invalid]="(hasAttemptedSubmit || fields['startTime'].touched) && fields['startTime'].errors ? true : null"
-          aria-describedby="startTime-errors">
+          [attr.aria-invalid]="
+            (hasAttemptedSubmit || fields['startTime'].touched) && fields['startTime'].errors
+              ? true
+              : null
+          "
+          aria-describedby="startTime-errors"
+        />
         <div
           id="startTime-errors"
           aria-live="polite"
           *ngIf="hasAttemptedSubmit || fields['startTime'].touched"
-          class="error-messages">
-          <small *ngIf="fields['startTime'].errors?.['required']" class="error-text">Start time is required.</small>
+          class="error-messages"
+        >
+          <small *ngIf="fields['startTime'].errors?.['required']" class="error-text"
+            >Start time is required.</small
+          >
         </div>
       </div>
 
@@ -148,23 +180,30 @@
           id="endTime"
           formControlName="endTime"
           aria-required="true"
-          [attr.aria-invalid]="(hasAttemptedSubmit || fields['endTime'].touched) && fields['endTime'].errors ? true : null"
-          aria-describedby="endTime-errors">
+          [attr.aria-invalid]="
+            (hasAttemptedSubmit || fields['endTime'].touched) && fields['endTime'].errors
+              ? true
+              : null
+          "
+          aria-describedby="endTime-errors"
+        />
         <div
           id="endTime-errors"
           aria-live="polite"
           *ngIf="hasAttemptedSubmit || fields['endTime'].touched"
-          class="error-messages">
-          <small *ngIf="fields['endTime'].errors?.['required']" class="error-text">End time is required.</small>
+          class="error-messages"
+        >
+          <small *ngIf="fields['endTime'].errors?.['required']" class="error-text"
+            >End time is required.</small
+          >
         </div>
       </div>
-
     </div>
 
     <!-- Cross-field error: only shown after both time fields have been touched -->
     @if (
-      (hasAttemptedSubmit || (fields['startTime'].touched && fields['endTime'].touched))
-      && performanceForm.errors?.['endNotAfterStart']
+      (hasAttemptedSubmit || (fields['startTime'].touched && fields['endTime'].touched)) &&
+      performanceForm.errors?.['endNotAfterStart']
     ) {
       <div class="error-messages cross-field-error" role="alert" aria-live="polite">
         <small class="error-text">End time must be later than start time.</small>
@@ -180,10 +219,10 @@
       <button
         type="submit"
         class="btn-submit"
-        [disabled]="performanceForm.invalid && hasAttemptedSubmit">
+        [disabled]="performanceForm.invalid && hasAttemptedSubmit"
+      >
         Save Performance
       </button>
     </div>
-
   </form>
 </div>

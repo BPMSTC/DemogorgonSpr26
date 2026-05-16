@@ -5,9 +5,10 @@
      ============================================================ -->
 
 <div class="create-container">
-
   <!-- Back link: returns to the festivals overview -->
-  <button type="button" class="back-link" (click)="navigateBackToFestivals()">← Back to Festivals</button>
+  <button type="button" class="back-link" (click)="navigateBackToFestivals()">
+    ← Back to Festivals
+  </button>
 
   <!-- ---- Page Header -------------------------------------------------- -->
   <div class="list-header">
@@ -27,12 +28,11 @@
       <p>No stages added yet. Click <strong>+ Add Stage</strong> to get started.</p>
     </div>
 
-  <!-- ---- Stage Cards -------------------------------------------------- -->
+    <!-- ---- Stage Cards -------------------------------------------------- -->
   } @else {
     <div class="stage-list">
       @for (stage of stageList; track stage.id) {
         <div class="stage-card">
-
           <!-- Card header: stage name and status badge -->
           <div class="stage-card-header">
             <span class="stage-name">{{ stage.name }}</span>
@@ -64,14 +64,13 @@
             <button
               class="btn-cancel btn-sm"
               (click)="confirmAndDeleteStage(stage.id)"
-              [attr.aria-label]="'Remove ' + stage.name">
+              [attr.aria-label]="'Remove ' + stage.name"
+            >
               Remove
             </button>
           </div>
-
         </div>
       }
     </div>
   }
-
 </div>

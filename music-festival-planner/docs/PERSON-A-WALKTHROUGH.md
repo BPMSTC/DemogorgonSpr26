@@ -1,6 +1,7 @@
 # Person A Walkthrough (Infrastructure + Data Integrity)
 
 This walkthrough covers:
+
 1. `angular.json` syntax/build verification
 2. Hash routing in Angular
 3. wildcard route fallback
@@ -49,6 +50,7 @@ Use this in `build.options`:
 ✅ Build parsing is already validated (`npm run build` exit code 0).
 
 **What to say:**
+
 > "First I verified the build-blocking JSON issue in `angular.json`. The options block now parses correctly and the build succeeds."
 
 ---
@@ -61,11 +63,13 @@ Use this in `build.options`:
 **Lines to edit:** import area (`1–3`) and providers (`19`)
 
 ### Add import
+
 ```ts
 import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 ```
 
 ### Update providers
+
 ```ts
 providers: [
   provideBrowserGlobalErrorListeners(),
@@ -74,6 +78,7 @@ providers: [
 ```
 
 **What to say:**
+
 > "I’m switching to hash-based routing so GitHub Pages can safely handle refreshes and deep links like `/#/festivals`."
 
 ---
@@ -99,6 +104,7 @@ Resulting tail of routes:
 ```
 
 **What to say:**
+
 > "This wildcard prevents dead-end navigation when a typo route is entered."
 
 ---
@@ -124,6 +130,7 @@ Resulting tail of routes:
 ```
 
 **What to say:**
+
 > "Even with hash routing, I’m adding a defensive static fallback page for hosting safety."
 
 ---
@@ -136,6 +143,7 @@ Resulting tail of routes:
 **Current key lines:** store (`12`), create/update/delete (`40`, `59`, `82`)
 
 ### Replace imports
+
 ```ts
 import { Injectable, Inject } from '@angular/core';
 import { Festival } from '../models/festival.model';
@@ -143,11 +151,13 @@ import { LOCAL_STORAGE } from './schedule.service';
 ```
 
 ### Add constant below imports
+
 ```ts
 const STORAGE_KEY = 'mfp_festivals';
 ```
 
 ### Add constructor + helpers inside class
+
 ```ts
 constructor(@Inject(LOCAL_STORAGE) private storage: Storage) {
   this.festivalStore = this.loadFromStorage();
@@ -199,11 +209,13 @@ private saveToStorage(): void {
 ```
 
 ### Add `saveToStorage()` calls
+
 - in `createFestival` after `this.festivalStore.push(savedFestival);`
 - in `updateFestival` after assignment to `this.festivalStore[festivalIndex]`
 - in `deleteFestival` after `splice(...)`
 
 **What to say:**
+
 > "Now festival create/update/delete operations persist across refreshes using localStorage."
 
 ---
@@ -216,6 +228,7 @@ private saveToStorage(): void {
 **Current key lines:** `nextStageId` at `52`, methods at `81`, `111`, `132`
 
 ### Replace imports
+
 ```ts
 import { Injectable, Inject } from '@angular/core';
 import { Stage } from '../models/stage.model';
@@ -223,11 +236,13 @@ import { LOCAL_STORAGE } from './schedule.service';
 ```
 
 ### Add constant
+
 ```ts
 const STORAGE_KEY = 'mfp_stages';
 ```
 
 ### Add constructor + helpers
+
 ```ts
 constructor(@Inject(LOCAL_STORAGE) private storage: Storage) {
   const stored = this.loadFromStorage();
@@ -281,11 +296,13 @@ private saveToStorage(): void {
 ```
 
 ### Add `saveToStorage()` calls
+
 - `createStage` after `this.stageStore.push(savedStage);`
 - `updateStage` after the update assignment
 - `deleteStage` after `this.stageStore.splice(stageIndex, 1);`
 
 ### Add cleanup API (before class closing brace)
+
 ```ts
 clearStagesByFestival(festivalId: string): number {
   const before = this.stageStore.length;
@@ -297,6 +314,7 @@ clearStagesByFestival(festivalId: string): number {
 ```
 
 **What to say:**
+
 > "I mirrored persistence in StageService and added a bulk cleanup method for cascade deletion."
 
 ---
@@ -308,11 +326,13 @@ clearStagesByFestival(festivalId: string): number {
 **File:** `js/components/festivals.ts`
 
 ### Add imports
+
 ```ts
 import { ScheduleService } from '../../services/schedule.service';
 ```
 
 ### Update constructor
+
 ```ts
 constructor(
   private festivalService: FestivalService,
@@ -322,6 +342,7 @@ constructor(
 ```
 
 ### Add helper + delete method inside class
+
 ```ts
 private refreshFestivalStageCache(): void {
   this.stagesByFestivalId = {};
@@ -355,12 +376,15 @@ deleteFestivalWithCascade(festivalId: string, clickEvent?: MouseEvent): void {
 ```
 
 ### Update `ngOnInit` to use refresh helper
+
 Replace current `forEach` block with:
+
 ```ts
 this.refreshFestivalStageCache();
 ```
 
 **What to say:**
+
 > "Delete now cascades in order: performances, stages, then festival. After that, I refresh local state so the UI is immediately consistent."
 
 ---
@@ -378,12 +402,14 @@ Add:
 <button
   type="button"
   class="kebab-item kebab-item-danger"
-  (click)="deleteFestivalWithCascade(festival.id, $event)">
+  (click)="deleteFestivalWithCascade(festival.id, $event)"
+>
   Delete Festival
 </button>
 ```
 
 **What to say:**
+
 > "The service had delete capability, but no user entry point. This button wires that workflow with confirmation."
 
 ---
@@ -395,6 +421,7 @@ Add:
 **File:** `js/components/festivals.ts`
 
 ### Update imports
+
 ```ts
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
@@ -402,16 +429,19 @@ import { Subscription, filter } from 'rxjs';
 ```
 
 ### Update class signature
+
 ```ts
 export class Festivals implements OnInit, OnDestroy {
 ```
 
 ### Add class field
+
 ```ts
 private routerEventsSubscription?: Subscription;
 ```
 
 ### Inject `Router` in constructor
+
 ```ts
 constructor(
   private festivalService: FestivalService,
@@ -422,6 +452,7 @@ constructor(
 ```
 
 ### Add router refresh subscription in `ngOnInit`
+
 ```ts
 this.routerEventsSubscription = this.router.events
   .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
@@ -434,6 +465,7 @@ this.routerEventsSubscription = this.router.events
 ```
 
 ### Add cleanup hook
+
 ```ts
 ngOnDestroy(): void {
   this.routerEventsSubscription?.unsubscribe();
@@ -441,6 +473,7 @@ ngOnDestroy(): void {
 ```
 
 **What to say:**
+
 > "This keeps festival stage counts fresh when users return from stage/performance pages without doing a full reload."
 
 ---
@@ -454,10 +487,12 @@ npm start
 ```
 
 Smoke checks:
+
 1. `/#/festivals` and `/#/my-schedule` work on hard refresh
 2. typo route redirects safely (wildcard)
 3. create festival/stage/performance, refresh, data persists
 4. delete festival removes related stages + performances
 
 **What to say:**
+
 > "Build passes, routes survive refresh, data persistence works, and cascade deletion removes orphaned records."

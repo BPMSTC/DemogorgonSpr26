@@ -7,7 +7,10 @@ const controller = require('../controllers/performanceController');
 // Middleware that rejects requests whose body does not match the expected shape.
 const validate = require('../middleware/validate');
 // The body shapes required when creating or fully replacing a performance.
-const { createPerformanceSchema, replacePerformanceSchema } = require('../validators/performanceSchemas');
+const {
+  createPerformanceSchema,
+  replacePerformanceSchema,
+} = require('../validators/performanceSchemas');
 
 // Return all performances that belong to a specific festival.
 router.get('/', controller.getPerformancesByFestival);

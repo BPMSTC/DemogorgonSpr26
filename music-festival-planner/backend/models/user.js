@@ -33,7 +33,7 @@ const userSchema = new Schema(
     collection: 'users',
     // Adds createdAt/updatedAt automatically.
     timestamps: true,
-  }
+  },
 );
 
 // Automatically hash the password before saving so plain text never reaches the database.

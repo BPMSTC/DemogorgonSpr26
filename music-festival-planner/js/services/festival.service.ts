@@ -45,7 +45,7 @@ export class FestivalService {
       // Return safe copies to callers rather than the raw cache entries.
       map(() => this.cloneFestivalList(this.cache)),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -69,7 +69,7 @@ export class FestivalService {
       // Give the caller a safe copy rather than a direct reference.
       map((festival) => this.cloneFestival(festival)),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -99,16 +99,13 @@ export class FestivalService {
         this.cache.push(this.cloneFestival(festival));
       }),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
   /** Partially updates a festival and refreshes its cache entry on success. */
   // Sends only the changed fields to the server and updates the matching cache entry on success.
-  updateFestival(
-    id: string,
-    fields: Partial<Omit<Festival, 'id'>>
-  ): Observable<Festival> {
+  updateFestival(id: string, fields: Partial<Omit<Festival, 'id'>>): Observable<Festival> {
     return this.http.patch<Festival>(`${this.apiUrl}/${id}`, fields).pipe(
       tap((updated) => {
         // Find the position of the old entry in the cache.
@@ -117,7 +114,7 @@ export class FestivalService {
         if (idx !== -1) this.cache[idx] = this.cloneFestival(updated);
       }),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -130,7 +127,7 @@ export class FestivalService {
         this.cache = this.cache.filter((f) => f.id !== id);
       }),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -138,8 +135,7 @@ export class FestivalService {
 
   // Pulls a readable message out of an error response and wraps it as a thrown error.
   private handleError(err: { error?: { message?: string }; message?: string }): Observable<never> {
-    const message =
-      err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
+    const message = err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
     return throwError(() => new Error(message));
   }
 }

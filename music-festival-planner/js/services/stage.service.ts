@@ -44,13 +44,10 @@ export class StageService {
           // Make safe copies of everything the server returned.
           const clonedStages = this.cloneStageList(stages);
           // Replace cached entries for this festival only, keeping stages from other festivals intact.
-          this.cache = [
-            ...this.cache.filter((s) => s.festivalId !== festivalId),
-            ...clonedStages,
-          ];
+          this.cache = [...this.cache.filter((s) => s.festivalId !== festivalId), ...clonedStages];
         }),
         // Format any error into a readable message.
-        catchError(this.handleError)
+        catchError(this.handleError),
       );
   }
 
@@ -59,11 +56,13 @@ export class StageService {
   /** Returns cached stages for the given festival. */
   // Lets components read stages for a festival instantly from memory without hitting the network.
   getStagesByFestival(festivalId: string): Stage[] {
-    return this.cache
-      // Keep only stages that belong to the requested festival.
-      .filter((s) => s.festivalId === festivalId)
-      // Return a safe copy of each so callers cannot accidentally mutate the cache.
-      .map((s) => this.cloneStage(s));
+    return (
+      this.cache
+        // Keep only stages that belong to the requested festival.
+        .filter((s) => s.festivalId === festivalId)
+        // Return a safe copy of each so callers cannot accidentally mutate the cache.
+        .map((s) => this.cloneStage(s))
+    );
   }
 
   /** Returns a cached stage by ID, or undefined. */
@@ -86,7 +85,7 @@ export class StageService {
         this.cache.push(this.cloneStage(stage));
       }),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -99,7 +98,7 @@ export class StageService {
         this.cache = this.cache.filter((s) => s.id !== id);
       }),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -115,7 +114,7 @@ export class StageService {
         this.cache = this.cache.filter((s) => s.festivalId !== festivalId);
       }),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -127,7 +126,7 @@ export class StageService {
     _date: string,
     _startTime: string,
     _endTime: string,
-    _excludePerformanceId?: string
+    _excludePerformanceId?: string,
   ): boolean {
     return true;
   }
@@ -137,8 +136,7 @@ export class StageService {
   // Pulls a readable message out of an error response and wraps it as a thrown error.
   private handleError(err: { error?: { message?: string }; message?: string }): Observable<never> {
     // Prefer the server's own message, then the generic HTTP message, then a fallback.
-    const message =
-      err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
+    const message = err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
     return throwError(() => new Error(message));
   }
 }

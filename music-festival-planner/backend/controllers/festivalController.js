@@ -84,7 +84,10 @@ exports.getAllFestivals = async (req, res, next) => {
       const skip = (pageNum - 1) * limitNum;
       // Fetch the page of festivals and the total count at the same time for efficiency.
       const [festivals, total] = await Promise.all([
-        Festival.find().sort({ [sortField]: sortOrder }).skip(skip).limit(limitNum),
+        Festival.find()
+          .sort({ [sortField]: sortOrder })
+          .skip(skip)
+          .limit(limitNum),
         Festival.countDocuments(),
       ]);
 
@@ -201,11 +204,10 @@ exports.replaceFestival = async (req, res, next) => {
     };
 
     // Swap out the existing document entirely with the new replacement.
-    const festival = await Festival.findOneAndReplace(
-      { _id: req.params.id },
-      replacement,
-      { new: true, runValidators: true }
-    );
+    const festival = await Festival.findOneAndReplace({ _id: req.params.id }, replacement, {
+      new: true,
+      runValidators: true,
+    });
     // If no document matched the ID, report a 404.
     if (!festival) return next(new AppError('Festival not found.', 404));
     // Return the newly saved festival.
@@ -262,7 +264,7 @@ exports.updateFestival = async (req, res, next) => {
     const updatedFestival = await Festival.findByIdAndUpdate(
       req.params.id,
       { $set: updates },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
     // Guard against a race condition where the record was deleted between the findById and update.
     if (!updatedFestival) return next(new AppError('Festival not found.', 404));

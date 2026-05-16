@@ -43,7 +43,9 @@
   color: var(--text-secondary) !important;
   padding: 0.4rem 1rem !important;
   border-bottom: 2px solid transparent;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .nav-link:hover,

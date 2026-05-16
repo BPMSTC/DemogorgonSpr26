@@ -21,10 +21,14 @@ const DEFAULT_FRONTEND_URL = 'http://localhost:4200/#/my-schedule';
 // Turn a raw comma-separated string of IDs into a clean, deduplicated list of valid MongoDB IDs.
 function parsePerformanceIds(rawPerformanceIds) {
   // Split by comma, trim whitespace from each piece, remove any that aren't valid MongoDB IDs, and deduplicate.
-  return [...new Set(String(rawPerformanceIds || '')
-    .split(',')
-    .map((id) => id.trim())
-    .filter((id) => mongoose.isValidObjectId(id)))];
+  return [
+    ...new Set(
+      String(rawPerformanceIds || '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => mongoose.isValidObjectId(id)),
+    ),
+  ];
 }
 
 // Look up a frontend URL from the environment, falling back to the default if nothing is set.
@@ -362,7 +366,7 @@ exports.handleCalendarCallback = async (req, res) => {
           lastUsedAt: new Date(),
         },
       },
-      { upsert: true, new: true, runValidators: true }
+      { upsert: true, new: true, runValidators: true },
     );
 
     // Load the stored credentials into the OAuth client so it can make authenticated API calls.
@@ -428,7 +432,7 @@ exports.handleCalendarCallback = async (req, res) => {
           calendarClient,
           performance,
           state.deviceUserId,
-          eventPayload.summary
+          eventPayload.summary,
         );
 
         // If a matching event is already there, count it as skipped and move on.

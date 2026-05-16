@@ -1,6 +1,14 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <a class="navbar-brand" href="#">Music Festival Planner</a>
-  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+  <button
+    class="navbar-toggler"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
@@ -25,7 +33,7 @@
       <li class="nav-item" *ngIf="authService.isLoggedIn">
         <span class="nav-link text-muted">{{ authService.currentUser?.email }}</span>
       </li>
-<li class="nav-item" *ngIf="authService.isLoggedIn">
+      <li class="nav-item" *ngIf="authService.isLoggedIn">
         <button class="btn btn-link nav-link" (click)="logout()">Sign Out</button>
       </li>
     </ul>
@@ -37,12 +45,12 @@
 </div>
 
 <footer class="footer">
-<div>
-  <p>&copy; 2026 Demogorgon Music Festival. All rights reserved.</p>
-  <p>
-    <a href="/assets/legal/terms.html" class="footer-link">Terms of Service</a> |
-    <a href="/assets/legal/privacy.html" class="footer-link">Privacy Policy</a> |
-    <a href="/assets/legal/contact.html" class="footer-link">Contact Us</a>
-  </p>
-</div>
+  <div>
+    <p>&copy; 2026 Demogorgon Music Festival. All rights reserved.</p>
+    <p>
+      <a href="/assets/legal/terms.html" class="footer-link">Terms of Service</a> |
+      <a href="/assets/legal/privacy.html" class="footer-link">Privacy Policy</a> |
+      <a href="/assets/legal/contact.html" class="footer-link">Contact Us</a>
+    </p>
+  </div>
 </footer>

@@ -64,7 +64,7 @@ const googleCalendarTokenSchema = new Schema(
     collection: 'google_calendar_tokens',
     // Adds createdAt/updatedAt automatically.
     timestamps: true,
-  }
+  },
 );
 
 // Reuse existing model in watch/hot-reload contexts to avoid OverwriteModelError.

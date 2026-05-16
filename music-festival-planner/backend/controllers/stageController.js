@@ -74,9 +74,7 @@ exports.createStage = async (req, res, next) => {
     });
     // Reject the request if a stage with this name already exists in the festival.
     if (duplicate) {
-      return next(
-        new AppError(`A stage named "${name}" already exists for this festival.`, 409)
-      );
+      return next(new AppError(`A stage named "${name}" already exists for this festival.`, 409));
     }
 
     // Build the new stage document with all the provided fields.
@@ -121,9 +119,7 @@ exports.replaceStage = async (req, res, next) => {
     });
     // Reject the replacement if another stage in the festival already has this name.
     if (duplicate) {
-      return next(
-        new AppError(`A stage named "${name}" already exists for this festival.`, 409)
-      );
+      return next(new AppError(`A stage named "${name}" already exists for this festival.`, 409));
     }
 
     // Overwrite every mutable field on the existing document.

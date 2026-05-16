@@ -40,7 +40,7 @@ const artistSchema = new Schema(
   {
     collection: 'artists',
     timestamps: true,
-  }
+  },
 );
 
 // Keep artist names unique in this demo dataset to prevent accidental duplicates.

@@ -87,9 +87,7 @@ export class Festivals implements OnInit, OnDestroy {
             festivals.map((f) =>
               this.stageService.loadByFestival(f.id).pipe(
                 switchMap((stages) => of({ id: f.id, stages, failed: false })),
-                catchError(() =>
-                  of({ id: f.id, stages: [] as Stage[], failed: true }),
-                ),
+                catchError(() => of({ id: f.id, stages: [] as Stage[], failed: true })),
               ),
             ),
           );

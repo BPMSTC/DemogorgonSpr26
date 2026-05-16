@@ -10,9 +10,7 @@ const mongoose = require('mongoose');
 // Safe fallback if no env file value is found.
 const DEFAULT_MONGODB_URI = 'mongodb://127.0.0.1:27017/music_festival_planner';
 // The default list of .env file locations to search when no explicit path is given.
-const DEFAULT_ENV_FILES = [
-  path.resolve(__dirname, '../.env'),
-];
+const DEFAULT_ENV_FILES = [path.resolve(__dirname, '../.env')];
 // Public DNS servers to try when the system's DNS fails to resolve an Atlas SRV record.
 const DEFAULT_DNS_FALLBACK_SERVERS = ['1.1.1.1', '8.8.8.8'];
 

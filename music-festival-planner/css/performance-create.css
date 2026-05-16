@@ -29,7 +29,9 @@
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   font-size: 0.95rem;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   outline: none;
 }
 
@@ -46,7 +48,7 @@
   box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.15);
 }
 
-.form-group input.ng-touched.ng-valid:not([type="date"]):not([type="time"]),
+.form-group input.ng-touched.ng-valid:not([type='date']):not([type='time']),
 .form-group select.ng-touched.ng-valid {
   border-color: #00e676;
   box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.12);

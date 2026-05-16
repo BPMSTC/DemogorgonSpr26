@@ -166,11 +166,11 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.1 `App` — Root Shell
 
-| Property | Value |
-|---|---|
-| **File** | `js/app.ts` |
-| **Selector** | `app-root` |
-| **Template** | `app.html` |
+| Property       | Value                    |
+| -------------- | ------------------------ |
+| **File**       | `js/app.ts`              |
+| **Selector**   | `app-root`               |
+| **Template**   | `app.html`               |
 | **Standalone** | `false` (NgModule-based) |
 
 **Purpose:** Provides the persistent navbar and the `<router-outlet>` that all route-level views render into.
@@ -179,11 +179,12 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 **Internal signals:**
 
-| Signal | Type | Description |
-|---|---|---|
+| Signal  | Type             | Description                                                   |
+| ------- | ---------------- | ------------------------------------------------------------- |
 | `title` | `Signal<string>` | App title (`'music-festival-planner'`). Protected, read-only. |
 
 **Responsibilities:**
+
 - Render the Bootstrap 5 responsive navbar with links to `/`, `/festivals`, and `/my-schedule`.
 - Host `<router-outlet>` so the router can swap views without a full page reload.
 
@@ -191,13 +192,13 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.2 `Home` — Landing Page
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/home.ts` |
-| **Selector** | `app-home` |
-| **Template** | `pages/home.html` |
-| **Route** | `/` (default) |
-| **Standalone** | `false` |
+| Property       | Value                   |
+| -------------- | ----------------------- |
+| **File**       | `js/components/home.ts` |
+| **Selector**   | `app-home`              |
+| **Template**   | `pages/home.html`       |
+| **Route**      | `/` (default)           |
+| **Standalone** | `false`                 |
 
 **Purpose:** Entry point displayed to users when they first open the app. Welcomes users and provides navigation cues to the main features.
 
@@ -207,34 +208,35 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.3 `Festivals` — Festival Listing
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/festivals.ts` |
-| **Selector** | `app-festivals` |
-| **Template** | `pages/festivals.html` |
-| **Route** | `/festivals` |
-| **Standalone** | `false` |
+| Property       | Value                        |
+| -------------- | ---------------------------- |
+| **File**       | `js/components/festivals.ts` |
+| **Selector**   | `app-festivals`              |
+| **Template**   | `pages/festivals.html`       |
+| **Route**      | `/festivals`                 |
+| **Standalone** | `false`                      |
 
 **Purpose:** Displays all music festivals as expandable cards. Each card can be expanded to show its stages and provides links to manage stages and performances.
 
 **Injections:**
 
-| Service | Usage |
-|---|---|
-| `FestivalService` | Load festival list; delete festivals |
-| `StageService` | Pre-fetch stages for each festival card |
+| Service           | Usage                                   |
+| ----------------- | --------------------------------------- |
+| `FestivalService` | Load festival list; delete festivals    |
+| `StageService`    | Pre-fetch stages for each festival card |
 
 **Key state:**
 
-| Field | Type | Description |
-|---|---|---|
-| `festivalsList` | `Festival[]` | All festivals loaded on init |
-| `stagesByFestivalId` | `Record<string, Stage[]>` | Stages pre-fetched per festival for instant expand |
-| `expandedFestivalId` | `string \| null` | Which festival card is currently expanded |
-| `isOrganizerUser` | `boolean` | Shows organizer actions (stub — no auth yet) |
-| `openKebabMenuFestivalId` | `string \| null` | Which festival's options menu (⋮) is open |
+| Field                     | Type                      | Description                                        |
+| ------------------------- | ------------------------- | -------------------------------------------------- |
+| `festivalsList`           | `Festival[]`              | All festivals loaded on init                       |
+| `stagesByFestivalId`      | `Record<string, Stage[]>` | Stages pre-fetched per festival for instant expand |
+| `expandedFestivalId`      | `string \| null`          | Which festival card is currently expanded          |
+| `isOrganizerUser`         | `boolean`                 | Shows organizer actions (stub — no auth yet)       |
+| `openKebabMenuFestivalId` | `string \| null`          | Which festival's options menu (⋮) is open          |
 
 **Responsibilities:**
+
 - Render festival cards with expand/collapse toggling (click or keyboard Enter/Space).
 - Show per-festival stage list in the expanded panel using pre-fetched `stagesByFestivalId`.
 - Provide kebab menu (⋮) with organizer actions: manage stages, add performance.
@@ -244,31 +246,31 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.4 `FestivalCreate` — Create Festival Form
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/festival-create.ts` |
-| **Selector** | `app-festival-create` |
-| **Template** | `pages/festival-create.html` |
-| **Route** | `/festivals/create` |
-| **Standalone** | `false` |
+| Property       | Value                              |
+| -------------- | ---------------------------------- |
+| **File**       | `js/components/festival-create.ts` |
+| **Selector**   | `app-festival-create`              |
+| **Template**   | `pages/festival-create.html`       |
+| **Route**      | `/festivals/create`                |
+| **Standalone** | `false`                            |
 
 **Purpose:** Reactive form for creating a new festival. Validates required fields and enforces that `endDate >= startDate`.
 
 **Injections:**
 
-| Service/Dep | Usage |
-|---|---|
-| `FormBuilder` | Build the reactive form group |
-| `FestivalService` | Save the new festival |
-| `Router` | Navigate to `/festivals` on success |
+| Service/Dep       | Usage                               |
+| ----------------- | ----------------------------------- |
+| `FormBuilder`     | Build the reactive form group       |
+| `FestivalService` | Save the new festival               |
+| `Router`          | Navigate to `/festivals` on success |
 
 **Key state:**
 
-| Field | Type | Description |
-|---|---|---|
-| `festivalForm` | `FormGroup` | Reactive form (name, startDate, endDate, location) |
-| `hasAttemptedSubmit` | `boolean` | Enables full error display after first submit attempt |
-| `serviceErrorMessage` | `string` | Shows service-thrown errors (e.g. date range) in the form banner |
+| Field                 | Type        | Description                                                      |
+| --------------------- | ----------- | ---------------------------------------------------------------- |
+| `festivalForm`        | `FormGroup` | Reactive form (name, startDate, endDate, location)               |
+| `hasAttemptedSubmit`  | `boolean`   | Enables full error display after first submit attempt            |
+| `serviceErrorMessage` | `string`    | Shows service-thrown errors (e.g. date range) in the form banner |
 
 **Validation:**
 
@@ -279,37 +281,37 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.5 `MySchedule` — Timetable View
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/my-schedule.ts` |
-| **Selector** | `app-my-schedule` |
-| **Template** | `pages/my-schedule.html` |
-| **Routes** | `/my-schedule` (standalone, defaults to festival ID "1") and `/festivals/:id/schedule` |
-| **Standalone** | `false` |
+| Property       | Value                                                                                  |
+| -------------- | -------------------------------------------------------------------------------------- |
+| **File**       | `js/components/my-schedule.ts`                                                         |
+| **Selector**   | `app-my-schedule`                                                                      |
+| **Template**   | `pages/my-schedule.html`                                                               |
+| **Routes**     | `/my-schedule` (standalone, defaults to festival ID "1") and `/festivals/:id/schedule` |
+| **Standalone** | `false`                                                                                |
 
 **Purpose:** Interactive timetable grid showing all performances for a festival. Supports day tabs, stage filter, genre filter, and highlights scheduling conflicts.
 
 **Injections:**
 
-| Service/Dep | Usage |
-|---|---|
-| `ActivatedRoute` | Read `:id` URL param |
+| Service/Dep       | Usage                              |
+| ----------------- | ---------------------------------- |
+| `ActivatedRoute`  | Read `:id` URL param               |
 | `ScheduleService` | Load performances for the festival |
 
 **Key state:**
 
-| Field | Type | Description |
-|---|---|---|
-| `festivalId` | `string` | ID from URL param (defaults to `'1'` on `/my-schedule`) |
-| `allPerformances` | `Performance[]` | Full unfiltered list for this festival |
-| `festivalDays` | `string[]` | Sorted unique dates — one tab button per day |
-| `selectedDay` | `string` | Currently displayed day |
-| `selectedStage` | `string` | Active stage filter (`ALL_STAGES` = show all) |
-| `selectedGenre` | `string` | Active genre filter (`ALL_GENRES` = show all) |
-| `stages` | `string[]` | Stage column headers for the visible timetable |
-| `times` | `string[]` | Time row headers, sorted chronologically |
-| `performanceGrid` | `Record<string, Performance>` | O(1) cell lookup keyed by `"startTime-stageName"` |
-| `conflicts` | `ConflictInfo[]` | Detected scheduling conflicts on the current day |
+| Field             | Type                          | Description                                             |
+| ----------------- | ----------------------------- | ------------------------------------------------------- |
+| `festivalId`      | `string`                      | ID from URL param (defaults to `'1'` on `/my-schedule`) |
+| `allPerformances` | `Performance[]`               | Full unfiltered list for this festival                  |
+| `festivalDays`    | `string[]`                    | Sorted unique dates — one tab button per day            |
+| `selectedDay`     | `string`                      | Currently displayed day                                 |
+| `selectedStage`   | `string`                      | Active stage filter (`ALL_STAGES` = show all)           |
+| `selectedGenre`   | `string`                      | Active genre filter (`ALL_GENRES` = show all)           |
+| `stages`          | `string[]`                    | Stage column headers for the visible timetable          |
+| `times`           | `string[]`                    | Time row headers, sorted chronologically                |
+| `performanceGrid` | `Record<string, Performance>` | O(1) cell lookup keyed by `"startTime-stageName"`       |
+| `conflicts`       | `ConflictInfo[]`              | Detected scheduling conflicts on the current day        |
 
 **Responsibilities:**
 
@@ -322,34 +324,35 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.6 `StageList` — Stage Management List
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/stage-list.ts` |
-| **Selector** | `app-stage-list` |
-| **Template** | `pages/stage-list.html` |
-| **Route** | `/festivals/:id/stages` |
-| **Standalone** | `false` |
+| Property       | Value                         |
+| -------------- | ----------------------------- |
+| **File**       | `js/components/stage-list.ts` |
+| **Selector**   | `app-stage-list`              |
+| **Template**   | `pages/stage-list.html`       |
+| **Route**      | `/festivals/:id/stages`       |
+| **Standalone** | `false`                       |
 
 **Purpose:** Displays all stages belonging to a specific festival. Allows adding and deleting stages.
 
 **Injections:**
 
-| Service/Dep | Usage |
-|---|---|
-| `ActivatedRoute` | Read `:id` URL param |
-| `Router` | Navigate to add-stage form or back to festivals |
-| `StageService` | Load and delete stages |
+| Service/Dep       | Usage                                            |
+| ----------------- | ------------------------------------------------ |
+| `ActivatedRoute`  | Read `:id` URL param                             |
+| `Router`          | Navigate to add-stage form or back to festivals  |
+| `StageService`    | Load and delete stages                           |
 | `FestivalService` | Look up parent festival name for the page header |
 
 **Key state:**
 
-| Field | Type | Description |
-|---|---|---|
-| `festivalId` | `string` | ID from URL param |
-| `currentFestival` | `Festival \| undefined` | Parent festival record |
-| `stageList` | `Stage[]` | All stages for this festival |
+| Field             | Type                    | Description                  |
+| ----------------- | ----------------------- | ---------------------------- |
+| `festivalId`      | `string`                | ID from URL param            |
+| `currentFestival` | `Festival \| undefined` | Parent festival record       |
+| `stageList`       | `Stage[]`               | All stages for this festival |
 
 **Responsibilities:**
+
 - List stage cards with name, capacity, environment, status badge, and notes.
 - Delete a stage via a confirm dialog.
 - Navigate to `/festivals/:id/stages/new` to add a stage.
@@ -358,35 +361,35 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.7 `StageCreate` — Add Stage Form
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/stage-create.ts` |
-| **Selector** | `app-stage-create` |
-| **Template** | `pages/stage-create.html` |
-| **Route** | `/festivals/:id/stages/new` |
-| **Standalone** | `false` |
+| Property       | Value                           |
+| -------------- | ------------------------------- |
+| **File**       | `js/components/stage-create.ts` |
+| **Selector**   | `app-stage-create`              |
+| **Template**   | `pages/stage-create.html`       |
+| **Route**      | `/festivals/:id/stages/new`     |
+| **Standalone** | `false`                         |
 
 **Purpose:** Reactive form for adding a new stage to a festival. Validates capacity as a positive integer and prevents duplicate stage names within the same festival.
 
 **Injections:**
 
-| Service/Dep | Usage |
-|---|---|
-| `FormBuilder` | Build the reactive form group |
-| `ActivatedRoute` | Read `:id` URL param |
-| `Router` | Navigate after save or cancel |
-| `StageService` | Save the new stage |
+| Service/Dep       | Usage                                       |
+| ----------------- | ------------------------------------------- |
+| `FormBuilder`     | Build the reactive form group               |
+| `ActivatedRoute`  | Read `:id` URL param                        |
+| `Router`          | Navigate after save or cancel               |
+| `StageService`    | Save the new stage                          |
 | `FestivalService` | Look up parent festival for the page header |
 
 **Key state:**
 
-| Field | Type | Description |
-|---|---|---|
-| `stageForm` | `FormGroup` | Reactive form (name, capacity, environment, status, notes) |
-| `hasAttemptedSubmit` | `boolean` | Enables full error display after first submit attempt |
-| `serviceErrorMessage` | `string` | Service-thrown errors shown in the form banner |
-| `currentFestival` | `Festival \| undefined` | Parent festival for the page header |
-| `existingFestivalStages` | `Stage[]` | Used to detect duplicate names |
+| Field                    | Type                    | Description                                                |
+| ------------------------ | ----------------------- | ---------------------------------------------------------- |
+| `stageForm`              | `FormGroup`             | Reactive form (name, capacity, environment, status, notes) |
+| `hasAttemptedSubmit`     | `boolean`               | Enables full error display after first submit attempt      |
+| `serviceErrorMessage`    | `string`                | Service-thrown errors shown in the form banner             |
+| `currentFestival`        | `Festival \| undefined` | Parent festival for the page header                        |
+| `existingFestivalStages` | `Stage[]`               | Used to detect duplicate names                             |
 
 **Validation:**
 
@@ -404,32 +407,32 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.8 `PerformanceList` — Performance Listing
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/performance-list.ts` |
-| **Selector** | `app-performance-list` |
-| **Template** | `pages/performance-list.html` |
-| **Route** | `/festivals/:id/performances` |
-| **Standalone** | `false` |
+| Property       | Value                               |
+| -------------- | ----------------------------------- |
+| **File**       | `js/components/performance-list.ts` |
+| **Selector**   | `app-performance-list`              |
+| **Template**   | `pages/performance-list.html`       |
+| **Route**      | `/festivals/:id/performances`       |
+| **Standalone** | `false`                             |
 
 **Purpose:** Displays all performances for a specific festival, sorted chronologically by date then start time. Allows deleting individual performances or clearing all at once.
 
 **Injections:**
 
-| Service/Dep | Usage |
-|---|---|
-| `ActivatedRoute` | Read `:id` URL param |
-| `Router` | Navigate to add-performance form or back to festivals |
-| `ScheduleService` | Load, delete, and clear performances |
-| `FestivalService` | Look up parent festival for the page header |
+| Service/Dep       | Usage                                                 |
+| ----------------- | ----------------------------------------------------- |
+| `ActivatedRoute`  | Read `:id` URL param                                  |
+| `Router`          | Navigate to add-performance form or back to festivals |
+| `ScheduleService` | Load, delete, and clear performances                  |
+| `FestivalService` | Look up parent festival for the page header           |
 
 **Key state:**
 
-| Field | Type | Description |
-|---|---|---|
-| `festivalId` | `string` | ID from URL param |
-| `currentFestival` | `Festival \| undefined` | Parent festival record |
-| `sortedPerformances` | `Performance[]` | Performances sorted by date then start time |
+| Field                | Type                    | Description                                 |
+| -------------------- | ----------------------- | ------------------------------------------- |
+| `festivalId`         | `string`                | ID from URL param                           |
+| `currentFestival`    | `Festival \| undefined` | Parent festival record                      |
+| `sortedPerformances` | `Performance[]`         | Performances sorted by date then start time |
 
 **Responsibilities:**
 
@@ -442,36 +445,36 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.9 `PerformanceCreate` — Add Performance Form
 
-| Property | Value |
-|---|---|
-| **File** | `js/components/performance-create.ts` |
-| **Selector** | `app-performance-create` |
-| **Template** | `pages/performance-create.html` |
-| **Route** | `/festivals/:id/performances/new` |
-| **Standalone** | `false` |
+| Property       | Value                                 |
+| -------------- | ------------------------------------- |
+| **File**       | `js/components/performance-create.ts` |
+| **Selector**   | `app-performance-create`              |
+| **Template**   | `pages/performance-create.html`       |
+| **Route**      | `/festivals/:id/performances/new`     |
+| **Standalone** | `false`                               |
 
 **Purpose:** Reactive form for scheduling a new performance on a festival stage. Validates time ordering and detects double-booking conflicts via `ScheduleService`.
 
 **Injections:**
 
-| Service/Dep | Usage |
-|---|---|
-| `FormBuilder` | Build the reactive form group |
-| `ActivatedRoute` | Read `:id` URL param |
-| `Router` | Navigate after save or cancel |
+| Service/Dep       | Usage                                              |
+| ----------------- | -------------------------------------------------- |
+| `FormBuilder`     | Build the reactive form group                      |
+| `ActivatedRoute`  | Read `:id` URL param                               |
+| `Router`          | Navigate after save or cancel                      |
 | `ScheduleService` | Save the new performance (includes conflict check) |
-| `StageService` | Load available stages for the stage dropdown |
-| `FestivalService` | Look up parent festival for the page header |
+| `StageService`    | Load available stages for the stage dropdown       |
+| `FestivalService` | Look up parent festival for the page header        |
 
 **Key state:**
 
-| Field | Type | Description |
-|---|---|---|
-| `performanceForm` | `FormGroup` | Reactive form (artistName, stageName, genre, date, startTime, endTime) |
-| `hasAttemptedSubmit` | `boolean` | Enables full error display after first submit attempt |
-| `serviceErrorMessage` | `string` | Service-thrown errors (e.g. double-booking) shown in the banner |
-| `availableStages` | `Stage[]` | Stages for this festival, populates the stage dropdown |
-| `artistNamePlaceholder` | `string` | Randomly selected example placeholder from a pool |
+| Field                   | Type        | Description                                                            |
+| ----------------------- | ----------- | ---------------------------------------------------------------------- |
+| `performanceForm`       | `FormGroup` | Reactive form (artistName, stageName, genre, date, startTime, endTime) |
+| `hasAttemptedSubmit`    | `boolean`   | Enables full error display after first submit attempt                  |
+| `serviceErrorMessage`   | `string`    | Service-thrown errors (e.g. double-booking) shown in the banner        |
+| `availableStages`       | `Stage[]`   | Stages for this festival, populates the stage dropdown                 |
+| `artistNamePlaceholder` | `string`    | Randomly selected example placeholder from a pool                      |
 
 **Validation:**
 
@@ -484,36 +487,37 @@ ScheduleService   (providedIn: 'root' — singleton, localStorage-backed)
 
 ### 4.10 `AppModule` — Root NgModule
 
-| Property | Value |
-|---|---|
-| **File** | `js/app-module.ts` |
+| Property | Value                               |
+| -------- | ----------------------------------- |
+| **File** | `js/app-module.ts`                  |
 | **Type** | NgModule (not a rendered component) |
 
 **Purpose:** The Angular root module that wires the whole application together.
 
 **Declarations:**
 
-| Component | Role |
-|---|---|
-| `App` | Root shell |
-| `Home` | Landing page |
-| `Festivals` | Festival listing |
-| `FestivalCreateComponent` | Create festival form |
-| `MySchedule` | Timetable view |
-| `StageListComponent` | Stage management list |
-| `StageCreateComponent` | Add stage form |
-| `PerformanceListComponent` | Performance listing |
-| `PerformanceCreateComponent` | Add performance form |
+| Component                    | Role                  |
+| ---------------------------- | --------------------- |
+| `App`                        | Root shell            |
+| `Home`                       | Landing page          |
+| `Festivals`                  | Festival listing      |
+| `FestivalCreateComponent`    | Create festival form  |
+| `MySchedule`                 | Timetable view        |
+| `StageListComponent`         | Stage management list |
+| `StageCreateComponent`       | Add stage form        |
+| `PerformanceListComponent`   | Performance listing   |
+| `PerformanceCreateComponent` | Add performance form  |
 
 **Imports:**
 
-| Module | Why |
-|---|---|
-| `BrowserModule` | Required for browser rendering |
-| `AppRoutingModule` | Registers the router with the route table |
+| Module                | Why                                                          |
+| --------------------- | ------------------------------------------------------------ |
+| `BrowserModule`       | Required for browser rendering                               |
+| `AppRoutingModule`    | Registers the router with the route table                    |
 | `ReactiveFormsModule` | Required by all form components (`FormBuilder`, `FormGroup`) |
 
 **Providers:**
+
 - `provideBrowserGlobalErrorListeners()` — captures unhandled browser errors.
 
 ---
@@ -542,72 +546,72 @@ Component onSubmit() / confirmAndDelete()
 
 ### 5.1 `FestivalService`
 
-| Property | Value |
-|---|---|
-| **File** | `js/services/festival.service.ts` |
-| **Scope** | `providedIn: 'root'` (app-wide singleton) |
+| Property      | Value                                                 |
+| ------------- | ----------------------------------------------------- |
+| **File**      | `js/services/festival.service.ts`                     |
+| **Scope**     | `providedIn: 'root'` (app-wide singleton)             |
 | **Transport** | `HttpClient` → `GET/POST/PATCH/DELETE /api/festivals` |
-| **Cache** | `private cache: Festival[]` — populated by `load()` |
-| **Test file** | `js/services/festival.service.spec.ts` |
+| **Cache**     | `private cache: Festival[]` — populated by `load()`   |
+| **Test file** | `js/services/festival.service.spec.ts`                |
 
 **Public API:**
 
-| Method | Returns | Description |
-|---|---|---|
-| `load()` | `Observable<Festival[]>` | Fetches all festivals from the API; populates cache. Call in `ngOnInit`. |
-| `getFestivals()` | `Festival[]` | Synchronous read from cache. |
-| `getFestivalById(id)` | `Festival \| undefined` | Synchronous lookup from cache. |
-| `createFestival(data)` | `Observable<Festival>` | POST to API; appends result to cache on success. |
-| `updateFestival(id, fields)` | `Observable<Festival>` | PATCH to API; updates cache entry on success. |
-| `deleteFestival(id)` | `Observable<void>` | DELETE to API; removes from cache on success. |
+| Method                       | Returns                  | Description                                                              |
+| ---------------------------- | ------------------------ | ------------------------------------------------------------------------ |
+| `load()`                     | `Observable<Festival[]>` | Fetches all festivals from the API; populates cache. Call in `ngOnInit`. |
+| `getFestivals()`             | `Festival[]`             | Synchronous read from cache.                                             |
+| `getFestivalById(id)`        | `Festival \| undefined`  | Synchronous lookup from cache.                                           |
+| `createFestival(data)`       | `Observable<Festival>`   | POST to API; appends result to cache on success.                         |
+| `updateFestival(id, fields)` | `Observable<Festival>`   | PATCH to API; updates cache entry on success.                            |
+| `deleteFestival(id)`         | `Observable<void>`       | DELETE to API; removes from cache on success.                            |
 
 ---
 
 ### 5.2 `StageService`
 
-| Property | Value |
-|---|---|
-| **File** | `js/services/stage.service.ts` |
-| **Scope** | `providedIn: 'root'` (app-wide singleton) |
-| **Transport** | `HttpClient` → `GET/POST/DELETE /api/stages` |
-| **Cache** | `private cache: Stage[]` — stores stages across all loaded festivals |
-| **Test file** | `js/services/stage.service.spec.ts` |
+| Property      | Value                                                                |
+| ------------- | -------------------------------------------------------------------- |
+| **File**      | `js/services/stage.service.ts`                                       |
+| **Scope**     | `providedIn: 'root'` (app-wide singleton)                            |
+| **Transport** | `HttpClient` → `GET/POST/DELETE /api/stages`                         |
+| **Cache**     | `private cache: Stage[]` — stores stages across all loaded festivals |
+| **Test file** | `js/services/stage.service.spec.ts`                                  |
 
 **Public API:**
 
-| Method | Returns | Description |
-|---|---|---|
-| `loadByFestival(festivalId)` | `Observable<Stage[]>` | Fetches stages for a festival; replaces that festival's cache entries. |
-| `getStagesByFestival(festivalId)` | `Stage[]` | Synchronous read from cache. |
-| `getStageById(id)` | `Stage \| undefined` | Synchronous lookup from cache. |
-| `createStage(data)` | `Observable<Stage>` | POST to API; appends result to cache on success. |
-| `deleteStage(id)` | `Observable<void>` | DELETE to API; removes from cache on success. |
-| `clearStagesByFestival(festivalId)` | `Observable<void>` | DELETE all stages for a festival; clears from cache. Used in cascade delete. |
+| Method                              | Returns               | Description                                                                  |
+| ----------------------------------- | --------------------- | ---------------------------------------------------------------------------- |
+| `loadByFestival(festivalId)`        | `Observable<Stage[]>` | Fetches stages for a festival; replaces that festival's cache entries.       |
+| `getStagesByFestival(festivalId)`   | `Stage[]`             | Synchronous read from cache.                                                 |
+| `getStageById(id)`                  | `Stage \| undefined`  | Synchronous lookup from cache.                                               |
+| `createStage(data)`                 | `Observable<Stage>`   | POST to API; appends result to cache on success.                             |
+| `deleteStage(id)`                   | `Observable<void>`    | DELETE to API; removes from cache on success.                                |
+| `clearStagesByFestival(festivalId)` | `Observable<void>`    | DELETE all stages for a festival; clears from cache. Used in cascade delete. |
 
 ---
 
 ### 5.3 `ScheduleService`
 
-| Property | Value |
-|---|---|
-| **File** | `js/services/schedule.service.ts` |
-| **Scope** | `providedIn: 'root'` (app-wide singleton) |
-| **Transport** | `HttpClient` → `GET/POST/DELETE /api/performances` |
-| **State** | Angular `Signal<Performance[]>` — reactive; components use `effect()` to auto-update |
-| **Test file** | `js/services/schedule.service.spec.ts` |
+| Property      | Value                                                                                |
+| ------------- | ------------------------------------------------------------------------------------ |
+| **File**      | `js/services/schedule.service.ts`                                                    |
+| **Scope**     | `providedIn: 'root'` (app-wide singleton)                                            |
+| **Transport** | `HttpClient` → `GET/POST/DELETE /api/performances`                                   |
+| **State**     | Angular `Signal<Performance[]>` — reactive; components use `effect()` to auto-update |
+| **Test file** | `js/services/schedule.service.spec.ts`                                               |
 
 **Reactive state:** The service holds a private `performancesState` Signal. Components that use `effect()` referencing `getPerformancesByFestival()` automatically re-render whenever the signal changes (after a load, create, or delete).
 
 **Public API:**
 
-| Method | Returns | Description |
-|---|---|---|
-| `loadByFestival(festivalId)` | `Observable<Performance[]>` | Fetches performances; merges into signal. Call in `ngOnInit`. |
-| `getPerformancesByFestival(festivalId)` | `Performance[]` | Synchronous read from signal (signal-tracked). |
-| `isStageOccupied(...)` | `boolean` | Synchronous interval-overlap check against in-memory signal data. Also validated server-side on POST. |
-| `createPerformance(data)` | `Observable<Performance>` | Local validation first (fast UX feedback), then POST; appends to signal on success. |
-| `deletePerformance(id)` | `Observable<void>` | DELETE to API; removes from signal on success. |
-| `clearPerformancesByFestival(festivalId)` | `Observable<void>` | DELETE all performances for a festival; clears from signal. |
+| Method                                    | Returns                     | Description                                                                                           |
+| ----------------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `loadByFestival(festivalId)`              | `Observable<Performance[]>` | Fetches performances; merges into signal. Call in `ngOnInit`.                                         |
+| `getPerformancesByFestival(festivalId)`   | `Performance[]`             | Synchronous read from signal (signal-tracked).                                                        |
+| `isStageOccupied(...)`                    | `boolean`                   | Synchronous interval-overlap check against in-memory signal data. Also validated server-side on POST. |
+| `createPerformance(data)`                 | `Observable<Performance>`   | Local validation first (fast UX feedback), then POST; appends to signal on success.                   |
+| `deletePerformance(id)`                   | `Observable<void>`          | DELETE to API; removes from signal on success.                                                        |
+| `clearPerformancesByFestival(festivalId)` | `Observable<void>`          | DELETE all performances for a festival; clears from signal.                                           |
 
 **Also exports:** `LOCAL_STORAGE` InjectionToken (re-exported for `PersonalScheduleService` backward compatibility).
 
@@ -615,26 +619,26 @@ Component onSubmit() / confirmAndDelete()
 
 ### 5.4 `PersonalScheduleService`
 
-| Property | Value |
-|---|---|
-| **File** | `js/services/personal-schedule.service.ts` |
-| **Scope** | `providedIn: 'root'` (app-wide singleton) |
+| Property    | Value                                         |
+| ----------- | --------------------------------------------- |
+| **File**    | `js/services/personal-schedule.service.ts`    |
+| **Scope**   | `providedIn: 'root'` (app-wide singleton)     |
 | **Storage** | `localStorage` (key: `mfp_personal_schedule`) |
 
 **Purpose:** Manages the attendee's personal bookmark list — performances the user has saved to their own timetable. This is purely device-local data so it intentionally stays in `localStorage` rather than the API.
 
 **Public API:**
 
-| Method | Returns | Description |
-|---|---|---|
-| `saved$` | `Observable<Performance[]>` | BehaviorSubject stream; components subscribe for live updates |
-| `isSaved(id)` | `boolean` | Synchronous check |
-| `add(performance)` | `void` | Adds to personal list |
-| `remove(id)` | `void` | Removes from personal list |
-| `toggle(performance)` | `void` | Adds if not present; removes if present |
-| `clearAll()` | `void` | Clears the entire personal list |
-| `removePerformancesByFestival(festivalId)` | `void` | Removes all bookmarks for a deleted festival |
-| `getPersonalConflicts()` | `PersonalConflict[]` | Detects time overlaps across all saved performances (cross-stage) |
+| Method                                     | Returns                     | Description                                                       |
+| ------------------------------------------ | --------------------------- | ----------------------------------------------------------------- |
+| `saved$`                                   | `Observable<Performance[]>` | BehaviorSubject stream; components subscribe for live updates     |
+| `isSaved(id)`                              | `boolean`                   | Synchronous check                                                 |
+| `add(performance)`                         | `void`                      | Adds to personal list                                             |
+| `remove(id)`                               | `void`                      | Removes from personal list                                        |
+| `toggle(performance)`                      | `void`                      | Adds if not present; removes if present                           |
+| `clearAll()`                               | `void`                      | Clears the entire personal list                                   |
+| `removePerformancesByFestival(festivalId)` | `void`                      | Removes all bookmarks for a deleted festival                      |
+| `getPersonalConflicts()`                   | `PersonalConflict[]`        | Detects time overlaps across all saved performances (cross-stage) |
 
 ---
 
@@ -664,10 +668,10 @@ backend/
 
 ### 6.2 Environment configuration
 
-| Variable | Description |
-|---|---|
+| Variable      | Description                                     |
+| ------------- | ----------------------------------------------- |
 | `MONGODB_URI` | Full MongoDB connection string (local or Atlas) |
-| `PORT` | Port the server listens on (default: `3000`) |
+| `PORT`        | Port the server listens on (default: `3000`)    |
 
 Copy `.env.example` → `.env` and fill in values. The `.env` file is git-ignored.
 
@@ -677,39 +681,39 @@ All routes are prefixed with `/api`. IDs in responses are strings (MongoDB Objec
 
 #### Festivals — `/api/festivals`
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/festivals` | Returns all festivals sorted by `startDate` |
-| `GET` | `/api/festivals/:id` | Returns festival + embedded `stages[]` + `performances[]` |
-| `POST` | `/api/festivals` | Creates a festival; validates `endDate >= startDate` |
-| `PATCH` | `/api/festivals/:id` | Partial update of festival fields |
+| Method   | Path                 | Description                                                    |
+| -------- | -------------------- | -------------------------------------------------------------- |
+| `GET`    | `/api/festivals`     | Returns all festivals sorted by `startDate`                    |
+| `GET`    | `/api/festivals/:id` | Returns festival + embedded `stages[]` + `performances[]`      |
+| `POST`   | `/api/festivals`     | Creates a festival; validates `endDate >= startDate`           |
+| `PATCH`  | `/api/festivals/:id` | Partial update of festival fields                              |
 | `DELETE` | `/api/festivals/:id` | Deletes festival + cascade-deletes its stages and performances |
 
 #### Stages — `/api/stages`
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/stages?festivalId=<id>` | Returns all stages for a festival |
-| `POST` | `/api/stages` | Creates a stage; validates positive-integer capacity and unique name per festival (case-insensitive) |
-| `DELETE` | `/api/stages/festival/:festivalId` | Deletes all stages for a festival (cascade helper) |
-| `DELETE` | `/api/stages/:id` | Deletes a single stage |
+| Method   | Path                               | Description                                                                                          |
+| -------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/stages?festivalId=<id>`      | Returns all stages for a festival                                                                    |
+| `POST`   | `/api/stages`                      | Creates a stage; validates positive-integer capacity and unique name per festival (case-insensitive) |
+| `DELETE` | `/api/stages/festival/:festivalId` | Deletes all stages for a festival (cascade helper)                                                   |
+| `DELETE` | `/api/stages/:id`                  | Deletes a single stage                                                                               |
 
 #### Performances — `/api/performances`
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/performances?festivalId=<id>` | Returns performances for a festival sorted by date then startTime |
-| `POST` | `/api/performances` | Creates a performance; validates time format, ordering, and double-booking |
-| `DELETE` | `/api/performances/festival/:festivalId` | Deletes all performances for a festival (cascade helper) |
-| `DELETE` | `/api/performances/:id` | Deletes a single performance |
+| Method   | Path                                     | Description                                                                |
+| -------- | ---------------------------------------- | -------------------------------------------------------------------------- |
+| `GET`    | `/api/performances?festivalId=<id>`      | Returns performances for a festival sorted by date then startTime          |
+| `POST`   | `/api/performances`                      | Creates a performance; validates time format, ordering, and double-booking |
+| `DELETE` | `/api/performances/festival/:festivalId` | Deletes all performances for a festival (cascade helper)                   |
+| `DELETE` | `/api/performances/:id`                  | Deletes a single performance                                               |
 
 > **Route order note:** In both stages and performances routers, the `/festival/:festivalId` route is declared **before** `/:id` to prevent Express from matching the literal string `"festival"` as an ID parameter.
 
 #### Utility
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/health` | Returns `{ status: "ok" }` — use to verify the server is up |
+| Method | Path      | Description                                                 |
+| ------ | --------- | ----------------------------------------------------------- |
+| `GET`  | `/health` | Returns `{ status: "ok" }` — use to verify the server is up |
 
 ### 6.4 Mongoose model conventions
 
@@ -737,13 +741,13 @@ This ensures the JSON shape matches the Angular TypeScript interfaces exactly (`
 
 ```typescript
 export interface Festival {
-  id: string;         // Unique identifier (assigned by FestivalService)
-  name: string;       // Display name of the festival
-  startDate: string;  // ISO 8601 start date (e.g. "2026-07-15")
-  endDate: string;    // ISO 8601 end date (e.g. "2026-07-18"); must be >= startDate
-  location: string;   // City/venue name
-  genre?: string;     // Optional primary music genre
-  capacity?: number;  // Optional maximum attendee count across all stages
+  id: string; // Unique identifier (assigned by FestivalService)
+  name: string; // Display name of the festival
+  startDate: string; // ISO 8601 start date (e.g. "2026-07-15")
+  endDate: string; // ISO 8601 end date (e.g. "2026-07-18"); must be >= startDate
+  location: string; // City/venue name
+  genre?: string; // Optional primary music genre
+  capacity?: number; // Optional maximum attendee count across all stages
 }
 ```
 
@@ -754,17 +758,17 @@ export interface Festival {
 **File:** `js/models/stage.model.ts`
 
 ```typescript
-export type StageStatus      = 'active' | 'inactive' | 'under-repair';
+export type StageStatus = 'active' | 'inactive' | 'under-repair';
 export type StageEnvironment = 'indoor' | 'outdoor';
 
 export interface Stage {
-  id: string;                      // Unique identifier (assigned by StageService)
-  festivalId: string;              // References Festival.id
-  name: string;                    // Display name (unique per festival, case-insensitive)
-  capacity: number;                // Max attendees; must be a positive integer
-  environment: StageEnvironment;   // 'indoor' | 'outdoor'
-  status: StageStatus;             // 'active' | 'inactive' | 'under-repair'
-  notes?: string;                  // Optional free-text notes
+  id: string; // Unique identifier (assigned by StageService)
+  festivalId: string; // References Festival.id
+  name: string; // Display name (unique per festival, case-insensitive)
+  capacity: number; // Max attendees; must be a positive integer
+  environment: StageEnvironment; // 'indoor' | 'outdoor'
+  status: StageStatus; // 'active' | 'inactive' | 'under-repair'
+  notes?: string; // Optional free-text notes
 }
 ```
 
@@ -776,14 +780,14 @@ export interface Stage {
 
 ```typescript
 export interface Performance {
-  id: string;          // Unique identifier (assigned by ScheduleService)
-  festivalId: string;  // References Festival.id
-  artistName: string;  // Performing artist or band name
-  stageName: string;   // References Stage.name
-  date: string;        // ISO 8601 date (e.g. "2026-08-01")
-  startTime: string;   // 24-hour time "H:mm" or "HH:mm" (e.g. "9:00", "18:00")
-  endTime: string;     // 24-hour time; must be after startTime
-  genre?: string;      // Optional music genre/category
+  id: string; // Unique identifier (assigned by ScheduleService)
+  festivalId: string; // References Festival.id
+  artistName: string; // Performing artist or band name
+  stageName: string; // References Stage.name
+  date: string; // ISO 8601 date (e.g. "2026-08-01")
+  startTime: string; // 24-hour time "H:mm" or "HH:mm" (e.g. "9:00", "18:00")
+  endTime: string; // 24-hour time; must be after startTime
+  genre?: string; // Optional music genre/category
 }
 ```
 
@@ -795,17 +799,17 @@ export interface Performance {
 
 **File:** `js/app-routing-module.ts`
 
-| Path | Component | Description |
-|---|---|---|
-| `` (empty string) | `Home` | Default landing page |
-| `festivals` | `Festivals` | Festival listing (expandable cards) |
-| `festivals/create` | `FestivalCreateComponent` | Create a new festival |
-| `my-schedule` | `MySchedule` | Standalone timetable (defaults to festival ID "1") |
-| `festivals/:id/schedule` | `MySchedule` | Timetable for a specific festival |
-| `festivals/:id/stages` | `StageListComponent` | Stage management for a festival |
-| `festivals/:id/stages/new` | `StageCreateComponent` | Add a stage to a festival |
-| `festivals/:id/performances` | `PerformanceListComponent` | Performance listing for a festival |
-| `festivals/:id/performances/new` | `PerformanceCreateComponent` | Schedule a new performance |
+| Path                             | Component                    | Description                                        |
+| -------------------------------- | ---------------------------- | -------------------------------------------------- |
+| `` (empty string)                | `Home`                       | Default landing page                               |
+| `festivals`                      | `Festivals`                  | Festival listing (expandable cards)                |
+| `festivals/create`               | `FestivalCreateComponent`    | Create a new festival                              |
+| `my-schedule`                    | `MySchedule`                 | Standalone timetable (defaults to festival ID "1") |
+| `festivals/:id/schedule`         | `MySchedule`                 | Timetable for a specific festival                  |
+| `festivals/:id/stages`           | `StageListComponent`         | Stage management for a festival                    |
+| `festivals/:id/stages/new`       | `StageCreateComponent`       | Add a stage to a festival                          |
+| `festivals/:id/performances`     | `PerformanceListComponent`   | Performance listing for a festival                 |
+| `festivals/:id/performances/new` | `PerformanceCreateComponent` | Schedule a new performance                         |
 
 The router is initialized with `RouterModule.forRoot(routes)` and uses the default **HTML5 `pushState`** strategy (`<base href="/">` in `index.html`).
 
@@ -825,11 +829,11 @@ The router is initialized with `RouterModule.forRoot(routes)` and uses the defau
 
 ### 8.3 Planned Routes
 
-| Path | Component | Description |
-|---|---|---|
-| `festivals/:id` | `FestivalDetail` (planned) | Detail view for a single festival |
-| `festivals/:id/edit` | `FestivalForm` (planned) | Edit existing festival |
-| `**` | `NotFound` (planned) | 404 catch-all |
+| Path                 | Component                  | Description                       |
+| -------------------- | -------------------------- | --------------------------------- |
+| `festivals/:id`      | `FestivalDetail` (planned) | Detail view for a single festival |
+| `festivals/:id/edit` | `FestivalForm` (planned)   | Edit existing festival            |
+| `**`                 | `NotFound` (planned)       | 404 catch-all                     |
 
 ---
 
@@ -991,26 +995,32 @@ subscribe next → loadData() refreshes UI
 ## 11. Development Conventions
 
 ### Branch Naming
+
 Following the project's git conventions (see `codeAndBrew/CODING-STANDARDS.md`):
 
-| Type | Pattern | Example |
-|---|---|---|
-| Feature ticket | `Dem-XX-short-description` | `Dem-62-CRUD-operations` |
+| Type                  | Pattern                            | Example                          |
+| --------------------- | ---------------------------------- | -------------------------------- |
+| Feature ticket        | `Dem-XX-short-description`         | `Dem-62-CRUD-operations`         |
 | Automated/tool branch | `claude/<description>-<sessionId>` | `claude/architecture-docs-e9Hu6` |
 
 ### Commit Messages
+
 Start with the ticket ID: `DEM-62: Add FestivalService with CRUD operations`
 
 ### Generating New Components
+
 ```bash
 ng generate component components/<component-name>
 ```
+
 Then: move the generated `.html` from `js/components/<name>/` to `pages/`, move the `.css` to `css/`, update the `@Component` `templateUrl` and `styleUrl` to point to the new locations, and add the class to `AppModule.declarations` in `js/app-module.ts`.
 
 ### Generating New Services
+
 ```bash
 ng generate service services/<service-name>
 ```
+
 Services with `providedIn: 'root'` are automatically available app-wide without adding to `AppModule.providers`.
 
 ### Running the App Locally
@@ -1031,16 +1041,19 @@ npm start               # ng serve → http://localhost:4200
 ```
 
 ### Running Tests
+
 ```bash
 npm test           # ng test (Vitest)
 ```
 
 ### Building for Production
+
 ```bash
 npm run build      # output in dist/music-festival-planner/
 ```
 
 ### Code Style
+
 - **TypeScript** — strict mode, no implicit `any`
 - **Prettier** — config in `.prettierrc`, run `npx prettier --write .` before committing
 - **Component selectors** — prefix `app-` (enforced by `angular.json` schematic prefix)

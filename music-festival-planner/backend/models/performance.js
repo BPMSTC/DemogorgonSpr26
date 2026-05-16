@@ -67,7 +67,7 @@ const performanceSchema = new Schema(
   {
     collection: 'performances',
     timestamps: true,
-  }
+  },
 );
 
 // Keep `day` automatically in sync so seed/API callers only need to provide
@@ -89,5 +89,4 @@ performanceSchema.index({ festival: 1, stage: 1, startDateTime: 1 });
 performanceSchema.index({ artist: 1, startDateTime: 1 });
 
 // Reuse existing model in watch/hot-reload contexts to avoid OverwriteModelError.
-module.exports =
-  mongoose.models.Performance || mongoose.model('Performance', performanceSchema);
+module.exports = mongoose.models.Performance || mongoose.model('Performance', performanceSchema);

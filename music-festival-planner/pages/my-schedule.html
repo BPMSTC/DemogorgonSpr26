@@ -304,15 +304,15 @@
         <div class="calendar-export-group">
           <span
             class="btn-export-calendar-wrap"
-            [attr.title]="hasScheduleClashes ? clashDisableReason: null"
-            [attr.aria-label]="hasScheduleClashes ? clashDisableReason: null"
+            [attr.title]="hasScheduleClashes ? clashDisableReason : null"
+            [attr.aria-label]="hasScheduleClashes ? clashDisableReason : null"
           >
             <button
               class="btn-export-calendar"
               (click)="addSavedPerformancesToGoogleCalendar()"
               [disabled]="calendarExportInProgress || hasScheduleClashes"
               [attr.aria-busy]="calendarExportInProgress"
-              [attr.aria-describedby]="hasScheduleClashes ? 'calendar-clash-msg': null"
+              [attr.aria-describedby]="hasScheduleClashes ? 'calendar-clash-msg' : null"
               aria-label="Add saved performances to Google Calendar"
             >
               @if (calendarExportInProgress) {

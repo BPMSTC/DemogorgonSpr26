@@ -5,12 +5,8 @@ import { App } from './app';
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        RouterModule.forRoot([])
-      ],
-      declarations: [
-        App
-      ],
+      imports: [RouterModule.forRoot([])],
+      declarations: [App],
     }).compileComponents();
   });
 
@@ -24,6 +20,8 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.navbar-brand')?.textContent).toContain('Music Festival Planner');
+    expect(compiled.querySelector('.navbar-brand')?.textContent).toContain(
+      'Music Festival Planner',
+    );
   });
 });

@@ -47,7 +47,7 @@ const stageSchema = new Schema(
   {
     collection: 'stages',
     timestamps: true,
-  }
+  },
 );
 
 // A festival cannot have two stages with the same name.

@@ -8,10 +8,6 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "include": [
-    "js/**/*.ts"
-  ],
-  "exclude": [
-    "js/**/*.spec.ts"
-  ]
+  "include": ["js/**/*.ts"],
+  "exclude": ["js/**/*.spec.ts"]
 }

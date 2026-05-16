@@ -33,8 +33,7 @@ export class ScheduleService {
 
   /** Read-only signal for components that need reactive schedule state. */
   // Exposes the performances signal to components without letting them write to it directly.
-  readonly performancesSignal: Signal<Performance[]> =
-    this.performancesState.asReadonly();
+  readonly performancesSignal: Signal<Performance[]> = this.performancesState.asReadonly();
 
   constructor(private http: HttpClient) {}
 
@@ -52,14 +51,12 @@ export class ScheduleService {
       .pipe(
         tap((perfs) => {
           // Keep all performances that belong to other festivals.
-          const current = this.performancesState().filter(
-            (p) => p.festivalId !== festivalId
-          );
+          const current = this.performancesState().filter((p) => p.festivalId !== festivalId);
           // Merge the fresh festival performances in with the ones we kept.
           this.performancesState.set([...current, ...perfs]);
         }),
         // Format any error into a readable message.
-        catchError(this.handleError)
+        catchError(this.handleError),
       );
   }
 
@@ -68,11 +65,13 @@ export class ScheduleService {
   /** Returns performances for the given festival from the in-memory signal. */
   // Filters the in-memory signal for one festival and returns safe copies to avoid mutation.
   getPerformancesByFestival(festivalId: string): Performance[] {
-    return this.performancesState()
-      // Only keep performances that belong to the requested festival.
-      .filter((p) => p.festivalId === festivalId)
-      // Return a shallow copy of each so callers cannot accidentally mutate the signal.
-      .map((p) => ({ ...p }));
+    return (
+      this.performancesState()
+        // Only keep performances that belong to the requested festival.
+        .filter((p) => p.festivalId === festivalId)
+        // Return a shallow copy of each so callers cannot accidentally mutate the signal.
+        .map((p) => ({ ...p }))
+    );
   }
 
   /**
@@ -87,7 +86,7 @@ export class ScheduleService {
     date: string,
     startTime: string,
     endTime: string,
-    excludeId?: string
+    excludeId?: string,
   ): boolean {
     // Convert the proposed start and end times to minute totals for easy comparison.
     const newStart = this.toMinutes(startTime);
@@ -132,10 +131,7 @@ export class ScheduleService {
     // Reject the request immediately if either time string is not a valid time.
     if (startMinutes === null || endMinutes === null) {
       return throwError(
-        () =>
-          new Error(
-            'Start and end times must be valid 24-hour times (H:mm or HH:mm).'
-          )
+        () => new Error('Start and end times must be valid 24-hour times (H:mm or HH:mm).'),
       );
     }
     // Reject the request if the performance ends before or exactly when it starts.
@@ -144,17 +140,10 @@ export class ScheduleService {
     }
     // Reject the request if another performance already occupies the stage at this time.
     if (
-      this.isStageOccupied(
-        data.festivalId,
-        data.stageName,
-        data.date,
-        data.startTime,
-        data.endTime
-      )
+      this.isStageOccupied(data.festivalId, data.stageName, data.date, data.startTime, data.endTime)
     ) {
       return throwError(
-        () =>
-          new Error(`"${data.stageName}" is already booked during that time slot.`)
+        () => new Error(`"${data.stageName}" is already booked during that time slot.`),
       );
     }
 
@@ -163,7 +152,7 @@ export class ScheduleService {
       // Add the server-assigned performance (with its new ID) to the in-memory signal.
       tap((perf) => this.performancesState.update((p) => [...p, perf])),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -172,11 +161,9 @@ export class ScheduleService {
   deletePerformance(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       // Drop the deleted performance from the signal by keeping everything else.
-      tap(() =>
-        this.performancesState.update((p) => p.filter((perf) => perf.id !== id))
-      ),
+      tap(() => this.performancesState.update((p) => p.filter((perf) => perf.id !== id))),
       // Format any error into a readable message.
-      catchError(this.handleError)
+      catchError(this.handleError),
     );
   }
 
@@ -186,18 +173,14 @@ export class ScheduleService {
    */
   // Removes every performance for a festival from both the server and the in-memory signal.
   clearPerformancesByFestival(festivalId: string): Observable<void> {
-    return this.http
-      .delete<void>(`${this.apiUrl}/festival/${encodeURIComponent(festivalId)}`)
-      .pipe(
-        // Remove all performances for this festival from the signal.
-        tap(() =>
-          this.performancesState.update((p) =>
-            p.filter((perf) => perf.festivalId !== festivalId)
-          )
-        ),
-        // Format any error into a readable message.
-        catchError(this.handleError)
-      );
+    return this.http.delete<void>(`${this.apiUrl}/festival/${encodeURIComponent(festivalId)}`).pipe(
+      // Remove all performances for this festival from the signal.
+      tap(() =>
+        this.performancesState.update((p) => p.filter((perf) => perf.festivalId !== festivalId)),
+      ),
+      // Format any error into a readable message.
+      catchError(this.handleError),
+    );
   }
 
   // ---- Private helpers ------------------------------------------------------
@@ -222,8 +205,7 @@ export class ScheduleService {
   // Pulls a readable message out of an error response and wraps it as a thrown error.
   private handleError(err: { error?: { message?: string }; message?: string }): Observable<never> {
     // Prefer the server's own message, then the generic HTTP message, then a fallback.
-    const message =
-      err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
+    const message = err?.error?.message ?? err?.message ?? 'An unexpected error occurred.';
     return throwError(() => new Error(message));
   }
 }

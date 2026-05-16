@@ -55,7 +55,7 @@ export class PersonalScheduleService {
    */
   // Checks whether the user has already saved this particular performance.
   isSaved(performanceId: string): boolean {
-    return this.saved.some(p => p.id === performanceId);
+    return this.saved.some((p) => p.id === performanceId);
   }
 
   /**
@@ -81,7 +81,7 @@ export class PersonalScheduleService {
   // Takes a performance out of the user's personal schedule.
   remove(performanceId: string): void {
     // Build a new list that excludes the performance being removed.
-    const updated = this.saved.filter(p => p.id !== performanceId);
+    const updated = this.saved.filter((p) => p.id !== performanceId);
     // Push the updated list out to all subscribers.
     this.savedSubject.next(updated);
     // Write the trimmed list to local storage.
@@ -144,7 +144,7 @@ export class PersonalScheduleService {
   // Cleans up the personal schedule when a festival is deleted, removing all its performances.
   removePerformancesByFestival(festivalId: string): void {
     // Keep only the performances that belong to other festivals.
-    const updated = this.saved.filter(p => p.festivalId !== festivalId);
+    const updated = this.saved.filter((p) => p.festivalId !== festivalId);
     // Broadcast the trimmed list to all subscribers.
     this.savedSubject.next(updated);
     // Persist the trimmed list to local storage.
@@ -189,15 +189,15 @@ export class PersonalScheduleService {
 
         // Convert all four boundary times to minutes for easy arithmetic.
         const aStart = toMin(a.startTime);
-        const aEnd   = toMin(a.endTime);
+        const aEnd = toMin(a.endTime);
         const bStart = toMin(b.startTime);
-        const bEnd   = toMin(b.endTime);
+        const bEnd = toMin(b.endTime);
 
         // Two intervals overlap when one starts before the other ends (and vice versa).
         if (aStart < bEnd && aEnd > bStart) {
           // The overlap window is the later start to the earlier end.
           const overlapStart = Math.max(aStart, bStart);
-          const overlapEnd   = Math.min(aEnd, bEnd);
+          const overlapEnd = Math.min(aEnd, bEnd);
           // Record the pair along with a formatted description of when they clash.
           conflicts.push({
             a,
@@ -230,7 +230,7 @@ export class PersonalScheduleService {
           p !== null &&
           typeof p === 'object' &&
           typeof p['id'] === 'string' &&
-          typeof p['festivalId'] === 'string'
+          typeof p['festivalId'] === 'string',
       );
     } catch {
       // If parsing fails for any reason, discard the corrupt data and start fresh.

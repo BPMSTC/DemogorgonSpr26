@@ -1,12 +1,17 @@
-import { Component, Inject, Injector, OnInit, OnDestroy, effect, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  Inject,
+  Injector,
+  OnInit,
+  OnDestroy,
+  effect,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ScheduleService } from '../services/schedule.service';
 import { FestivalService } from '../services/festival.service';
-import {
-  PersonalScheduleService,
-  PersonalConflict,
-} from '../services/personal-schedule.service';
+import { PersonalScheduleService, PersonalConflict } from '../services/personal-schedule.service';
 import { Performance } from '../models/performance.model';
 import { CalendarService } from '../services/calendar.service';
 import { LOCAL_STORAGE } from '../services/schedule.service';
@@ -128,7 +133,7 @@ export class MySchedule implements OnInit, OnDestroy {
     public personalSchedule: PersonalScheduleService,
     private calendarService: CalendarService,
     @Inject(LOCAL_STORAGE) private storage: Storage,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -336,7 +341,9 @@ export class MySchedule implements OnInit, OnDestroy {
     // Read the browser's local timezone to pass to the calendar service.
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     // De-duplicate performance ids in case the same performance appears more than once.
-    const performanceIds = [...new Set(this.savedPerformances.map((performance) => performance.id))];
+    const performanceIds = [
+      ...new Set(this.savedPerformances.map((performance) => performance.id)),
+    ];
 
     if (performanceIds.length === 0) {
       // Guard against an empty id list after de-duplication.
@@ -572,8 +579,7 @@ export class MySchedule implements OnInit, OnDestroy {
       // Any non-success status means the export failed — show the server's message or a default.
       this.calendarStatusType = 'error';
       this.calendarStatusMessage =
-        queryParamMap.get('calendarMessage') ||
-        'Google Calendar export failed.';
+        queryParamMap.get('calendarMessage') || 'Google Calendar export failed.';
     }
 
     // Remove the calendar query params from the URL so a page refresh doesn't re-trigger this code.

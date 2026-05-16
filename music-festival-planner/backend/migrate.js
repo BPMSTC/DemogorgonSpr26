@@ -7,10 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const {
-  connectToDatabase,
-  disconnectFromDatabase,
-} = require('./config/database');
+const { connectToDatabase, disconnectFromDatabase } = require('./config/database');
 const Festival = require('./models/festival');
 const Stage = require('./models/stage');
 const Artist = require('./models/artist');
@@ -56,7 +53,7 @@ function parseDateAndTime(dateText, timeText) {
 
   // Build an ISO string and parse it into a Date, treating the time as UTC.
   const parsed = new Date(
-    `${dateText}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`
+    `${dateText}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`,
   );
   if (Number.isNaN(parsed.getTime())) return null;
   return parsed;
@@ -89,7 +86,7 @@ async function migrate() {
   // Default to empty arrays so the rest of the script can iterate safely.
   const { festivals = [], stages = [], performances = [] } = data;
   console.log(
-    `Loaded ${festivals.length} festival(s), ${stages.length} stage(s), ${performances.length} performance(s).`
+    `Loaded ${festivals.length} festival(s), ${stages.length} stage(s), ${performances.length} performance(s).`,
   );
 
   // Open the database connection now that we know the input is valid.
@@ -138,17 +135,14 @@ async function migrate() {
       endDate,
       location: inputFestival.location,
       genre: inputFestival.genre || '',
-      capacity:
-        typeof inputFestival.capacity === 'number' ? inputFestival.capacity : 0,
+      capacity: typeof inputFestival.capacity === 'number' ? inputFestival.capacity : 0,
     }).save();
 
     festivalIdMap.set(inputFestival.id, created._id.toString());
     festivalsCreated++;
   }
 
-  console.log(
-    `Festivals — created: ${festivalsCreated}, skipped(existing): ${festivalsSkipped}`
-  );
+  console.log(`Festivals — created: ${festivalsCreated}, skipped(existing): ${festivalsSkipped}`);
 
   // ---- Stages --------------------------------------------------------------
   for (const inputStage of stages) {
@@ -160,7 +154,9 @@ async function migrate() {
     // Use a case-insensitive search to avoid duplicating stages with different casing.
     const existing = await Stage.findOne({
       festival: mappedFestivalId,
-      name: { $regex: new RegExp(`^${inputStage.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+      name: {
+        $regex: new RegExp(`^${inputStage.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'),
+      },
     });
 
     if (existing) {
@@ -200,7 +196,7 @@ async function migrate() {
 
     // Build the composite key to look up the stage this performance is on.
     const stageKey = `${mappedFestivalId}::${String(
-      inputPerformance.stageName || ''
+      inputPerformance.stageName || '',
     ).toLowerCase()}`;
 
     // Try the in-memory cache first before falling back to a database query.
@@ -212,7 +208,7 @@ async function migrate() {
         name: {
           $regex: new RegExp(
             `^${String(inputPerformance.stageName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
-            'i'
+            'i',
           ),
         },
       });
@@ -231,7 +227,7 @@ async function migrate() {
       name: {
         $regex: new RegExp(
           `^${String(inputPerformance.artistName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
-          'i'
+          'i',
         ),
       },
     });
@@ -246,14 +242,8 @@ async function migrate() {
     }
 
     // Convert the separate date and time strings into proper Date objects.
-    const startDateTime = parseDateAndTime(
-      inputPerformance.date,
-      inputPerformance.startTime
-    );
-    const endDateTime = parseDateAndTime(
-      inputPerformance.date,
-      inputPerformance.endTime
-    );
+    const startDateTime = parseDateAndTime(inputPerformance.date, inputPerformance.startTime);
+    const endDateTime = parseDateAndTime(inputPerformance.date, inputPerformance.endTime);
 
     // Skip the record if the times are invalid or the end is not after the start.
     if (!startDateTime || !endDateTime || startDateTime >= endDateTime) continue;
@@ -286,7 +276,7 @@ async function migrate() {
   }
 
   console.log(
-    `Performances — created: ${performancesCreated}, skipped(existing): ${performancesSkipped}`
+    `Performances — created: ${performancesCreated}, skipped(existing): ${performancesSkipped}`,
   );
 
   console.log('\nMigration complete!');

@@ -1,13 +1,10 @@
 const Joi = require('joi');
 
 // Reusable rule for MongoDB ObjectId strings — must be exactly 24 hex characters.
-const objectIdField = Joi.string()
-  .hex()
-  .length(24)
-  .messages({
-    'string.hex': '{{#label}} must be a valid ObjectId',
-    'string.length': '{{#label}} must be a valid ObjectId',
-  });
+const objectIdField = Joi.string().hex().length(24).messages({
+  'string.hex': '{{#label}} must be a valid ObjectId',
+  'string.length': '{{#label}} must be a valid ObjectId',
+});
 
 // Reusable field rules shared between the create and replace schemas.
 const stageFields = {
